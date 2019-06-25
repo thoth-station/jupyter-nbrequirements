@@ -23,9 +23,15 @@
 
 """Jupyter magic extension for managing notebook requirements."""
 
+import json
+
 from IPython.core.magic import line_cell_magic
 from IPython.core.magic import magics_class
 from IPython.core.magic import Magics
+
+from jupyter_require import execute as executejs
+
+from thoth.python import Pipfile
 
 
 @magics_class
@@ -33,7 +39,7 @@ class RequirementsMagic(Magics):
     """Jupyter magic for managing notebook requirements."""
 
     @line_cell_magic
-    def requirements(self, line: str, cell: str):
+    def requirements(self, line: str, cell: str = None):
         """
         Get or set notebook requirements.
 
@@ -49,3 +55,21 @@ class RequirementsMagic(Magics):
         :param cell: Notebook requirements in Pipfile format.
         :return: None
         """
+        params = dict()
+
+        if cell is not None:
+            requirements = Pipfile.from_string(cell).to_dict()
+
+            script = """
+            Jupyter.notebook.set_requirements($$requirements)
+            """
+            params["requirements"] = json.dumps(requirements)
+
+        else:
+            _ = line  # ignored
+
+            script = """
+            display(Jupyter.notebook.metadata.requirements, element)
+            """
+
+        return executejs(script,  **params)

@@ -30,8 +30,9 @@ from IPython.core.magic import magics_class
 from IPython.core.magic import Magics
 
 from jupyter_require import execute as executejs
-
 from thoth.python import Pipfile
+
+from .magic_parser import MagicParser
 
 
 @magics_class
@@ -45,13 +46,13 @@ class RequirementsMagic(Magics):
 
         Line magic: Print notebook requirements
 
-        :param line: <empty>
+        :param line: arguments to `%requirements` magic (see `%%requiremnts --help`)
         :param cell: <empty>
         :return: None
 
         Cell magic: Set notebook requirements
 
-        :param line: <empty>
+        :param line: arguments to `%%requirements` magic (see `%requiremnts --help`)
         :param cell: Notebook requirements in Pipfile format.
         :return: None
         """
@@ -66,10 +67,98 @@ class RequirementsMagic(Magics):
             params["requirements"] = json.dumps(requirements)
 
         else:
-            _ = line  # ignored
+            parser = MagicParser(prog="%requirements")
+            parser.add_argument(
+                "-i", "--ignore-metadata",
+                action="store_true",
+                help="Whether to ignore embedded notebook metadata."
+            )
+            parser.add_argument(
+                "--to-string",
+                action="store_true",
+                help="Whether to display requirements in Pipfile string format."
+            )
+            parser.add_argument(
+                "--to-file",
+                action="store_true",
+                help="Whether to store requirements to Pipfile."
+            )
+            parser.add_argument(
+                "-w", "--overwrite",
+                action="store_true",
+                help="Whether to overwrite existing Pipfile."
+            )
+            parser.add_argument(
+                "-l", "--lock",
+                action="store_true",
+                help="Whether to lock down dependencies."
+            )
+            parser.add_argument(
+                "-b", "--backend",
+                type=str,
+                choices=("pipenv", "thoth"),
+                default="thoth",
+                help="Backend to be used for locking dependencies."
+            )
 
-            script = """
-            display(Jupyter.notebook.metadata.requirements, element)
-            """
+            opts = line.split()
+            args = parser.parse_args(opts)
 
-        return executejs(script,  **params)
+            if any([opt in {"-h", "--help"} for opt in opts]):
+                # print help and return
+                return
+
+            params["magic_args"] = json.dumps(args.__dict__)
+
+            if args.lock:
+                script = """
+                const args = $$magic_args
+
+                create_pipfile_lock(args.backend)
+                    .then(() => {
+                        console.log("Pipfile.lock was sucessfully created.")
+                    })
+                    .catch((err) => {
+                        console.error("Failed to lock down dependencies.\n", err)
+                    })
+                """
+            else:
+                script = """
+                const args = $$magic_args
+
+                Jupyter.notebook.get_requirements(args.ignore_metadata)
+                    .then( async (r) => {
+                        if ( args.to_string ) {
+                            r = JSON.stringify(r)
+
+                            return await execute_python_script(
+                                dedent`print(
+                                    Pipfile.from_dict(json.loads('${r}')).to_string()
+                                )`
+                            )
+                        }
+
+                        if ( args.to_file ) {
+                            return await create_pipfile(r, args.overwrite)
+                        }
+
+                        display(r, element)  // default, display and exit
+                    })
+                """
+
+        return executejs(script, **params)
+
+
+def load_ipython_extension(ipython):
+    """Load the jupyter-nbrequirements extension."""
+
+    ipython.register_magics(RequirementsMagic)
+
+
+def _jupyter_nbextension_paths():
+    return [{
+        'section': 'notebook',
+        'src': 'js',
+        'dest': 'jupyter-nbrequirements',
+        'require': 'jupyter-nbrequirements/extension'
+    }]

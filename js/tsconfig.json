@@ -1,0 +1,9 @@
+{
+	"compilerOptions": {
+		"baseUrl": "./src/",
+		"target": "esnext",
+		"module": "umd",
+		"watch": true,
+	},
+	"exclude": ["node_modules"],
+}

@@ -1,0 +1,17 @@
+{
+  "name": "jupyter-nbrequirements",
+  "version": "0.0.1",
+  "description": "Jupyter magic extension for managing notebook requirements",
+  "main": "./src/index.js",
+  "dependencies": {
+    "@types/lodash": "^4.14.135",
+    "@types/node": "^12.0.10"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "jupyter",
+    "ipython"
+  ],
+  "author": "Marek Cermak <macermak@redhat.com>",
+  "license": "MIT"
+}

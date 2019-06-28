@@ -1,8 +1,11 @@
 {
 	"compilerOptions": {
 		"baseUrl": "./src/",
+		"outDir": "static/",
+		"module": "amd",
 		"target": "esnext",
-		"module": "umd",
+		"allowJs": true,
+		"sourceMap": true,
 		"watch": true,
 	},
 	"exclude": ["node_modules"],

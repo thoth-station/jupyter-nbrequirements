@@ -5,8 +5,9 @@
 		"module": "amd",
 		"target": "esnext",
 		"allowJs": true,
+		"noEmit": true,
 		"sourceMap": true,
 		"watch": true,
 	},
-	"exclude": ["node_modules"],
+	"exclude": ["node_modules", "static"],
 }

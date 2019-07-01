@@ -25,6 +25,8 @@
 
 import json
 
+from pathlib import Path
+
 from IPython.core.magic import line_cell_magic
 from IPython.core.magic import magics_class
 from IPython.core.magic import Magics
@@ -33,6 +35,19 @@ from jupyter_require import execute as executejs
 from thoth.python import Pipfile
 
 from .magic_parser import MagicParser
+
+
+_HERE = Path(__file__).parent
+
+
+def _requirements(args) -> str:
+    """Return script to be executed on `requirements` command."""
+    sub_command = f"_{args.script}" if args.script else ""
+
+    with open(_HERE / f"static/requirements{sub_command}.js") as f:
+        script = f.read()
+    
+    return script
 
 
 @magics_class
@@ -68,83 +83,77 @@ class RequirementsMagic(Magics):
 
         else:
             parser = MagicParser(prog="%requirements")
+            parser.set_defaults(func=_requirements)
+
+            # main
             parser.add_argument(
                 "-i", "--ignore-metadata",
                 action="store_true",
                 help="Whether to ignore embedded notebook metadata."
             )
             parser.add_argument(
-                "--to-string",
+                "--to-json",
                 action="store_true",
-                help="Whether to display requirements in Pipfile string format."
+                help="Whether to display output in JSON format."
             )
             parser.add_argument(
                 "--to-file",
                 action="store_true",
-                help="Whether to store requirements to Pipfile."
+                help="Whether to store output to file."
             )
             parser.add_argument(
                 "-w", "--overwrite",
                 action="store_true",
-                help="Whether to overwrite existing Pipfile."
+                help="Whether to overwrite existing file."
             )
-            parser.add_argument(
-                "-l", "--lock",
-                action="store_true",
-                help="Whether to lock down dependencies."
+
+            subparsers = parser.add_subparsers(dest="script")
+
+            # subcommand: lock
+            parser_lock = subparsers.add_parser(
+                "lock",
+                help="Lock (pin down) dependencies."
             )
-            parser.add_argument(
+            parser_lock.add_argument(
                 "-b", "--backend",
                 type=str,
                 choices=("pipenv", "thoth"),
                 default="thoth",
                 help="Backend to be used for locking dependencies."
             )
+            parser_lock.set_defaults(func=_requirements)
+
+            # subcommand: config
+            parser_config = subparsers.add_parser(
+                "config",
+                help="Generate Thoth config."
+            )
+            parser_config.set_defaults(func=_requirements)
+
+            # subcommand: install
+            parser_install = subparsers.add_parser(
+                "install",
+                help="Install pinned down dependencies."
+            )
+            parser_install.set_defaults(func=_requirements)
+
+            # subcommand: kernel
+            parser_kernel = subparsers.add_parser(
+                "kernel",
+                help="Create new Jupyter kernel."
+            )
+            parser_kernel.set_defaults(func=_requirements)
 
             opts = line.split()
-            args = parser.parse_args(opts)
 
             if any([opt in {"-h", "--help"} for opt in opts]):
                 # print help and return
                 return
 
-            params["magic_args"] = json.dumps(args.__dict__)
+            args = parser.parse_args(opts)
 
-            if args.lock:
-                script = """
-                const args = $$magic_args
-
-                create_pipfile_lock(args.backend)
-                    .then(() => {
-                        console.log("Pipfile.lock was sucessfully created.")
-                    })
-                    .catch((err) => {
-                        console.error("Failed to lock down dependencies.\n", err)
-                    })
-                """
-            else:
-                script = """
-                const args = $$magic_args
-
-                Jupyter.notebook.get_requirements(args.ignore_metadata)
-                    .then( async (r) => {
-                        if ( args.to_string ) {
-                            r = JSON.stringify(r)
-
-                            return await execute_python_script(
-                                dedent`print(
-                                    Pipfile.from_dict(json.loads('${r}')).to_string()
-                                )`
-                            )
-                        }
-
-                        if ( args.to_file ) {
-                            return await create_pipfile(r, args.overwrite)
-                        }
-
-                        display(r, element)  // default, display and exit
-                    })
-                """
+            script = args.func(args)
+            params["magic_args"] = json.dumps(args.__dict__, default=lambda s: repr(s))
 
         return executejs(script, **params)
 

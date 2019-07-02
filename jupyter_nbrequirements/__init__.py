@@ -66,34 +66,32 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
 
 def _requirements_config(args):
     """Return script to be executed on `requirements` command."""
-    if not config.config_file_exists():
+    content = None
+
+    # TODO: Allow the user to edit the file directly in Jupyter
+
+    if args.to_file:
+        if config.config_file_exists() and not args.overwrite:
+            raise Exception("Config file already exists and `overwrite` is not set.")
+
         config.create_default_config()
+        script = f"console.log('Default Thoth config file has been created:', {json.dumps(config.content)})"
 
-        script = f"console.log('Config file has been created:', {json.dumps(config.content)})"
+        return script, {}
+
+    if not config.config_file_exists():
+        content: dict = config.create_default_config(nowrite=True)
+        script = f"console.log('Default Thoth config:', {json.dumps(content)})"
     else:
-        script = f"console.log('Config file already exists:', {json.dumps(config.content)})"
-
-    with workdir(config.CONFIG_NAME) as config_dir:
-        p = Path(config_dir, config.CONFIG_NAME)
-        content: str = p.read_text()
-
-        # TODO: Allow the user to edit the file directly in Jupyter
-        for arg, value in args.__dict__.items():
-            if value is not None and arg in config.content:
-                pattern = re.compile(f"{arg}: (.*)")
-                content = re.sub(pattern, f"{arg}: {value}", content, count=1)
-
-        # write with changes
-        p.write_text(content)
-    
-    config.load_config()
+        script = f"console.log('Thoth config file content:', {json.dumps(config.content)})"
 
     if args.to_json:
         print(json.dumps(config.content, indent=4))
     else:
-        print(
-            "\n".join(filter(lambda s: not s.strip().startswith("#"), content.splitlines()))
-        )
+        with workdir(config.CONFIG_NAME) as config_dir:
+            print(
+                Path(config_dir, config.CONFIG_NAME).read_text()
+            )
 
     return script, {}
 
@@ -159,6 +157,8 @@ class RequirementsMagic(Magics):
             # subcommand: lock
             parser_lock = subparsers.add_parser(
                 "lock",
+                add_help=False,
+                parents=[parser],
                 description="Lock (pin down) dependencies."
             )
             parser_lock.set_defaults(func=_requirements)
@@ -166,24 +166,9 @@ class RequirementsMagic(Magics):
             # subcommand: config
             parser_config = subparsers.add_parser(
                 "config",
+                add_help=False,
+                parents=[parser],
                 description="Generate Thoth config."
-            )
-            parser_config.add_argument(
-                "--host",
-                type=str,
-                help="A remote Thoth service to talk to."
-            )
-            parser_config.add_argument(
-                "--requirements-format",
-                type=str,
-                choices=["pipenv"],
-                help="Format of requirements file, currently supported is only Pipenv."
-            )
-            parser_config.add_argument(
-                "--tls-verify",
-                type=str,
-                choices=["false", "true"],
-                help="TLS verification for communication with remote Thoth instance."
             )
             parser_config.set_defaults(func=_requirements_config)
 

@@ -10,6 +10,12 @@ Jupyter.notebook.get_requirements(args.ignore_metadata)
 
         else if (args.to_file) {
             return await create_pipfile(r, args.overwrite)
+                .then(() => {
+                    console.log("Pipfile has been sucessfully created.")
+                })
+                .catch((err) => {
+                    console.error("Failed to create Pipfile.\n", err)
+                })
         }
 
         else {

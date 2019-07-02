@@ -50,7 +50,11 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
     """Return script to be executed on `requirements` command."""
     params = params or dict()
 
-    sub_command = f"_{args.script}" if args.script else ""
+    try:
+        sub_command = f"_{args.command}" if args.command is not None else ""
+    except AttributeError:
+        sub_command = ""
+
     with open(_HERE / f"static/requirements{sub_command}.js") as f:
         script = f.read()
     
@@ -156,13 +160,6 @@ class RequirementsMagic(Magics):
             parser_lock = subparsers.add_parser(
                 "lock",
                 description="Lock (pin down) dependencies."
-            )
-            parser_lock.add_argument(
-                "-b", "--backend",
-                type=str,
-                choices=("pipenv", "thoth"),
-                default="thoth",
-                help="Backend to be used for locking dependencies."
             )
             parser_lock.set_defaults(func=_requirements)
 

@@ -205,7 +205,28 @@ class RequirementsMagic(Magics):
             # subcommand: kernel
             parser_kernel = subparsers.add_parser(
                 "kernel",
-                description="Create new Jupyter kernel."
+                description="Install and manage Jupyter kernels."
+            )
+            parser_kernel_subparser = parser_kernel.add_subparsers(dest="sub_command") 
+
+            parser_kernel_install = parser_kernel_subparser.add_parser(
+                "install",
+                description="Install new Jupyter kernel."
+            )
+            parser_kernel_install.add_argument(
+                "name",
+                nargs="?",
+                help="[optional] Kernel name, otherwise use notebook name."
+            )
+            
+            parser_kernel_set = parser_kernel_subparser.add_parser(
+                "set",
+                description="Set existing kernel as current kernel."
+            )
+            parser_kernel_set.add_argument(
+                "name",
+                nargs="?",
+                help="[optional] Kernel name, otherwise use notebook name."
             )
             parser_kernel.set_defaults(func=_requirements)
 

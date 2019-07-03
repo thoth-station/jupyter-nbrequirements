@@ -23,6 +23,7 @@
 
 """Jupyter magic extension for managing notebook requirements."""
 
+import argparse
 import re
 import sys
 import json
@@ -175,7 +176,29 @@ class RequirementsMagic(Magics):
             # subcommand: install
             parser_install = subparsers.add_parser(
                 "install",
-                description="Install pinned down dependencies."
+                description=(
+                    "Installs provided packages and adds them to Pipfile, "
+                    "or (if no packages are given), installs all packages from Pipfile.lock."
+                )
+            )
+            parser_install.add_argument(
+                "requirements",
+                type=str,
+                nargs=argparse.REMAINDER,
+                help=(
+                    "[optional] Packages to be installed. "
+                    "If not provided, install all packages from Pipfile.lock."
+                )
+            )
+            parser_install.add_argument(
+                "-d", "--dev",
+                action="store_true",
+                help="Install both develop and default packages."
+            )
+            parser_install.add_argument(
+                "--pre",
+                action="store_true",
+                help="Allow pre-releases."
             )
             parser_install.set_defaults(func=_requirements)
 

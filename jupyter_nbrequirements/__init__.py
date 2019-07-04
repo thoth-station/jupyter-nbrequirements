@@ -146,7 +146,7 @@ class RequirementsMagic(Magics):
 
             # main
             parser.add_argument(
-                "-i", "--ignore-metadata",
+                "-I", "--ignore-metadata",
                 action="store_true",
                 help="Whether to ignore embedded notebook metadata."
             )

@@ -66,7 +66,7 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
 
 
 def _requirements_config(args):
-    """Return script to be executed on `requirements` command."""
+    """Return script to be executed on `requirements config` command."""
     content = None
 
     # TODO: Allow the user to edit the file directly in Jupyter
@@ -95,6 +95,14 @@ def _requirements_config(args):
             )
 
     return script, {}
+
+
+def _requirements_lock(args):
+    """Return script to be executed on `requirements config` command."""
+    args.command = "lock"  # Workaround for subparsers with parser parser
+
+    return _requirements(args)
+
 
 @magics_class
 class RequirementsMagic(Magics):
@@ -128,7 +136,12 @@ class RequirementsMagic(Magics):
             params["requirements"] = json.dumps(requirements)
 
         else:
-            parser = MagicParser(prog="%requirements")
+            parser = MagicParser(
+                prog="%requirements",
+                description="""
+                Jupyter magic for managing notebook requirements.
+                """
+            )
             parser.set_defaults(func=_requirements)
 
             # main
@@ -155,16 +168,16 @@ class RequirementsMagic(Magics):
 
             subparsers = parser.add_subparsers(dest="command")
 
-            # subcommand: lock
+            # command: lock
             parser_lock = subparsers.add_parser(
                 "lock",
                 add_help=False,
                 parents=[parser],
                 description="Lock (pin down) dependencies."
             )
-            parser_lock.set_defaults(func=_requirements)
+            parser_lock.set_defaults(func=_requirements_lock)
 
-            # subcommand: config
+            # command: config
             parser_config = subparsers.add_parser(
                 "config",
                 add_help=False,
@@ -173,7 +186,7 @@ class RequirementsMagic(Magics):
             )
             parser_config.set_defaults(func=_requirements_config)
 
-            # subcommand: install
+            # command: install
             parser_install = subparsers.add_parser(
                 "install",
                 description=(
@@ -202,7 +215,7 @@ class RequirementsMagic(Magics):
             )
             parser_install.set_defaults(func=_requirements)
 
-            # subcommand: kernel
+            # command: kernel
             parser_kernel = subparsers.add_parser(
                 "kernel",
                 description="Install and manage Jupyter kernels."

@@ -22,7 +22,9 @@ Jupyter.notebook.get_requirements(args.ignore_metadata)
             // default, display requirements in Pipfile format
             r = JSON.stringify(r)
             return await execute_python_script(
-                dedent`print(
+                dedent`
+                from thoth.python import Pipfile
+                print(
                     Pipfile.from_dict(json.loads('${r}')).to_string()
                 )`
             )

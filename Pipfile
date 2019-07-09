@@ -1,0 +1,18 @@
+[packages]
+ipykernel = "*"
+ipython = "*"
+jupyter-require = "*"
+invectio = "*"
+thoth-python = "*"
+thamos = "*"
+
+[dev-packages]
+autopep8 = "*"
+
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.6"

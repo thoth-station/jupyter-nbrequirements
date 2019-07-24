@@ -36,7 +36,7 @@ from IPython.core.magic import Magics
 
 from jupyter_require import execute as executejs
 
-from thamos.config import config
+from thamos.config import config as thoth_config
 from thamos.config import workdir
 
 from thoth.python import Pipfile
@@ -72,26 +72,29 @@ def _requirements_config(args):
     # TODO: Allow the user to edit the file directly in Jupyter
 
     if args.to_file:
-        if config.config_file_exists() and not args.overwrite:
-            raise Exception("Config file already exists and `overwrite` is not set.")
+        with workdir():
+            fp = Path(thoth_config.CONFIG_NAME)
 
-        config.create_default_config()
-        script = f"console.log('Default Thoth config file has been created:', {json.dumps(config.content)})"
+            if fp.exists() and not args.overwrite:
+                raise Exception("Config file already exists and `overwrite` is not set.")
 
+            thoth_config.create_default_config()
+
+        script = f"console.log('Default Thoth config file has been created:', {json.dumps(thoth_config.content)})"
         return script, {}
 
-    if not config.config_file_exists():
-        content: dict = config.create_default_config(nowrite=True)
+    if not thoth_config.config_file_exists():
+        content: dict = thoth_config.create_default_config(nowrite=True)
         script = f"console.log('Default Thoth config:', {json.dumps(content)})"
     else:
-        script = f"console.log('Thoth config file content:', {json.dumps(config.content)})"
+        script = f"console.log('Thoth config file content:', {json.dumps(thoth_config.content)})"
 
     if args.to_json:
-        print(json.dumps(config.content, indent=4))
+        print(json.dumps(thoth_config.content, indent=4))
     else:
-        with workdir(config.CONFIG_NAME) as config_dir:
+        with workdir(thoth_config.CONFIG_NAME) as config_dir:
             print(
-                Path(config_dir, config.CONFIG_NAME).read_text()
+                Path(config_dir, thoth_config.CONFIG_NAME).read_text()
             )
 
     return script, {}

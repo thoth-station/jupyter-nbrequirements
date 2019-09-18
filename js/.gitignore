@@ -1,14 +1,3 @@
-# Python
-**/__pycache__
-*.egg-info/
-*.py[cod]
-.idea/
-.ipynb_checkpoints/
-
-build/
-dist/
-
-# NPM
 lib-cov
 *.seed
 *.log
@@ -50,6 +39,3 @@ dist/**/*
 
 # ignore yarn.lock
 yarn.lock
-
-# Compiled TS
-**/dist/

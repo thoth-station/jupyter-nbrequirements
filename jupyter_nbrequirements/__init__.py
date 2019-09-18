@@ -56,7 +56,7 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
     except AttributeError:
         sub_command = ""
 
-    with open(_HERE / f"static/requirements{sub_command}.js") as f:
+    with open(_HERE / f"snippets/requirements{sub_command}.js") as f:
         script = f.read()
     
     params.update(kwargs)
@@ -267,7 +267,7 @@ def load_ipython_extension(ipython):
 def _jupyter_nbextension_paths():
     return [{
         'section': 'notebook',
-        'src': 'js',
+        'src': 'static',
         'dest': 'jupyter-nbrequirements',
         'require': 'jupyter-nbrequirements/extension'
     }]

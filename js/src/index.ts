@@ -1,13 +1,21 @@
-import * as utils  from './utils';
+/**
+ * Jupyter NBRequirements.
+ *
+ * Jupyter magic extension for managing notebook requirements.
+ *
+ * @link   https://github.com/CermakM/jupyter-nbrequirements#readme
+ * @file   Jupyter magic extension for managing notebook requirements.
+ * @author Marek Cermak <macermak@redhat.com>
+ * @since  0.0.1
+ */
 
-// Types
-import { Message } from './notebook';
+import _ from 'lodash'
 
-// Jupyter RequireJS runtime environment
-const _ = require("underscore")
-const events = require("base/js/events")
-const Jupyter = require("base/js/namespace")
-const Notebook = require("notebook/js/notebook").Notebook
+// Jupyter runtime environment
+// @ts-ignore
+import events  = require("base/js/events")
+// @ts-ignore
+import Jupyter = require("base/js/namespace")
 
 const DEFAULT_PYTHON_INDENT: number = 4
 
@@ -17,8 +25,7 @@ export interface Requirements {
     python_packages: Object
     requires: Object
     source: Object[]
-}
-
+} 
 class PackageVersion {
     constructor(version: string) { /* TODO */ }
 
@@ -28,82 +35,82 @@ class PackageVersion {
 class Source { /* TODO */ }
 
 
-export function execute_python_script(script: string, callbacks?, options?, context?): Promise<void> {
-    return new Promise(resolve => {
-        // TODO
-    })
-}
+// export function execute_python_script(script: string, callbacks? : any, options?: any, context?: any): Promise<void> {
+//     return new Promise(resolve => {
+//         // TODO
+//     })
+// }
 
-export function gather_library_usage(cells?: Array<{ cell_type: string; source: string }>): Promise<string[]> {
-    return new Promise(async (resolve) => {
+// export function gather_library_usage(cells?: Array<{ cell_type: string; source: string }>): Promise<string[]> {
+//     return new Promise(async (resolve) => {
 
-        cells = cells || Jupyter.notebook.toJSON().cells
+//         cells = cells || Jupyter.notebook.toJSON().cells
 
-        console.log("Gathering requirements from cells, ", cells)
+//         console.log("Gathering requirements from cells, ", cells)
 
-        cells.forEach((c, i: number) => {
-            const source: string = c.source
-                .trim()
-                .replace("?", "")  // remove Jupyter magic to display help
-                .replace(/^[%!]{1}[^%]{1}.*$/gm, "\n")  // remove lines starting with single % or !
-                .replace(/^\s*\n/gm, "")     // remove empty lines
+//         cells.forEach((c, i: number) => {
+//             const source: string = c.source
+//                 .trim()
+//                 .replace("?", "")  // remove Jupyter magic to display help
+//                 .replace(/^[%!]{1}[^%]{1}.*$/gm, "\n")  // remove lines starting with single % or !
+//                 .replace(/^\s*\n/gm, "")     // remove empty lines
 
-            c.source = source
-        })
+//             c.source = source
+//         })
 
-        cells = cells.filter(c => (c.cell_type === "code") && (!c.source.startsWith("%%")))
+//         cells = cells.filter(c => (c.cell_type === "code") && (!c.source.startsWith("%%")))
 
-        let kernel = Jupyter.notebook.kernel
-        let notebook_content: string = cells.map(c => c.source).join("\n")
+//         let kernel = Jupyter.notebook.kernel
+//         let notebook_content: string = cells.map(c => c.source).join("\n")
 
-        notebook_content = utils.indent(notebook_content, DEFAULT_PYTHON_INDENT * 3)
+//         notebook_content = utils.indent(notebook_content, DEFAULT_PYTHON_INDENT * 3)
 
-        console.debug("Notebook content: ", notebook_content)
+//         console.debug("Notebook content: ", notebook_content)
 
-        let script: string = utils.dedent(`
-            import ast
-            import distutils
+//         let script: string = utils.dedent(`
+//             import ast
+//             import distutils
 
-            from pathlib import Path
-            from invectio.lib import InvectioVisitor
+//             from pathlib import Path
+//             from invectio.lib import InvectioVisitor
 
-            _STD_LIB_PATH = Path(sysconfig.get_python_lib(standard_lib=True))
-            _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
+//             _STD_LIB_PATH = Path(sysconfig.get_python_lib(standard_lib=True))
+//             _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
 
-            ast = ast.parse('''
-            ${notebook_content}
-            ''')
+//             ast = ast.parse('''
+//             ${notebook_content}
+//             ''')
 
-            visitor = InvectioVisitor()
-            visitor.visit(ast)
+//             visitor = InvectioVisitor()
+//             visitor.visit(ast)
 
-            report = visitor.get_module_report()
+//             report = visitor.get_module_report()
 
-            libs = filter(
-                lambda k: k not in _STD_LIB | set(sys.builtin_module_names), report
-            )
+//             libs = filter(
+//                 lambda k: k not in _STD_LIB | set(sys.builtin_module_names), report
+//             )
 
-            list(libs)
-        `)
+//             list(libs)
+//         `)
 
-        let callback: Function = (msg: Message) => {
-            console.debug("Execution callback: ", msg)
-            if (msg.msg_type == "error") {
-                throw new Error(`Script execution error: ${msg.content.ename}: ${msg.content.evalue}`)
-            }
+//         let callback: Function = (msg: Message) => {
+//             console.debug("Execution callback: ", msg)
+//             if (msg.msg_type == "error") {
+//                 throw new Error(`Script execution error: ${msg.content.ename}: ${msg.content.evalue}`)
+//             }
 
-            const result = msg.content.data["text/plain"].replace(/\'/g, '"')
-            const requirements = JSON.parse(result)
+//             const result = msg.content.data["text/plain"].replace(/\'/g, '"')
+//             const requirements = JSON.parse(result)
 
-            resolve(requirements)
-        }
+//             resolve(requirements)
+//         }
 
-        await execute_python_script(script, { iopub: { output: callback } })
-    })
-}
+//         await execute_python_script(script, { iopub: { output: callback } })
+//     })
+// }
 
 
-Notebook.prototype.set_requirements = function (requirements: Requirements): void {
+Jupyter.Notebook.prototype.set_requirements = function (requirements: Requirements): void {
     let metadata = Jupyter.notebook.metadata
 
     if (_.isUndefined(metadata.requirements)) {
@@ -118,38 +125,38 @@ Notebook.prototype.set_requirements = function (requirements: Requirements): voi
 }
 
 
-Notebook.prototype.get_requirements = function (ignore_metadata = false) {
-    return new Promise(async (resolve) => {
-        console.log("Reading notebook requirements.")
+// Jupyter.Notebook.prototype.get_requirements = function (ignore_metadata: boolean = false) {
+//     return new Promise(async (resolve) => {
+//         console.log("Reading notebook requirements.")
 
-        let requirements = Jupyter.notebook.metadata.requirements
+//         let requirements = Jupyter.notebook.metadata.requirements
 
-        if (_.isUndefined(requirements) || ignore_metadata) {
-            console.log("Requirements are not defined.")
+//         if (_.isUndefined(requirements) || ignore_metadata) {
+//             console.log("Requirements are not defined.")
 
-            requirements = gather_library_usage()
-                .then((r) => {
-                    let python_packages = {}
+//             requirements = gather_library_usage()
+//                 .then((r) => {
+//                     let python_packages = {}
 
-                    r.forEach((p) => {
-                        let python_package = new PackageVersion(p.toLocaleLowerCase())
+//                     r.forEach((p) => {
+//                         let python_package = new PackageVersion(p.toLocaleLowerCase())
 
-                        _.assign(python_packages, python_package.to_pipfile())
-                    })
+//                         _.assign(python_packages, python_package.to_pipfile())
+//                     })
 
-                    let kernel = Jupyter.notebook.kernel
-                    let language_info = kernel.info_reply.language_info
+//                     let kernel = Jupyter.notebook.kernel
+//                     let language_info = kernel.info_reply.language_info
 
-                    const python_version = language_info.version
-                    const requires = { python_version: python_version.match(/\d.\d/)[0] }
+//                     const python_version = language_info.version
+//                     const requires = { python_version: python_version.match(/\d.\d/)[0] }
 
-                    return { python_packages: python_packages, requires: requires, source: [new Source()] }
-                })
-                .catch(console.error)
+//                     return { python_packages: python_packages, requires: requires, source: [new Source()] }
+//                 })
+//                 .catch(console.error)
 
-            resolve(requirements)
-        }
+//             resolve(requirements)
+//         }
 
-        resolve(requirements)
-    })
-}
+//         resolve(requirements)
+//     })
+// }

@@ -1,4 +1,14 @@
-export function display(s: Object, output): void {
+/**
+ * Utilities.
+ *
+ * A module containing common functions and utilities.
+ *
+ * @file   A file containing common functions and utilities.
+ * @author Marek Cermak <macermak@redhat.com>
+ * @since  0.0.1
+ */
+
+export function display(s: Object, output: HTMLDivElement): void {
     output.append(`<pre>${JSON.stringify(s, null, 2)}</pre>`)
 }
 
@@ -53,7 +63,7 @@ export function dedent(
         .replace(/\\n/g, "\n");
 }
 
-export function indent(text, indent = 4) {
+export function indent(text: string, indent = 4) {
     const indentation = " ".repeat(indent)
 
     return text

@@ -1,20 +1,49 @@
 {
   "name": "jupyter-nbrequirements",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "Jupyter magic extension for managing notebook requirements",
+  "author": "Marek Cermak <macermak@redhat.com>",
+  "homepage": "https://github.com/CermakM/jupyter-nbrequirements#readme",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/CermakM/jupyter-nbrequirements/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CermakM/jupyter-nbrequirements.git"
+  },
+  "private": true,
+  "scripts": {
+    "lint": "tsc --noEmit && eslint \"**/*.ts\" --quiet --fix",
+    "build": "webpack -p",
+    "watch": "webpack -d --watch",
+    "build-ts": "rm -rf dist/ && tsc",
+    "watch-ts": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "dependencies",
+    "ipython",
+    "jupyter",
+    "notebook",
+    "requirements",
+    "thoth"
+  ],
   "dependencies": {
+    "@jupyterlab/cells": "^1.1.2",
+    "@jupyterlab/outputarea": "^1.1.2",
     "@types/node": "^12.0.10"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.138",
+    "eslint": "^6.4.0",
     "ts-loader": "^6.0.4",
     "typescript": "^3.5.2",
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5"
   },
-  "keywords": [
-    "jupyter",
-    "ipython"
-  ],
-  "author": "Marek Cermak <macermak@redhat.com>",
-  "license": "MIT"
+  "types": "src/types/notebook.d.ts",
+  "_moduleAliases": {
+    "@": "dist"
+  }
 }

@@ -42,7 +42,7 @@
     "webpack": "^4.35.0",
     "webpack-cli": "^3.3.5"
   },
-  "types": "src/types/notebook.d.ts",
+  "types": "types/index.d.ts",
   "_moduleAliases": {
     "@": "dist"
   }

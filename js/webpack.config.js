@@ -32,9 +32,9 @@ module.exports = [
 			path: path.resolve(__dirname, '..', __package__, 'static'),
 			libraryTarget: 'amd',
 		},
-		devtool: 'source-map',
+		devtool: 'inline-source-map',
 		resolve: {
-			extensions: ['.tsx', '.ts', '.js']
+			extensions: ['.tsx', '.ts', '.js', '.json']
 		},
 		externals: {
 			'base/js/events': { amd: 'base/js/events' },

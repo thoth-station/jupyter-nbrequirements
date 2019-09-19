@@ -51,13 +51,18 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
     """Return script to be executed on `requirements` command."""
     params = params or dict()
 
+    default_command = "get"
     try:
-        sub_command = f"_{args.command}" if args.command is not None else ""
+        command = f"{args.command}" if args.command is not None else default_command
     except AttributeError:
-        sub_command = ""
+        # %requirements is an alias to 'get' if no command is provided
+        command = default_command
 
-    with open(_HERE / f"snippets/requirements{sub_command}.js") as f:
-        script = f.read()
+    script = """
+    require(['nbrequirements'], ({cli, version}) => {
+        cli('%s', $$magic_args, element, context)
+    })
+    """ % command
     
     params.update(kwargs)
     params["magic_args"] = json.dumps(args.__dict__, default=lambda s: repr(s))
@@ -134,7 +139,9 @@ class RequirementsMagic(Magics):
             requirements = Pipfile.from_string(cell).to_dict()
 
             script = """
-            Jupyter.notebook.set_requirements($$requirements)
+            require(['nbrequirements'], ({cli, version}) => {
+                cli('set', { requirements: $$requirements })
+            })
             """
             params["requirements"] = json.dumps(requirements)
 

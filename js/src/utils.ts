@@ -8,7 +8,7 @@
  * @since  0.0.1
  */
 
-export function display(s: Object, output: HTMLDivElement): void {
+export function display(s: any, output: HTMLDivElement): void {
     output.append(`<pre>${JSON.stringify(s, null, 2)}</pre>`)
 }
 

@@ -12,6 +12,8 @@
  import _ from 'lodash'
 
 import { Requirements } from './types'
+import { KernelInfo, KernelInfoProxy } from './types/kernel_info';
+
 import { gather_library_usage, PackageVersion, Source } from './thoth'
 
 // Jupyter runtime environment
@@ -56,7 +58,9 @@ export function get_requirements(notebook: Jupyter.Notebook, ignore_metadata: bo
                         )
                     })
 
-                    const python_version: string = notebook.kernel.info.language_info.version
+                    const kernel_info: KernelInfo = get_kernel_info(notebook)
+
+                    const python_version: string = kernel_info.language_info.version
                     const match = python_version.match(/\d.\d/)
                     if (match == null) {
                         throw Error(`Python version '${match}' does not match required pattern.`)
@@ -82,4 +86,15 @@ export function get_requirements(notebook: Jupyter.Notebook, ignore_metadata: bo
             resolve(requirements)
         }
     })
+}
+
+function get_kernel_info(notebook: Jupyter.Notebook): KernelInfo {
+    // TODO: Get proper type definition for the Kernel
+    const kernel: any = notebook.kernel
+
+    const json: string = JSON.stringify(kernel.info_reply)
+    // Parse and perform type check
+    const info: KernelInfo = KernelInfoProxy.Parse(json)
+
+    return info
 }

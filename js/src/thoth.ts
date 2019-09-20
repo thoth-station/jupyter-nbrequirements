@@ -122,7 +122,7 @@ export function gather_library_usage(cells?: Array<Cell>): Promise<string[]> {
             from pathlib import Path
             from invectio.lib import InvectioVisitor
 
-            _STD_LIB_PATH = Path(sysconfig.get_python_lib(standard_lib=True))
+            _STD_LIB_PATH = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
             _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
 
             ast = ast.parse('''

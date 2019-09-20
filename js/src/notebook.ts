@@ -89,10 +89,11 @@ export function get_requirements(notebook: Jupyter.Notebook, ignore_metadata: bo
 }
 
 function get_kernel_info(notebook: Jupyter.Notebook): KernelInfo {
-    // TODO: Get proper type definition for the Kernel
-    const kernel: any = notebook.kernel
+    const json: string = JSON.stringify(notebook.kernel.info_reply)
+    if (_.isUndefined(json)) {
+        throw Error('Unable to retrieve Kernel info')
+    }
 
-    const json: string = JSON.stringify(kernel.info_reply)
     // Parse and perform type check
     const info: KernelInfo = KernelInfoProxy.Parse(json)
 

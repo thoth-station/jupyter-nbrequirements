@@ -14,6 +14,7 @@ import _ from 'lodash'
 import { io, Cell, Requirements } from './types'
 import * as utils from './utils'
 import { execute_python_script }  from './core'
+import { set_requirements, get_requirements } from './notebook';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -75,6 +76,59 @@ export class Pipfile {
         public dev_packages: any,
         public meta: any
     ) {}
+
+    /**
+     * Create and write the Pipfile
+     *
+     * @static
+     * @param {Requirements} requirements  notebook requirements
+     * @param {boolean} [overwrite=false]  whether to overwrite existing Pipfile
+     * @param {boolean} [sync=true]        whether to sync with notebook requirements
+     * @returns Promise<Requirements>
+     * @memberof Pipfile
+     */
+    public static create(requirements: Requirements, overwrite: boolean = false, sync: boolean = true): Promise<Requirements> {
+        return new Promise(async (resolve) => {
+            if (_.isUndefined(requirements))
+                requirements = await get_requirements(Jupyter.notebook)
+
+            console.log("Creating Pipfile from notebook requirements.")
+
+            const script = `
+            import json
+
+            from pathlib import Path
+            from thoth.python import Pipfile
+
+            if Path("Pipfile").exists() and "${overwrite}" != "true":
+                raise FileExistsError("Pipfile already exists and \`overwrite\` is not set.")
+
+            requirements: dict = json.loads("""${JSON.stringify(requirements)}""")
+            pipfile = Pipfile.from_dict(requirements)
+            pipfile.to_file()
+
+            pipfile.to_string()
+            `
+            const callback = (msg: io.Message) => {
+                console.debug("Execution callback: ", msg)
+                if (msg.msg_type == "error") {
+                    throw new Error(`Script execution error: ${msg.content.ename}: ${msg.content.evalue}`)
+                }
+
+                console.log("Pipfile has been created successfully: ", msg.content.data["text/plain"])
+
+                if (sync) {
+                    // sync notebook metadata with the Pipfile
+                    set_requirements(Jupyter.notebook, requirements)
+                    console.log("Notebook requirements have been synced with Pipfile.")
+                }
+
+                resolve(requirements)
+            }
+
+            await execute_python_script(script, { iopub: { output: callback } })
+        })
+    }
 }
 
 export class Source {

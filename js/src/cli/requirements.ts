@@ -5,6 +5,7 @@ import { Requirements } from '../types';
 import { execute_python_script } from '../core';
 import { get_requirements, set_requirements } from '../notebook';
 import { dedent, display } from '../utils';
+import { Pipfile } from '../thoth';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -36,15 +37,15 @@ export class Get extends Command {
                 // Append to the cell output
                 display(req, element);
             }
-            // else if (args.to_file) {
-            //     return await create_pipfile(r, args.overwrite)
-            //         .then(() => {
-            //             console.log("Pipfile has been sucessfully created.");
-            //         })
-            //         .catch((err: Error) => {
-            //             console.error("Failed to create Pipfile.\n", err);
-            //         });
-            // }
+            else if (args.to_file) {
+                return await Pipfile.create(req)
+                    .then(() => {
+                        console.log("Pipfile has been sucessfully created.");
+                    })
+                    .catch((err: Error) => {
+                        console.error("Failed to create Pipfile.\n", err);
+                    });
+            }
             else {// default, display requirements in Pipfile format
                 const json = JSON.stringify(req);
                 // TODO: Turn this into a template

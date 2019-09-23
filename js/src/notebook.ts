@@ -11,10 +11,11 @@
 
  import _ from 'lodash'
 
-import { Requirements } from './types'
-import { KernelInfo, KernelInfoProxy } from './types/kernel_info';
+import { Requirements, RequirementsLocked } from './types/requirements';
 
-import { gather_library_usage, PackageVersion, Source } from './thoth'
+import { KernelInfo, KernelInfoProxy } from './kernel';
+import { gather_library_usage, lock_requirements } from './thoth'
+import { PackageVersion, Source } from './thoth'
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -23,6 +24,12 @@ import Jupyter = require("base/js/namespace")
 // Hang the functions on Jupyter.Notebook prototype for easier usage
 Jupyter.Notebook.prototype.set_requirements = _.partial(set_requirements, Jupyter.notebook)
 Jupyter.Notebook.prototype.get_requirements = _.partial(get_requirements, Jupyter.notebook)
+
+Jupyter.Notebook.prototype.set_requirements_locked = _.partial(set_requirements_locked, Jupyter.notebook)
+Jupyter.Notebook.prototype.get_requirements_locked = _.partial(get_requirements_locked, Jupyter.notebook)
+
+Jupyter.Notebook.prototype.get_kernel_info = _.partial(get_kernel_info, Jupyter.notebook)
+
 
 export function set_requirements(notebook: Jupyter.Notebook, requirements: Requirements): void {
     let metadata = notebook.metadata
@@ -70,7 +77,7 @@ export function get_requirements(notebook: Jupyter.Notebook, ignore_metadata: bo
                     return {
                         python_packages: python_packages,
                         requires: requires,
-                        source: [
+                        sources: [
                             new Source()
                         ]
                     } as Requirements
@@ -84,6 +91,42 @@ export function get_requirements(notebook: Jupyter.Notebook, ignore_metadata: bo
         } else {
             // Resolve with the metadata otherwise
             resolve(requirements)
+        }
+    })
+}
+
+
+export function set_requirements_locked(notebook: Jupyter.Notebook, requirements_locked: RequirementsLocked) {
+    const metadata: any = notebook.metadata
+    
+    if ( _.isUndefined(metadata.requirements_locked) ) {
+        metadata.requirements_locked = requirements_locked
+    } else {
+        console.debug("requirements_locked already exist. Updating.")
+        // update the notebook metadata
+        _.assign(metadata.requirements_locked, requirements_locked)
+    }
+        
+    console.log("Notebook locked requirements have been set successfully.")
+}
+
+export function get_requirements_locked(notebook: Jupyter.Notebook, ignore_metadata = false, sync = true): Promise<RequirementsLocked> {
+    return new Promise(async (resolve, reject) => {
+        console.log("Reading notebook locked requirements.")
+        
+        const requirements_locked: RequirementsLocked | undefined = notebook.metadata.requirements_locked
+        if ( _.isUndefined(requirements_locked) || ignore_metadata ) {
+            console.log("Locked requirements are not defined.")
+
+            lock_requirements(undefined, sync)
+                .then( (req_locked: RequirementsLocked) => {
+                    console.log("Successfully locked notebook requirements.", req_locked)
+
+                    resolve(req_locked)
+                })
+                .catch( (err: string) => reject(new Error(err)) )
+        } else {
+            resolve(requirements_locked)
         }
     })
 }

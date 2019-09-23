@@ -11,12 +11,13 @@
 
 import _ from 'lodash'
 
-import { io } from './types'
-import { CodeCell, Context, Requirements } from './types';
+import * as io from './types/io'
+import { CodeCell, Context } from './types/nb';
 
 import * as utils from './utils'
 import { execute_python_script, get_execute_context } from './core';
-import { set_requirements, get_requirements } from './notebook';
+import { set_requirements, get_requirements, set_requirements_locked } from './notebook';
+import { Requirements, RequirementsLocked, RequirementsLockedProxy } from './requirements';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -194,12 +195,6 @@ export function gather_library_usage(cells?: Array<CodeCell>): Promise<string[]>
 
         // TODO: Move this to templates
         const script: string = utils.dedent(`
-            import ast
-            import distutils
-
-            from pathlib import Path
-            from invectio.lib import InvectioVisitor
-
             _STD_LIB_PATH = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
             _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
 
@@ -207,7 +202,7 @@ export function gather_library_usage(cells?: Array<CodeCell>): Promise<string[]>
             ${notebook_content}
             ''')
 
-            visitor = InvectioVisitor()
+            visitor = invectio.lib.InvectioVisitor()
             visitor.visit(ast)
 
             report = visitor.get_module_report()
@@ -215,7 +210,6 @@ export function gather_library_usage(cells?: Array<CodeCell>): Promise<string[]>
             libs = filter(
                 lambda k: k not in _STD_LIB | set(sys.builtin_module_names), report
             )
-
             list(libs)
         `)
 
@@ -233,5 +227,81 @@ export function gather_library_usage(cells?: Array<CodeCell>): Promise<string[]>
         }
 
         await execute_python_script(script, { iopub: { output: callback } })
+    })
+}
+
+
+export function lock_requirements(requirements: Requirements | undefined, sync = true): Promise<RequirementsLocked> {
+    return new Promise( async (resolve, reject) => {
+        if ( _.isUndefined(requirements) ) 
+            requirements = await get_requirements(Jupyter.notebook)
+
+        // we want Pipfile to be synced with Pipfile.lock, always overwrite
+        await Pipfile.create(requirements, true)
+
+        // TODO: send REST request (ajax?) directly instead of using Python lib here
+        const command = `
+            pipfile_content, pipfile_lock_content = thamos.cli._load_pipfiles()
+
+            results = thamos.lib.advise(
+                pipfile_content,
+                pipfile_lock_content,
+                nowait=False,
+                no_static_analysis=True  # static analysis is not yet functional for Jupyter NBs
+            )
+
+            if not results:
+                raise Exception("Analysis was not successful.")
+
+            result, error = results
+            report = result["report"]
+
+            if not error:
+                pipfile = report[0][1]["requirements"]
+                pipfile_lock = report[0][1]["requirements_locked"]
+            else:
+                raise Exception(f"Errors occured: {result}")
+
+            json.dumps(pipfile_lock)
+        `
+        
+        const timeout = setTimeout(() => {
+            // interrupt the running script
+            Jupyter.notebook.kernel.interrupt()
+            
+            reject(new Error("Timeout exceeded: Locking requirements was not successful."))
+        }, 3000 * 60)
+        
+        let callback = (msg: io.Message) => {
+            console.debug("Execution callback: ", msg)
+            
+            if ( msg.msg_type == "error") {
+                reject(new Error(`${msg.content.ename}: ${msg.content.evalue}`))
+                return
+            }
+            if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
+                console.info(`[Thamos]: `, msg.content.text)
+                return
+            }
+
+            if ( msg.msg_type == "execute_result" ){
+                clearTimeout(timeout)
+                
+                const result = msg.content.data["text/plain"].replace(/(^')|('$)/g, "")
+                const requirements_locked: RequirementsLocked = RequirementsLockedProxy.Parse(result)
+                
+                if (sync) {
+                    // sync requirements locked with Pipfile.lock
+                    set_requirements_locked(Jupyter.notebook, requirements_locked)
+                    console.log("Locked requirements have been synced with Pipfile.")
+                }
+                
+                resolve(requirements_locked)
+            }
+            else
+                reject(new Error(`Unknown message type: ${msg.msg_type}`))
+        }
+
+        await execute_python_script(command, {iopub: { output: callback } })
     })
 }

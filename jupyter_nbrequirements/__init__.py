@@ -29,6 +29,7 @@ import sys
 import json
 
 from pathlib import Path
+from textwrap import dedent
 
 from IPython.core.magic import line_cell_magic
 from IPython.core.magic import magics_class
@@ -267,7 +268,25 @@ class RequirementsMagic(Magics):
 
 def load_ipython_extension(ipython):
     """Load the jupyter-nbrequirements extension."""
+    imports = """\
+    import ast
+    import sys
 
+    import json
+    import distutils
+            
+    from pathlib import Path
+
+    import invectio
+    import thamos
+
+    print("Initialized.")
+    """
+    # Populate runtime environment with the required libraries
+    # so that we don't have to load it in the code snippets
+    ipython.ex(dedent(imports))
+
+    # Register the magic
     ipython.register_magics(RequirementsMagic)
 
 

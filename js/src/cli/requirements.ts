@@ -1,7 +1,7 @@
 import Command from './command'
 import { Context } from '../types'
 
-import { Requirements } from '../types'
+import { Requirements } from '../types/requirements'
 
 import { execute_python_script } from '../core'
 import { get_requirements, set_requirements } from '../notebook'
@@ -14,7 +14,7 @@ import Jupyter = require("base/js/namespace")
 
 
 export class Help extends Command {
-    public message: string = "Provide valid command. See --help for more info."
+    public message: string = "Provide a valid JS command. See --help for more info."
 
     constructor(message?: string) {
         super()
@@ -69,5 +69,10 @@ export class Set extends Command {
         const req: Requirements = args.requirements
 
         set_requirements(Jupyter.notebook, req)
+    }
+}
+
+export class Lock extends Command {
+    public run(args: any): void {
     }
 }

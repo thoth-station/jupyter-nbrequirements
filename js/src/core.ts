@@ -10,9 +10,8 @@
  */
 
 import _ from 'lodash'
-import { io } from './types'
-import { Context } from './types';
-import { OutputArea, CodeCell } from './types/index';
+import * as io from './types/io'
+import { Context, CodeCell } from './types/nb';
 
 // Jupyter runtime environment
 // @ts-ignore

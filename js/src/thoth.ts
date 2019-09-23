@@ -13,11 +13,12 @@ import _ from 'lodash'
 
 import * as io from './types/io'
 import { CodeCell, Context } from './types/nb';
+import { Meta, Requirements, RequirementsLocked } from './types/requirements';
 
 import * as utils from './utils'
 import { execute_python_script, get_execute_context } from './core';
-import { set_requirements, get_requirements, set_requirements_locked } from './notebook';
-import { Requirements, RequirementsLocked, RequirementsLockedProxy } from './requirements';
+import { set_requirements, get_requirements, set_requirements_locked, get_requirements_locked } from './notebook';
+import { RequirementsLockedProxy } from './requirements';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -156,6 +157,51 @@ export class Pipfile {
     }
 }
 
+export class PipfileLock {
+    public readonly "default": PackageVersion[]
+
+    constructor(
+        packages: PackageVersion[],
+        public readonly develop: PackageVersion[],
+        public readonly _meta?: Meta
+    ){
+        this.default = packages
+    }
+
+    public static create(requirements_locked: RequirementsLocked, ignore_metadata = false, sync = true): Promise<void> {
+        return new Promise( async (resolve, reject) => {
+            if (_.isUndefined(requirements_locked)) {
+                requirements_locked = await get_requirements_locked(
+                    Jupyter.notebook,
+                    ignore_metadata,
+                    sync
+                )
+            }
+
+            console.log("Creating Pipfile.lock from notebook locked requirements.")
+
+            let script = `
+            requirements_locked = json.loads("""${JSON.stringify(requirements_locked, null, 4)}""")
+
+            Path("Pipfile.lock").write_text(
+                json.dumps(requirements_locked, sort_keys=True, indent=4),
+                encoding='utf-8'
+            )`
+
+            const callback = (msg: io.Message) => {
+                console.debug("Execution callback: ", msg)
+                if (msg.msg_type == "error") {
+                    reject(new Error(`ERROR: ${msg.content.ename}: ${msg.content.evalue}`))
+                }
+
+                resolve()
+            }
+
+            await execute_python_script(script, { shell: { reply: callback } })
+        })
+    }
+}
+
 export class Source {
     constructor(
         public readonly name: string = "pypi",
@@ -241,7 +287,9 @@ export function lock_requirements(requirements: Requirements | undefined, sync =
 
         // TODO: send REST request (ajax?) directly instead of using Python lib here
         const command = `
-            pipfile_content, pipfile_lock_content = thamos.cli._load_pipfiles()
+            from thamos.cli import _load_pipfiles
+
+            pipfile_content, pipfile_lock_content = _load_pipfiles()
 
             results = thamos.lib.advise(
                 pipfile_content,

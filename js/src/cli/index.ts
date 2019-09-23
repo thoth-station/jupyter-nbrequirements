@@ -15,6 +15,7 @@ import { Context } from '../types';
 import {
     Get,
     Set,
+    Lock,
     Help,
 } from './requirements'
 
@@ -24,6 +25,7 @@ export async function cli(command: string, args: Object, element?: HTMLDivElemen
     switch (command) {
         case 'get': cmd = new Get(); break
         case 'set': cmd = new Set(); break
+        case 'lock': cmd = new Lock(); break
 
         default: cmd = new Help()
     }

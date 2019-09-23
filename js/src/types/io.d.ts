@@ -4,11 +4,12 @@ export interface Callbacks {
 }
 
 export interface iopubCallback {
-    output: (msg: Message) => any
+    output?: (msg: Message) => any
 }
 
 export interface shellCallback {
-    output: (msg: Message) => any
+    output?: (msg: Message) => any
+    reply ?: (msg: Message) => any
 }
 
 export interface Message {
@@ -23,6 +24,7 @@ export interface Message {
 }
 
 export interface iopubMessageContent {
+    status          : string
     data            : iopubMessageData
     name            : string
     text            : string

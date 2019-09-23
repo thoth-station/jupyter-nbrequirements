@@ -4,9 +4,9 @@ import { Context } from '../types'
 import { Requirements } from '../types/requirements'
 
 import { execute_python_script } from '../core'
-import { get_requirements, set_requirements } from '../notebook'
+import { get_requirements, set_requirements, get_requirements_locked } from '../notebook'
 import { dedent, display } from '../utils'
-import { Pipfile } from '../thoth'
+import { Pipfile, PipfileLock } from '../thoth'
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -73,6 +73,25 @@ export class Set extends Command {
 }
 
 export class Lock extends Command {
-    public run(args: any): void {
+
+    public async run(args: any, element: HTMLDivElement): Promise<void> {
+        get_requirements_locked(Jupyter.notebook, args.ignore_metadata, args.sync)
+            .then(async (req_locked) => {
+                if (args.to_file) {
+                    return await PipfileLock.create(req_locked, args.overwrite)
+                        .then(() => {
+                            console.log("Pipfile.lock has been sucessfully created.")
+                        })
+                        .catch((err) => {
+                            console.error("Failed to lock down dependencies.\n", err)
+                        })
+                }
+
+                // default, display requirements in Pipfile.lock format
+                display(req_locked, element)
+            })
+            .catch((err) => {
+                console.error("Failed to get requirements.\n", err)
+            })
     }
 }

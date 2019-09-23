@@ -9,7 +9,9 @@
  * @since  0.0.1
  */
 
-import Command, { Context } from './command';
+import Command from './command';
+import { Context } from '../types';
+
 import {
     Get,
     Set,

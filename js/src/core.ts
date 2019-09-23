@@ -11,6 +11,8 @@
 
 import _ from 'lodash'
 import { io } from './types'
+import { Context } from './types';
+import { OutputArea, CodeCell } from './types/index';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -26,11 +28,8 @@ export function execute_request(request: string, callbacks?: io.Callbacks, optio
         }
 
         if (_.isUndefined(context)) {
-            context = {
-                cell: Jupyter.notebook.get_executed_cell()
-            }
+            context = get_execute_context()
         }
-
         const cell = context.cell
 
         options   = _.assign(default_options, options)
@@ -62,4 +61,17 @@ export function execute_shell_script(script: string, callbacks?: io.Callbacks, o
 export function execute_python_script(script: string, callbacks?: io.Callbacks, options?: any, context?: any) {
     
     return execute_request(`${script}`, callbacks, options, context)
+}
+
+export function get_execute_context(): Context | undefined {
+    const cell: CodeCell = Jupyter.notebook.get_executed_cell()
+    if (_.isUndefined(cell)) {
+        console.warn("Execution context could not be determined.")
+        return
+    }
+
+    return {
+        cell: cell,
+        output_area: cell.output_area
+    }
 }

@@ -32,7 +32,7 @@ module.exports = [
 			path: path.resolve(__dirname, '..', __package__, 'static'),
 			libraryTarget: 'amd',
 		},
-		devtool: 'inline-source-map',
+		devtool: 'source-map',
 		resolve: {
 			extensions: ['.tsx', '.ts', '.js', '.json']
 		},

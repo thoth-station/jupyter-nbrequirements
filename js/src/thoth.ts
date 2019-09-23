@@ -11,9 +11,11 @@
 
 import _ from 'lodash'
 
-import { io, Cell, Requirements } from './types'
+import { io } from './types'
+import { CodeCell, Context, Requirements } from './types';
+
 import * as utils from './utils'
-import { execute_python_script }  from './core'
+import { execute_python_script, get_execute_context } from './core';
 import { set_requirements, get_requirements } from './notebook';
 
 // Jupyter runtime environment
@@ -88,20 +90,28 @@ export class Pipfile {
      * @memberof Pipfile
      */
     public static create(requirements: Requirements, overwrite: boolean = false, sync: boolean = true): Promise<Requirements> {
-        return new Promise(async (resolve) => {
+        return new Promise(async (resolve, reject) => {
             if (_.isUndefined(requirements))
                 requirements = await get_requirements(Jupyter.notebook)
 
             console.log("Creating Pipfile from notebook requirements.")
 
             const script = `
+            import os
             import json
+            import logging
 
             from pathlib import Path
             from thoth.python import Pipfile
 
+            # Either use global LOGGER or get logger for the pipfile module
+            _log = os.environ.get('LOGGER', logging.getLogger('pipfile'))
+
             if Path("Pipfile").exists() and "${overwrite}" != "true":
-                raise FileExistsError("Pipfile already exists and \`overwrite\` is not set.")
+                reason = "Pipfile already exists and \`overwrite\` is not set."
+                _log.warning(reason)
+
+                raise FileExistsError(reason)
 
             requirements: dict = json.loads("""${JSON.stringify(requirements)}""")
             pipfile = Pipfile.from_dict(requirements)
@@ -112,18 +122,32 @@ export class Pipfile {
             const callback = (msg: io.Message) => {
                 console.debug("Execution callback: ", msg)
                 if (msg.msg_type == "error") {
-                    throw new Error(`Script execution error: ${msg.content.ename}: ${msg.content.evalue}`)
+                    reject(`ERROR: ${msg.content.ename}: ${msg.content.evalue}`)
+                    return
+                }
+                if (msg.msg_type === "stream") {
+                    // let codecell handle the callback and append the stream to the output
+                    const context: Context | undefined = get_execute_context()
+                    if (!_.isUndefined(context)){
+                        const cell: CodeCell = context.cell
+
+                        cell.events.trigger('set_dirty.Notebook', {value: true});
+                        cell.output_area.handle_output(msg);
+                    }
+                    return
                 }
 
-                console.log("Pipfile has been created successfully: ", msg.content.data["text/plain"])
+                if (msg.msg_type === "execute_result") {
 
-                if (sync) {
-                    // sync notebook metadata with the Pipfile
-                    set_requirements(Jupyter.notebook, requirements)
-                    console.log("Notebook requirements have been synced with Pipfile.")
+                    console.log("Pipfile has been created successfully: ", msg.content.data["text/plain"])
+
+                    if (sync) {
+                        // sync notebook metadata with the Pipfile
+                        set_requirements(Jupyter.notebook, requirements)
+                        console.log("Notebook requirements have been synced with Pipfile.")
+                    }
+                    resolve(requirements)
                 }
-
-                resolve(requirements)
             }
 
             await execute_python_script(script, { iopub: { output: callback } })
@@ -142,11 +166,11 @@ export class Source {
 }
 
 
-export function gather_library_usage(cells?: Array<Cell>): Promise<string[]> {
+export function gather_library_usage(cells?: Array<CodeCell>): Promise<string[]> {
     const default_python_indent: number = 4
 
-    return new Promise(async (resolve) => {
-        cells = cells || Jupyter.notebook.toJSON().cells as Array<Cell>
+    return new Promise(async (resolve, reject) => {
+        cells = cells || Jupyter.notebook.toJSON().cells as Array<CodeCell>
         console.log("Gathering requirements from cells, ", cells)
 
         cells.forEach((c, i: number) => {
@@ -198,7 +222,8 @@ export function gather_library_usage(cells?: Array<Cell>): Promise<string[]> {
         const callback = (msg: io.Message) => {
             console.debug("Execution callback: ", msg)
             if (msg.msg_type == "error") {
-                throw new Error(`Script execution error: ${msg.content.ename}: ${msg.content.evalue}`)
+                reject(`ERROR: ${msg.content.ename}: ${msg.content.evalue}`)
+                return
             }
 
             const result: string = msg.content.data["text/plain"].replace(/\'/g, '"')

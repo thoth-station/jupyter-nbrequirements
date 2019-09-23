@@ -9,13 +9,7 @@
  * @since  0.0.1
  */
 
-import { CodeCell } from '../types';
-
-
-export interface Context {
-    cell: CodeCell
-    output_area: any
-}
+import { Context } from '../types';
 
 /**
  * Base class for all commands.

@@ -17,21 +17,23 @@ import {
     Set,
     Lock,
     Install,
+    Kernel,
     Help,
 } from './requirements'
 
 // Wrap the cli functionality to easily handle the commands
-export async function cli(command: string, args: Object, element?: HTMLDivElement, context?: Context) {
+export async function cli( command: string, args: Object, element?: HTMLDivElement, context?: Context ) {
     let cmd: Command;
-    switch (command) {
+    switch ( command ) {
         case 'get': cmd = new Get(); break
         case 'set': cmd = new Set(); break
         case 'lock': cmd = new Lock(); break
         case 'install': cmd = new Install(); break
+        case 'kernel': cmd = new Kernel(); break
 
-        default: cmd = new Help()
+        default: cmd = new Help( command )
     }
 
     // Run the command
-    return await cmd.run(args, element, context)
+    return await cmd.run( args, element, context )
 }

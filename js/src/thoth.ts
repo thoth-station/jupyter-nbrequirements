@@ -11,14 +11,25 @@
 
 import _ from 'lodash'
 
+import {
+    execute_python_script,
+    get_execute_context,
+    execute_shell_command,
+    execute_shell_script
+} from './core'
+import {
+    set_requirements,
+    get_requirements,
+    set_requirements_locked,
+    get_requirements_locked
+} from './notebook'
+
+import * as utils from './utils'
+import { RequirementsLockedProxy } from './requirements';
+
 import * as io from './types/io'
 import { CodeCell, Context } from './types/nb';
 import { Meta, Requirements, RequirementsLocked } from './types/requirements';
-
-import * as utils from './utils'
-import { execute_python_script, get_execute_context, execute_shell_command } from './core';
-import { set_requirements, get_requirements, set_requirements_locked, get_requirements_locked } from './notebook';
-import { RequirementsLockedProxy } from './requirements';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -413,5 +424,116 @@ export function install_requirements(
             `pipenv install --ignore-pipfile --keep-outdated ${ opts } ${ requirements }`,
             { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }
         )
+    } )
+}
+
+export function install_kernel( name: string ): Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+
+        /**
+         * Logging callback
+         */
+        let iopub_callback = ( msg: io.Message ) => {
+            console.debug( "Execution logging callback: ", msg )
+
+            if ( msg.msg_type == "error" ) {
+                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            }
+
+            else if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
+                const stream = msg.content.name || "stdout"
+                const text = utils.parse_console_output( msg.content.text )
+
+                if ( stream === "stderr" ) {
+                    console.warn( `[pipenv]: `, text )
+                } else
+                    console.log( `[pipenv]: `, text )
+
+            }
+        }
+
+        const kernel_name: string = name || Jupyter.notebook.notebook_name
+            .replace( ".ipynb", "" )
+            .replace( /\s+/g, "_" )
+
+        // check if ipython and ipykernel are both installed
+        const script = utils.dedent( `
+            PACKAGE_LIST=$(pipenv run pip list | cut -d' ' -f 1)
+
+            if [[ $(echo $PACKAGE_LIST | grep -E "ipython\$|ipykernel\$" | wc -l) != 2 ]]; then
+                echo "Packages 'ipython' and 'ipykernel are already installed'"
+            else
+                echo "Installing required packages: 'ipython', 'ipykernel'"
+                pipenv run pip install ipython ipykernel
+            fi
+        `)
+
+        console.log( `Installing kernel ${ kernel_name }.` )
+
+        await execute_shell_script( script, { iopub: { output: iopub_callback } } )
+            .then( async () => {
+                await execute_shell_command(
+                    `pipenv run ipython kernel install --user --name=${ kernel_name }`,
+                    { iopub: { output: iopub_callback } }
+                )
+                console.log( `Kernel '${ kernel_name }' has been installed.` )
+            } )
+            .catch( reject )
+
+        resolve( kernel_name )
+    } )
+}
+
+export function load_kernel( name: string | undefined ): Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+        const kernel_name: string = name || Jupyter.notebook.notebook_name
+            .replace( ".ipynb", "" )
+            .replace( /\s+/g, "_" )
+
+        const kernel_selector = Jupyter.notebook.kernel_selector
+
+        // Request kernel specifications
+        // This function adds kernels to the notebook toolbar as well
+        kernel_selector.request_kernelspecs()
+
+        let wait_for_kernelspec = () => {
+            if ( _.has( kernel_selector.kernelspecs, kernel_name ) )
+                resolve( kernel_name )
+            else
+                setTimeout( wait_for_kernelspec, 50 )  // check again in 50ms
+        }
+
+        setTimeout( () => reject(
+            new Error( `Timeout exceeded while waiting for kernel spec: ${ kernel_name }` )
+        ), 1000 )
+
+        wait_for_kernelspec()
+    } )
+}
+
+export function set_kernel( name: string ): Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+        const kernel_name: string = name || Jupyter.notebook.notebook_name
+            .replace( ".ipynb", "" )
+            .replace( /\s+/g, "_" )
+
+        const kernel_selector = Jupyter.notebook.kernel_selector
+
+        console.log( `Setting kernel: ${ kernel_name }.` )
+
+        if ( kernel_selector.current_selection === kernel_name ) {
+            console.log( `Kernel ${ kernel_name } is already set.` )
+
+            return resolve( kernel_name )
+        }
+
+        // make sure kernelspec exists
+        if ( !_.has( kernel_selector.kernelspecs, kernel_name ) ) {
+            return reject( new Error( `Missing kernel spec: ${ kernel_name }` ) )
+        }
+
+        kernel_selector.set_kernel( kernel_name )
+
+        resolve( kernel_name )
     } )
 }

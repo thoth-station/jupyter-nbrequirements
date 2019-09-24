@@ -16,7 +16,7 @@ export function display( s: any, output: HTMLDivElement ): void {
     output.append( `<pre>${ JSON.stringify( s, null, 2 ) }</pre>` )
 }
 
-export function parse_console_output( stream: string ) {
+export function parse_console_output( stream: string ): string {
     const ansi_re = /\x1b\[(.*?)([@-~])/g
 
     stream = _.escape( stream ) + "\x1b[m"  // Ensure markup for trailing text
@@ -33,7 +33,7 @@ export function parse_console_output( stream: string ) {
 
     const result = out.join( "" )
 
-    return _.flow( nbutils.fixBackspace, nbutils.fixCarriageReturn )( result )
+    return _.flow( nbutils.fixBackspace, nbutils.fixCarriageReturn )( result ) as string
 }
 
 export function dedent(

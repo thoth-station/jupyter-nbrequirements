@@ -78,9 +78,9 @@ export class Lock extends Command {
         get_requirements_locked(Jupyter.notebook, args.ignore_metadata, args.sync)
             .then(async (req_locked) => {
                 if (args.to_file) {
-                    return await PipfileLock.create(req_locked, args.overwrite)
+                    return await PipfileLock.create(req_locked)
                         .then(() => {
-                            console.log("Pipfile.lock has been sucessfully created.")
+                            console.log("Pipfile.lock has been successfully created.")
                         })
                         .catch((err) => {
                             console.error("Failed to lock down dependencies.\n", err)
@@ -91,7 +91,7 @@ export class Lock extends Command {
                 display(req_locked, element)
             })
             .catch((err) => {
-                console.error("Failed to get requirements.\n", err)
+                console.error("Failed to lock requirements.\n", err)
             })
     }
 }

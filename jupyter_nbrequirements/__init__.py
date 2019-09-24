@@ -186,6 +186,11 @@ class RequirementsMagic(Magics):
                 parents=[parser],
                 description="Lock (pin down) dependencies."
             )
+            parser_lock.add_argument(
+                "sync",
+                action="store_true",
+                help="Whether to sync notebook metadata with the Pipfile.lock."
+            )
             parser_lock.set_defaults(func=_requirements_lock)
 
             # command: config

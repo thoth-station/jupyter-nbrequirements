@@ -287,13 +287,7 @@ export function lock_requirements(requirements: Requirements | undefined, sync =
 
         // TODO: send REST request (ajax?) directly instead of using Python lib here
         const command = `
-            from thamos.cli import _load_pipfiles
-
-            pipfile_content, pipfile_lock_content = _load_pipfiles()
-
-            results = thamos.lib.advise(
-                pipfile_content,
-                pipfile_lock_content,
+            results = thamos.lib.advise_here(
                 nowait=False,
                 no_static_analysis=True  # static analysis is not yet functional for Jupyter NBs
             )
@@ -308,7 +302,7 @@ export function lock_requirements(requirements: Requirements | undefined, sync =
                 pipfile = report[0][1]["requirements"]
                 pipfile_lock = report[0][1]["requirements_locked"]
             else:
-                raise Exception(f"Errors occured: {result}")
+                raise Exception(f"Errors occurred: {result}")
 
             json.dumps(pipfile_lock)
         `

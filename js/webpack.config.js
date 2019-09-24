@@ -39,6 +39,7 @@ module.exports = [
 		externals: {
 			'base/js/events': { amd: 'base/js/events' },
 			'base/js/namespace': { amd: 'base/js/namespace' },
+			'base/js/utils': { amd: 'base/js/utils' },
 		},
 	}
 ]

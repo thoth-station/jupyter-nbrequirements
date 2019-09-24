@@ -1,12 +1,11 @@
 import Command from './command'
-import { Context } from '../types'
 
 import { Requirements } from '../types/requirements'
 
 import { execute_python_script } from '../core'
 import { get_requirements, set_requirements, get_requirements_locked } from '../notebook'
 import { dedent, display } from '../utils'
-import { Pipfile, PipfileLock } from '../thoth'
+import { Pipfile, PipfileLock, install_requirements } from '../thoth'
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -93,5 +92,12 @@ export class Lock extends Command {
             .catch((err) => {
                 console.error("Failed to lock requirements.\n", err)
             })
+    }
+}
+
+export class Install extends Command {
+
+    public async run(args: any): Promise<void> {
+        await install_requirements(args.requirements, args.dev, args.pre)
     }
 }

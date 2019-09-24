@@ -16,6 +16,7 @@ import {
     Get,
     Set,
     Lock,
+    Install,
     Help,
 } from './requirements'
 
@@ -26,6 +27,7 @@ export async function cli(command: string, args: Object, element?: HTMLDivElemen
         case 'get': cmd = new Get(); break
         case 'set': cmd = new Set(); break
         case 'lock': cmd = new Lock(); break
+        case 'install': cmd = new Install(); break
 
         default: cmd = new Help()
     }

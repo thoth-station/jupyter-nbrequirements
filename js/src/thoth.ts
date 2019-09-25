@@ -108,7 +108,7 @@ export class Pipfile {
             if ( _.isUndefined( requirements ) )
                 requirements = await get_requirements( Jupyter.notebook )
 
-            console.log( "Creating Pipfile from notebook requirements." )
+            console.log( "Writing notebook requirements to the Pipfile." )
 
             const script = `
             import os
@@ -191,7 +191,7 @@ export class PipfileLock {
                 )
             }
 
-            console.log( "Creating Pipfile.lock from notebook locked requirements." )
+            console.log( "Writing notebook locked requirements to the Pipfile.lock." )
 
             let script = `
             requirements_locked = json.loads("""${JSON.stringify( requirements_locked, null, 4 ) }""")

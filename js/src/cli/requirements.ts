@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import Command from './command'
+import Command, { DefaultArguments } from './command'
 
 import { execute_python_script } from '../core'
 import {
@@ -45,10 +45,23 @@ export class Help extends Command {
     }
 }
 
+namespace Get {
 
+    export interface Arguments extends DefaultArguments { }
+
+}
 export class Get extends Command {
 
-    public async run( args: any, element: HTMLDivElement ): Promise<void> {
+    /**
+     * Get notebook requirements from the notebook metadata.
+     * If the metadata are not set, gather library usage from the notebook.
+     *
+     * @param {Get.Arguments} args
+     * @param {HTMLDivElement} element
+     * @returns {Promise<void>}
+     * @memberof Get
+     */
+    public async run( args: Get.Arguments, element: HTMLDivElement ): Promise<void> {
         this.validate( args )
         try {
             let req = await get_requirements( Jupyter.notebook, args.ignore_metadata )
@@ -79,18 +92,48 @@ export class Get extends Command {
     }
 }
 
+namespace Set {
+
+    export interface Arguments extends DefaultArguments {
+        requirements: Requirements
+    }
+
+}
 export class Set extends Command {
 
-    public run( args: any ): void {
+    /**
+     * Set notebook requirements.
+     * If `to_file` argument is provided, writes them to the Pipfile.
+     *
+     * @param {Set.Arguments} args
+     * @memberof Set
+     */
+    public run( args: Set.Arguments ): void {
         const req: Requirements = args.requirements
 
         set_requirements( Jupyter.notebook, req )
     }
 }
 
+namespace Lock {
+
+    export interface Arguments extends DefaultArguments {
+        sync: boolean
+    }
+
+}
 export class Lock extends Command {
 
-    public async run( args: any, element: HTMLDivElement ): Promise<void> {
+    /**
+     * Lock notebook requirements.
+     * If `to_file` argument is provided, writes them to the Pipfile.lock.
+     *
+     * @param {Lock.Arguments} args
+     * @param {HTMLDivElement} element
+     * @returns {Promise<void>}
+     * @memberof Lock
+     */
+    public async run( args: Lock.Arguments, element: HTMLDivElement ): Promise<void> {
         get_requirements_locked( Jupyter.notebook, args.ignore_metadata, args.sync )
             .then( async ( req_locked ) => {
                 if ( args.to_file ) {
@@ -112,16 +155,51 @@ export class Lock extends Command {
     }
 }
 
+namespace Install {
+
+    export interface Arguments extends DefaultArguments {
+        requirements: string[]
+        dev: boolean
+        pre: boolean
+    }
+
+}
 export class Install extends Command {
 
-    public async run( args: any ): Promise<void> {
+    /**
+     * Install notebook requirements to a virtual environment.
+     * If no such virtual environment exists, create it first.
+     *
+     * @param {Install.Arguments} args
+     * @returns {Promise<void>}
+     * @memberof Install
+     */
+    public async run( args: Install.Arguments ): Promise<void> {
         await install_requirements( args.requirements, args.dev, args.pre )
     }
 }
 
+namespace Kernel {
+
+    type KernelCommand = "info" | "install" | "set"
+
+    export interface Arguments extends DefaultArguments {
+        name: string
+        sub_command: KernelCommand
+    }
+
+}
 export class Kernel extends Command {
 
-    public async run( args: any, element: HTMLDivElement ): Promise<void> {
+    /**
+     * Create and/or set a new Jupyter kernel.
+     *
+     * @param {Kernel.Arguments} args
+     * @param {HTMLDivElement} element
+     * @returns {Promise<void>}
+     * @memberof Kernel
+     */
+    public async run( args: Kernel.Arguments, element: HTMLDivElement ): Promise<void> {
         const kernel = Jupyter.notebook.kernel
 
         if ( args.sub_command === "install" ) {

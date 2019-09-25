@@ -64,7 +64,7 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
         cli('%s', $$magic_args, element, context)
     })
     """ % command
-    
+
     params.update(kwargs)
     params["magic_args"] = json.dumps(args.__dict__, default=lambda s: repr(s))
 
@@ -82,7 +82,8 @@ def _requirements_config(args):
             fp = Path(thoth_config.CONFIG_NAME)
 
             if fp.exists() and not args.overwrite:
-                raise Exception("Config file already exists and `overwrite` is not set.")
+                raise Exception(
+                    "Config file already exists and `overwrite` is not set.")
 
             thoth_config.create_default_config()
 
@@ -187,7 +188,7 @@ class RequirementsMagic(Magics):
                 description="Lock (pin down) dependencies."
             )
             parser_lock.add_argument(
-                "sync",
+                "--sync",
                 action="store_true",
                 help="Whether to sync notebook metadata with the Pipfile.lock."
             )
@@ -236,7 +237,8 @@ class RequirementsMagic(Magics):
                 "kernel",
                 description="Install and manage Jupyter kernels."
             )
-            parser_kernel_subparser = parser_kernel.add_subparsers(dest="sub_command") 
+            parser_kernel_subparser = parser_kernel.add_subparsers(
+                dest="sub_command")
 
             parser_kernel_install = parser_kernel_subparser.add_parser(
                 "install",
@@ -247,7 +249,7 @@ class RequirementsMagic(Magics):
                 nargs="?",
                 help="[optional] Kernel name, otherwise use notebook name."
             )
-            
+
             parser_kernel_set = parser_kernel_subparser.add_parser(
                 "set",
                 description="Set existing kernel as current kernel."
@@ -283,7 +285,10 @@ def load_ipython_extension(ipython):
     from pathlib import Path
 
     import invectio
+
     import thamos
+    import thamos.cli
+    import thamos.lib
 
     print("Initialized.")
     """

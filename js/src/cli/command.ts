@@ -11,6 +11,19 @@
 
 import { Context } from '../types';
 
+export interface DefaultArguments {
+    // show this help message and exit
+    help: boolean
+    // Whether to ignore embedded notebook metadata
+    ignore_metadata: boolean
+    // Whether to display output in JSON format
+    to_json: boolean
+    // Whether to store output to file
+    to_file: boolean
+    // Whether to overwrite existing file
+    overwrite: boolean
+}
+
 /**
  * Base class for all commands.
  *
@@ -22,8 +35,8 @@ export default abstract class Command {
     public static help?(): string
 
     // Run the command
-    public abstract run(args: any, element?: HTMLDivElement, context?: Context): void | Promise<any>
+    public abstract run( args: DefaultArguments, element?: HTMLDivElement, context?: Context ): void | Promise<any>
 
     // Validate arguments
-    protected validate(args: any): void | never {}
+    protected validate( args: DefaultArguments ): void | never { }
 }

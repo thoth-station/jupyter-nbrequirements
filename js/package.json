@@ -15,7 +15,8 @@
   "private": true,
   "scripts": {
     "lint": "tsc --noEmit && eslint \"**/*.ts\" --quiet --fix",
-    "build": "webpack -p",
+    "build": "webpack -d",
+    "build-prod": "webpack -p --config webpack.config.prod.js",
     "watch": "webpack -d --watch",
     "build-ts": "rm -rf dist/ && tsc",
     "watch-ts": "tsc --watch",

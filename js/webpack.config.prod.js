@@ -5,7 +5,7 @@ const __package__ = 'jupyter_nbrequirements'
 
 module.exports = [
 	{// Notebook extension loader
-		mode: 'development',
+		mode: 'production',
 		entry: './src/extension.js',
 		output: {
 			filename: 'extension.js',
@@ -17,7 +17,7 @@ module.exports = [
 		},
 	},
 	{// Notebook extension bundle
-		mode: 'development',
+		mode: 'production',
 		entry: './src/index.ts',
 		module: {
 			rules: [
@@ -33,7 +33,6 @@ module.exports = [
 			path: path.resolve( __dirname, '..', __package__, 'static' ),
 			libraryTarget: 'amd',
 		},
-		devtool: 'source-map',
 		resolve: {
 			extensions: [ '.tsx', '.ts', '.js', '.json' ]
 		},

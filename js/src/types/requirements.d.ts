@@ -1,8 +1,8 @@
 export interface Requirements {
-    python_packages: any
+    packages: { [ name: string ]: string | { version: string, index: string } }
     requires: Requires
-    sources: (SourcesEntity)[] | null;
-    "dev-python_packages"?: any
+    sources: ( SourcesEntity )[] | null;
+    "dev-packages"?: any
 }
 
 export interface RequirementsLocked {
@@ -14,7 +14,7 @@ export interface RequirementsLocked {
 export interface Meta {
     hash: Hash;
     requires: Requires;
-    sources: (SourcesEntity)[] | null;
+    sources: ( SourcesEntity )[] | null;
     "pipfile-spec"?: number;
 }
 

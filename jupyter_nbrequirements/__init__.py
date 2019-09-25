@@ -42,7 +42,7 @@ from thamos.config import workdir
 
 from thoth.python import Pipfile
 
-from .magic_parser import MagicParser
+from .magic_parser import MagicParser, MagicParserError
 
 
 _HERE = Path(__file__).parent
@@ -119,6 +119,11 @@ class RequirementsMagic(Magics):
     """Jupyter magic for managing notebook requirements."""
 
     @line_cell_magic
+    def dep(self, line: str, cell: str = None):
+        """Alias for `requirements` magic."""
+        return self.requirements(line, cell)
+
+    @line_cell_magic
     def requirements(self, line: str, cell: str = None):
         """
         Get or set notebook requirements.
@@ -179,6 +184,64 @@ class RequirementsMagic(Magics):
             )
 
             subparsers = parser.add_subparsers(dest="command")
+
+            # command: add
+            parser_add = subparsers.add_parser(
+                "add",
+                description="Add dependency to notebook metadata without installing it."
+            )
+            parser_add.add_argument(
+                "-d", "--dev",
+                action="store_true",
+                help="Whether to store the dependency as dev-package."
+            )
+            parser_add.add_argument(
+                "--sync",
+                action="store_true",
+                help="Whether to sync notebook metadata with the Pipfile."
+            )
+            parser_add.add_argument(
+                "--index",
+                type=str,
+                default="pypi",
+                help=(
+                    "Index (source name) for this dependency."
+                    "NOTE: The source of that name must be present!"
+                )
+            )
+            parser_add.add_argument(
+                "dependency",
+                type=str,
+                help="The dependency to be added to notebook metadata."
+            )
+            parser_add.set_defaults(func=_requirements)
+
+            # command: add-source
+            parser_source = subparsers.add_parser(
+                "add-source",
+                description="Add source index to the notebook metadata."
+            )
+            parser_source.add_argument(
+                "--name",
+                type=str,
+                help="Name for this index."
+            )
+            parser_source.add_argument(
+                "--url",
+                type=str,
+                help="URL for this index.",
+            )
+            parser_source.add_argument(
+                "--verify-ssl",
+                type=bool,
+                default=False,
+                help="Whether to set verify_ssl=true"
+            )
+            parser_source.add_argument(
+                "--sync",
+                action="store_true",
+                help="Whether to sync notebook metadata with the Pipfile."
+            )
 
             # command: lock
             parser_lock = subparsers.add_parser(
@@ -262,7 +325,12 @@ class RequirementsMagic(Magics):
             parser_kernel.set_defaults(func=_requirements)
 
             opts = line.split()
-            args = parser.parse_args(opts)
+
+            try:
+                args = parser.parse_args(opts)
+            except MagicParserError as exc:
+                print(f"\n{exc.args[0]}", file=sys.stderr)
+                return
 
             if any([opt in {"-h", "--help"} for opt in opts]):
                 # print help and return

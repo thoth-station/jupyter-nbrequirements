@@ -20,7 +20,7 @@ import {
 import * as utils from '../utils'
 
 import * as io from '../types/io'
-import { Requirements } from '../types/requirements'
+import { Requirements, SourcesEntity } from '../types/requirements';
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -45,6 +45,74 @@ export class Help extends Command {
     }
 }
 
+namespace Add {
+
+    export interface Arguments extends DefaultArguments {
+        dependency: string
+        // Index (source name) for this dependency.
+        index: string
+        // Whether to store the dependency as dev-package.
+        dev: boolean
+        // Whether to sync notebook metadata with the Pipfile
+        sync: boolean
+    }
+
+}
+export class Add extends Command {
+
+    /**
+     * Add dependency to the notebook metadata without installing it.
+     *
+     * @param {Add.Arguments} args
+     * @returns {Promise<void>}
+     * @memberof Get
+     */
+    public async run( args: Add.Arguments ): Promise<void> {
+        this.validate( args )
+        let req: Requirements = await get_requirements( Jupyter.notebook, args.ignore_metadata )
+        let [ dep, version ] = args.dependency.split( "=" )
+
+        if ( _.isUndefined( version ) )
+            version = "*"
+
+        let spec: string | { version: string, index: string } = version
+
+        // resolve index
+        if ( args.index !== "pypi" ) {
+            // check if the source exists
+            if ( req.sources == null )
+                throw Error( `Missing index: ${ args.index }` )
+
+            const indices: string[] = Array.from( req.sources ).map( ( source: SourcesEntity ) => source.name )
+            if ( !_.includes( indices, args.index ) )
+                throw Error( `Missing index: ${ args.index }` )
+
+            spec = { version: version, index: args.index }
+        }
+
+        // resolve development package
+        if ( args.dev )
+            _.assign( req[ "dev-packages" ], { [ args.dependency ]: spec } )
+        else
+            _.assign( req.packages, { [ args.dependency ]: spec } )
+
+        set_requirements( Jupyter.notebook, req )
+
+        // resolve sync
+        if ( args.sync ) {
+            console.log( "Updating Pipfile." )
+            await Pipfile.create( { requirements: req, overwrite: true } )
+                .then( () => {
+                    console.log( "Pipfile has been successfully updated." )
+                } )
+                .catch( ( err: string | Error ) => {
+                    console.error( err )
+                    throw typeof err === "string" ? new Error( err ) : err
+                } )
+        }
+    }
+}
+
 namespace Get {
 
     export interface Arguments extends DefaultArguments { }
@@ -63,31 +131,27 @@ export class Get extends Command {
      */
     public async run( args: Get.Arguments, element: HTMLDivElement ): Promise<void> {
         this.validate( args )
-        try {
-            let req = await get_requirements( Jupyter.notebook, args.ignore_metadata )
-            if ( args.to_json ) {
-                // Append to the cell output
-                utils.display( req, element )
-            }
-            else if ( args.to_file ) {// Create the Pipfile in the current repository
-                return await Pipfile.create( req )
-                    .then( () => {
-                        console.log( "Pipfile has been sucessfully created." )
-                    } )
-                    .catch( ( err: string | Error ) => {
-                        console.error( err )
-                    } )
-            }
-            else {// default, display requirements in Pipfile format
-                const json = JSON.stringify( req )
-                // TODO: Turn this into a template
-                await execute_python_script(
-                    utils.dedent( `\n                    from thoth.python import Pipfile\n                    print(\n                        Pipfile.from_dict(json.loads('${ json }')).to_string()\n                    )` )
-                )
-            }
+        let req = await get_requirements( Jupyter.notebook, args.ignore_metadata )
+
+        if ( args.to_json ) {
+            // Append to the cell output
+            utils.display( req, element )
         }
-        catch ( err ) {
-            console.error( "Failed to get requirements.\n", err )
+        else if ( args.to_file ) {// Create the Pipfile in the current repository
+            return await Pipfile.create( { requirements: req } )
+                .then( () => {
+                    console.log( "Pipfile has been successfully created." )
+                } )
+                .catch( ( err: string | Error ) => {
+                    console.error( err )
+                } )
+        }
+        else {// default, display requirements in Pipfile format
+            const json = JSON.stringify( req )
+            // TODO: Turn this into a template
+            await execute_python_script(
+                utils.dedent( `\n                    from thoth.python import Pipfile\n                    print(\n                        Pipfile.from_dict(json.loads('${ json }')).to_string()\n                    )` )
+            )
         }
     }
 }
@@ -118,6 +182,7 @@ export class Set extends Command {
 namespace Lock {
 
     export interface Arguments extends DefaultArguments {
+        // Whether to sync notebook metadata with the Pipfile.lock
         sync: boolean
     }
 
@@ -137,7 +202,7 @@ export class Lock extends Command {
         get_requirements_locked( Jupyter.notebook, args.ignore_metadata, args.sync )
             .then( async ( req_locked ) => {
                 if ( args.to_file ) {
-                    return await PipfileLock.create( req_locked )
+                    return await PipfileLock.create( { requirements_locked: req_locked } )
                         .then( () => {
                             console.log( "Pipfile.lock has been successfully created." )
                         } )
@@ -151,6 +216,7 @@ export class Lock extends Command {
             } )
             .catch( ( err ) => {
                 console.error( "Failed to lock requirements.\n", err )
+                throw new Error( err )
             } )
     }
 }

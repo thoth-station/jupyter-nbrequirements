@@ -9,10 +9,14 @@
  * @since  0.0.1
  */
 
+import _ from "lodash";
+
 import Command, { DefaultArguments } from './command';
 import { Context } from '../types';
+import { OutputError } from "../types/nb"
 
 import {
+    Add,
     Get,
     Set,
     Lock,
@@ -34,6 +38,15 @@ import {
 export async function cli( command: string, args: DefaultArguments, element?: HTMLDivElement, context?: Context ) {
     let cmd: Command;
     switch ( command ) {
+
+        /**
+         * Add dependency to the notebook metadata without installing it.
+         *
+         * @param {Add.Arguments} args
+         * @returns {Promise<void>}
+         * @memberof Get
+         */
+        case 'add': cmd = new Add(); break
 
         /**
          * Get notebook requirements from the notebook metadata.
@@ -91,6 +104,24 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         default: cmd = new Help( command )
     }
 
-    // Run the command
-    return await cmd.run( args, element, context )
+    try {
+
+        // Run the command
+        await cmd.run( args, element, context )
+
+    } catch ( err ) {
+        console.error( err )
+
+        if ( context && !_.isUndefined( context.cell ) ) {
+            const obj: OutputError = {
+                output_type: "error",
+                ename: err.name,
+                evalue: err.message,
+                traceback: err.stack.split( "\n" )
+            }
+
+            // append the error output
+            context.cell.output_area.append_error( obj )
+        }
+    }
 }

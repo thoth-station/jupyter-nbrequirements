@@ -102,7 +102,7 @@ export class Pipfile {
      * @returns Promise<Requirements>
      * @memberof Pipfile
      */
-    public static create( requirements: Requirements, overwrite: boolean = false, sync: boolean = true ): Promise<Requirements> {
+    public static create( { requirements, overwrite = false, sync = true }: { requirements: Requirements; overwrite?: boolean; sync?: boolean; } ): Promise<Requirements> {
         return new Promise( async ( resolve, reject ) => {
 
             if ( _.isUndefined( requirements ) )
@@ -180,7 +180,7 @@ export class PipfileLock {
         this.default = packages
     }
 
-    public static create( requirements_locked: RequirementsLocked, ignore_metadata = false, sync = true ): Promise<void> {
+    public static create( { requirements_locked, ignore_metadata = false, sync = true }: { requirements_locked: RequirementsLocked; ignore_metadata?: boolean; sync?: boolean; } ): Promise<void> {
         return new Promise( async ( resolve, reject ) => {
 
             if ( _.isUndefined( requirements_locked ) ) {
@@ -301,7 +301,7 @@ export function lock_requirements(
             requirements = await get_requirements( Jupyter.notebook )
 
         // we want Pipfile to be synced with Pipfile.lock, always overwrite
-        await Pipfile.create( requirements, true )
+        await Pipfile.create( { requirements, overwrite: true } )
 
         // TODO: send REST request (ajax?) directly instead of using Python lib here
         const command = `

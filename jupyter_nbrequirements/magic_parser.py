@@ -38,8 +38,7 @@ class MagicParser(argparse.ArgumentParser):
         """Run this method on parser error."""
         self.print_usage(sys.stderr)
 
-        if "invalid choice" in message:
-            raise MagicParserError(message)
+        raise MagicParserError(message)
 
     def exit(self, failure=False, message=None):
         """Run this method before exit."""

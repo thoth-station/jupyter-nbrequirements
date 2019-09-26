@@ -509,7 +509,7 @@ export function install_requirements(
         if ( dev_packages ) opts += "--dev "
         if ( pre_releases ) opts += "--pre"
 
-        console.log( "Installing requirements: " )
+        console.log( "Installing requirements." )
 
         await execute_shell_command(
             `pipenv install --ignore-pipfile --keep-outdated ${ opts } ${ requirements }`,

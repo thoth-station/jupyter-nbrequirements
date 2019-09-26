@@ -282,7 +282,7 @@ class RequirementsMagic(Magics):
                 help="Overwrite default dependency resolution engine."
             )
             parser_lock.add_argument(
-                "-d", "--dev",
+                "-d", "--dev-packages",
                 action="store_true",
                 help=(
                     "Install both develop and default packages.\n"
@@ -290,7 +290,7 @@ class RequirementsMagic(Magics):
                 )
             )
             parser_lock.add_argument(
-                "--pre",
+                "--pre-releases",
                 action="store_true",
                 help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`"
             )
@@ -384,7 +384,25 @@ class RequirementsMagic(Magics):
                 formatter_class=argparse.RawTextHelpFormatter
             )
             parser_ensure.add_argument(
-                "-I", "--install-kernel",
+                "--engine",
+                choices=["thoth", "pipenv"],
+                help="Overwrite default dependency resolution engine."
+            )
+            parser_ensure.add_argument(
+                "-d", "--dev-packages",
+                action="store_true",
+                help=(
+                    "Install both develop and default packages.\n"
+                    "Only applicable when `engine='pipenv'`"
+                )
+            )
+            parser_ensure.add_argument(
+                "--pre-releases",
+                action="store_true",
+                help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`"
+            )
+            parser_ensure.add_argument(
+                "-i", "--install-kernel",
                 action="store_true",
                 help="Whether to install and set the Jupyter kernel as well."
             )

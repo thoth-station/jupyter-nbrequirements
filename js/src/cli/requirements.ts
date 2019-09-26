@@ -24,6 +24,7 @@ import * as utils from '../utils'
 import * as io from '../types/io'
 import { Requirements, SourcesEntity, ResolutionEngine, RequirementsLocked } from "../types/requirements"
 import { get_python_version } from "../notebook"
+import { lock_requirements_with_pipenv } from "../thoth"
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -72,6 +73,12 @@ export class Clear extends Command {
 namespace Ensure {
 
     export interface Arguments extends DefaultArguments {
+        // Resolution engine: {thoth, pipenv} (defaults to thoth)
+        engine: ResolutionEngine
+        // Only applicable if engine == 'pipenv'
+        dev_packages?: boolean,
+        // Only applicable if engine == 'pipenv'
+        pre_releases?: boolean,
         // Whether to install and set the Jupyter kernel as well.
         install_kernel: boolean
         // [optional] Kernel name, otherwise use notebook name.
@@ -101,7 +108,22 @@ export class Ensure extends Command {
 
         // Stage 2: lock down the dependencies and write them to the Pipfile.lock
         // This command also makes sure that the requirements are written to the Pipfile
-        const req_locked = await lock_requirements( req, true )
+        let req_locked: RequirementsLocked
+
+        const engine: ResolutionEngine = args.engine || DEFAULT_RESOLUTION_ENGINE
+        switch ( engine ) {
+            case "thoth": {
+                req_locked = await lock_requirements( req, true )
+                break
+            }
+
+            case "pipenv": {
+                req_locked = await lock_requirements_with_pipenv( args.dev_packages, args.pre_releases, true )
+                break
+            }
+
+            default: throw new Error( `Unknown resolution engine: ${ engine }` )
+        }
 
         console.info( "[Ensure] locked requirements: ", req_locked )
 

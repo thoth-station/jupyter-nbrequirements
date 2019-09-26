@@ -16,6 +16,7 @@ import { Context } from '../types';
 import { OutputError } from "../types/nb"
 
 import {
+    Clear,
     Ensure,
     Add,
     Get,
@@ -39,6 +40,14 @@ import {
 export async function cli( command: string, args: DefaultArguments, element?: HTMLDivElement, context?: Context ) {
     let cmd: Command;
     switch ( command ) {
+
+        /**
+         * Clear notebook requirements and locked requirements metadata.
+         *
+         * @param {Clear.Arguments} args
+         * @memberof Clear
+         */
+        case 'clear': cmd = new Clear(); break
 
         /**
          * Ensure gets a project into a complete, reproducible, and likely compilable state.

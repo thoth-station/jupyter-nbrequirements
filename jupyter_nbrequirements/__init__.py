@@ -355,6 +355,13 @@ class RequirementsMagic(Magics):
             )
             parser_ensure.set_defaults(func=_requirements)
 
+            # command: clear
+            parser_clear = subparsers.add_parser(
+                "clear",
+                description="Clear notebook requirements and locked requirements metadata."
+            )
+            parser_clear.set_defaults(func=_requirements)
+
             opts = line.split()
 
             try:

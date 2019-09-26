@@ -48,6 +48,25 @@ export class Help extends Command {
     }
 }
 
+namespace Clear {
+
+    export interface Arguments extends DefaultArguments { }
+
+}
+export class Clear extends Command {
+
+    /**
+     * Clear notebook requirements and locked requirements metadata.
+     *
+     * @param {Clear.Arguments} args
+     * @memberof Clear
+     */
+    public run( args: Clear.Arguments ): void {
+        delete Jupyter.notebook.metadata.requirements
+        delete Jupyter.notebook.metadata.requirements_locked
+    }
+}
+
 namespace Ensure {
 
     export interface Arguments extends DefaultArguments {
@@ -63,7 +82,7 @@ export class Ensure extends Command {
     /**
      * Ensure gets a project into a complete, reproducible, and likely compilable state.
      *
-     * @param {Get.Arguments} args
+     * @param {Ensure.Arguments} args
      * @param {HTMLDivElement} element
      * @returns {Promise<void>}
      * @memberof Ensure
@@ -120,7 +139,7 @@ export class Add extends Command {
      *
      * @param {Add.Arguments} args
      * @returns {Promise<void>}
-     * @memberof Get
+     * @memberof Add
      */
     public async run( args: Add.Arguments ): Promise<void> {
         this.validate( args )

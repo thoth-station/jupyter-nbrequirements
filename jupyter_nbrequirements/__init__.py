@@ -402,9 +402,9 @@ class RequirementsMagic(Magics):
                 help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`"
             )
             parser_ensure.add_argument(
-                "-i", "--install-kernel",
+                "-I", "--skip-kernel",
                 action="store_true",
-                help="Whether to install and set the Jupyter kernel as well."
+                help="Skip installation of the Jupyter kernel."
             )
             parser_ensure.add_argument(
                 "name",
@@ -412,7 +412,7 @@ class RequirementsMagic(Magics):
                 nargs="?",
                 help=(
                     "[optional] Kernel name, otherwise use notebook name.\n"
-                    "Only applicable when `--install-kernel = true`."
+                    "Only applicable when `--skip-kernel=false`."
                 )
             )
             parser_ensure.set_defaults(func=_requirements)

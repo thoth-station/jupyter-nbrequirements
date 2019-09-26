@@ -79,8 +79,8 @@ namespace Ensure {
         dev_packages?: boolean,
         // Only applicable if engine == 'pipenv'
         pre_releases?: boolean,
-        // Whether to install and set the Jupyter kernel as well.
-        install_kernel: boolean
+        // Skip installation of the Jupyter kernel.
+        skip_kernel: boolean
         // [optional] Kernel name, otherwise use notebook name.
         name: string
     }
@@ -132,6 +132,8 @@ export class Ensure extends Command {
         await install_requirements( [], true )
 
         // [Optional] Stage 4: install the Jupyter kernel
+        if ( args.skip_kernel ) return
+
         await install_kernel( args.name )
             .then( ( name: string ) => load_kernel( name ) )
             .then( ( name: string ) => set_kernel( name ) )

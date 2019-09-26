@@ -125,7 +125,7 @@ export class Add extends Command {
     public async run( args: Add.Arguments ): Promise<void> {
         this.validate( args )
 
-        let req: Requirements | undefined = Jupyter.notebook.requirements
+        let req: Requirements | undefined = Jupyter.notebook.metadata.requirements
         if ( _.isUndefined( req ) ) {
             const python_version = get_python_version( Jupyter.notebook )
             req = {

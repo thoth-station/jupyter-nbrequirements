@@ -59,6 +59,14 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
         # %requirements is an alias to 'get' if no command is provided
         command = default_command
 
+    if command == "get" and getattr(args, "from_file") != None:
+        # read the requirements from the file and change the command to set
+        with args.from_file as f:
+            requirements = Pipfile.from_string(f.read()).to_dict()
+            setattr(args, "requirements", requirements)
+
+        command = "set"
+
     script = """
     require(['nbrequirements'], ({cli, version}) => {
         cli('%s', $$magic_args, element, context)
@@ -175,12 +183,17 @@ class RequirementsMagic(Magics):
                 help="Whether to ignore embedded notebook metadata."
             )
             parser.add_argument(
+                "-f", "--from-file",
+                type=argparse.FileType('r', encoding='utf-8'),
+                help="Whether to store output to file."
+            )
+            parser.add_argument(
                 "--to-json",
                 action="store_true",
                 help="Whether to display output in JSON format."
             )
             parser.add_argument(
-                "-f", "--to-file",
+                "--to-file",
                 action="store_true",
                 help="Whether to store output to file."
             )

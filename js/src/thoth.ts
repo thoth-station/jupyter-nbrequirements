@@ -258,12 +258,12 @@ export function gather_library_usage( cells?: Array<CodeCell> ): Promise<string[
             _STD_LIB_PATH = Path(distutils.sysconfig.get_python_lib(standard_lib=True))
             _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
 
-            ast = ast.parse('''
+            tree = ast.parse('''
             ${notebook_content }
             ''')
 
             visitor = invectio.lib.InvectioVisitor()
-            visitor.visit(ast)
+            visitor.visit(tree)
 
             report = visitor.get_module_report()
 

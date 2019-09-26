@@ -325,6 +325,7 @@ class RequirementsMagic(Magics):
             )
             parser_kernel.set_defaults(func=_requirements)
 
+            # command: ensure
             parser_ensure = subparsers.add_parser(
                 "ensure",
                 description="\n".join(

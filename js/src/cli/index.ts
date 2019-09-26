@@ -124,6 +124,10 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         console.error( err )
 
         if ( context && !_.isUndefined( context.cell ) ) {
+            if ( typeof err === "string" ) {
+                err = new Error( err )
+            }
+
             const obj: OutputError = {
                 output_type: "error",
                 ename: err.name,

@@ -46,51 +46,47 @@ export function set_requirements( notebook: Jupyter.Notebook, requirements: Requ
 }
 
 export function get_requirements( notebook: Jupyter.Notebook, ignore_metadata: boolean = false ): Promise<Requirements> {
-    return new Promise( async ( resolve ) => {
+    return new Promise( async ( resolve, reject ) => {
         console.log( "Reading notebook requirements." )
+        let notebook_metadata: Requirements | {} = notebook.metadata.requirements || {}
 
-        let requirements: Requirements | undefined = notebook.metadata.requirements
-        if ( _.isUndefined( requirements ) || ignore_metadata ) {
-            console.log( "Requirements are not defined. Gathering." )
-            requirements = await gather_library_usage()
-                .then( ( req: string[] ) => {
-                    const python_packages: { [ name: string ]: any } = {}
-                    req.forEach( ( p: string ) => {
-                        const python_package_name = p.toLocaleLowerCase()
-                        const python_package = new PackageVersion( python_package_name )
+        console.log( "Gathering library usage." )
+        try {
+            const library_usage: string[] = await gather_library_usage()
+            const python_packages: { [ name: string ]: any } = {}
 
-                        _.assign(
-                            python_packages,
-                            python_package.get_pipfile_entry()
-                        )
-                    } )
+            library_usage.forEach( ( p: string ) => {
+                const python_package_name = p.toLocaleLowerCase()
+                const python_package = new PackageVersion( python_package_name )
 
-                    const kernel_info: KernelInfo = get_kernel_info( notebook )
+                _.assign(
+                    python_packages,
+                    python_package.get_pipfile_entry()
+                )
+            } )
 
-                    const python_version: string = kernel_info.language_info.version
-                    const match = python_version.match( /\d.\d/ )
-                    if ( match == null ) {
-                        throw Error( `Python version '${ match }' does not match required pattern.` )
-                    }
-                    const requires = { python_version: match[ 0 ] }
+            const requires = { python_version: get_python_version( notebook ) }
+            const notebook_requirements: Requirements = {
+                packages: python_packages,
+                requires: requires,
+                sources: [
+                    new Source()
+                ]
+            }
 
-                    return {
-                        packages: python_packages,
-                        requires: requires,
-                        sources: [
-                            new Source()
-                        ]
-                    } as Requirements
-                } )
-                .catch( ( err: Error ) => {
-                    console.error( err )
-                    throw err
-                } )
+            if ( ignore_metadata ) {
+                resolve( notebook_requirements )
+                return
+            }
 
-            resolve( requirements )
-        } else {
-            // Resolve with the metadata otherwise
-            resolve( requirements )
+            // Resolve with both the metadata and library usage otherwise
+            // The requirements defined in metadata take preference as they can
+            // have a specific version pinned down.
+            notebook_metadata = _.merge( notebook_requirements, notebook_metadata )
+            resolve( notebook_metadata as Requirements )
+
+        } catch ( err ) {
+            reject( err )
         }
     } )
 }
@@ -131,7 +127,7 @@ export function get_requirements_locked( notebook: Jupyter.Notebook, ignore_meta
     } )
 }
 
-function get_kernel_info( notebook: Jupyter.Notebook ): KernelInfo {
+export function get_kernel_info( notebook: Jupyter.Notebook ): KernelInfo {
     const json: string = JSON.stringify( notebook.kernel.info_reply )
     if ( _.isUndefined( json ) ) {
         throw Error( 'Unable to retrieve Kernel info' )
@@ -141,4 +137,16 @@ function get_kernel_info( notebook: Jupyter.Notebook ): KernelInfo {
     const info: KernelInfo = KernelInfoProxy.Parse( json )
 
     return info
+}
+
+export function get_python_version( notebook: Jupyter.notebook ): string {
+    const kernel_info = get_kernel_info( notebook )
+    const python_version: string = kernel_info.language_info.version
+
+    const match = python_version.match( /\d.\d/ )
+    if ( match == null ) {
+        throw new Error( `Python version '${ match }' does not match required pattern.` )
+    }
+
+    return match[ 0 ]
 }

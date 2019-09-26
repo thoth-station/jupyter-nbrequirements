@@ -6,11 +6,12 @@ import { execute_python_script } from '../core'
 import {
     get_requirements,
     set_requirements,
-    get_requirements_locked
+    get_requirements_locked,
 } from '../notebook'
 import {
     Pipfile,
     PipfileLock,
+    Source,
     lock_requirements,
     install_requirements,
     install_kernel,
@@ -22,6 +23,7 @@ import * as utils from '../utils'
 
 import * as io from '../types/io'
 import { Requirements, SourcesEntity } from '../types/requirements';
+import { get_python_version } from "../notebook"
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -69,10 +71,10 @@ export class Ensure extends Command {
     public async run( args: Ensure.Arguments, element: HTMLDivElement ): Promise<void> {
 
         // Stage 1: get & set notebook requirements
-        // We want to ignore the metadata here, the purpose of ensure
-        // is to have a working environment, hence missing dependencies
-        // are not acceptable
-        const req: Requirements = await get_requirements( Jupyter.notebook, true )
+        // We don't want to ignore the metadata here, the purpose of ensure
+        // is to have a working environment, hence we should merge both metadata
+        // and notebook requirements
+        const req: Requirements = await get_requirements( Jupyter.notebook, false )
 
         console.info( "[Ensure] requirements: ", req )
 
@@ -122,9 +124,18 @@ export class Add extends Command {
      */
     public async run( args: Add.Arguments ): Promise<void> {
         this.validate( args )
-        let req: Requirements = await get_requirements( Jupyter.notebook, args.ignore_metadata )
-        let [ dep, version ] = args.dependency.split( "=" )
 
+        let req: Requirements | undefined = Jupyter.notebook.requirements
+        if ( _.isUndefined( req ) ) {
+            const python_version = get_python_version( Jupyter.notebook )
+            req = {
+                packages: {},
+                requires: { python_version: python_version },
+                sources: [ new Source() ]
+            }
+        }
+
+        let [ dep, version ] = args.dependency.split( "=" )
         if ( _.isUndefined( version ) )
             version = "*"
 

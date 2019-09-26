@@ -65,8 +65,15 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
     })
     """ % command
 
+    args = {
+        arg: re.sub("[\"']", "", v) if isinstance(v, str) else v
+        for arg, v in args._get_kwargs()
+    }
+
+    def _serialize(arg): return repr(arg)  # noqa
+
     params.update(kwargs)
-    params["magic_args"] = json.dumps(args.__dict__, default=lambda s: repr(s))
+    params["magic_args"] = json.dumps(args, default=_serialize)
 
     return script, params
 
@@ -196,18 +203,24 @@ class RequirementsMagic(Magics):
                 help="Whether to store the dependency as dev-package."
             )
             parser_add.add_argument(
-                "--sync",
-                action="store_true",
-                help="Whether to sync notebook metadata with the Pipfile."
+                "-v", "--version",
+                type=str,
+                default="*",
+                help="Version constraint."
             )
             parser_add.add_argument(
-                "--index",
+                "-i", "--index",
                 type=str,
                 default="pypi",
                 help=(
                     "Index (source name) for this dependency."
                     "NOTE: The source of that name must be present!"
                 )
+            )
+            parser_add.add_argument(
+                "--sync",
+                action="store_true",
+                help="Whether to sync notebook metadata with the Pipfile."
             )
             parser_add.add_argument(
                 "dependency",

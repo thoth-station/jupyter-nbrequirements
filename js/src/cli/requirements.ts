@@ -123,6 +123,8 @@ namespace Add {
 
     export interface Arguments extends DefaultArguments {
         dependency: string
+        // Version constraint
+        version: string
         // Index (source name) for this dependency.
         index: string
         // Whether to store the dependency as dev-package.
@@ -154,11 +156,7 @@ export class Add extends Command {
             }
         }
 
-        let [ dep, version ] = args.dependency.split( "=" )
-        if ( _.isUndefined( version ) )
-            version = "*"
-
-        let spec: string | { version: string, index: string } = version
+        let spec: string | { version: string, index: string } = args.version
 
         // resolve index
         if ( args.index !== "pypi" ) {
@@ -170,7 +168,7 @@ export class Add extends Command {
             if ( !_.includes( indices, args.index ) )
                 throw Error( `Missing index: ${ args.index }` )
 
-            spec = { version: version, index: args.index }
+            spec = { version: args.version, index: args.index }
         }
 
         // resolve development package

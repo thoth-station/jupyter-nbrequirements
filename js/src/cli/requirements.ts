@@ -219,7 +219,7 @@ export class Get extends Command {
             utils.display( req, element )
         }
         else if ( args.to_file ) {// Create the Pipfile in the current repository
-            return await Pipfile.create( { requirements: req } )
+            return await Pipfile.create( { requirements: req, overwrite: args.overwrite } )
                 .then( () => {
                     console.log( "Pipfile has been successfully created." )
                 } )

@@ -180,7 +180,7 @@ class RequirementsMagic(Magics):
                 help="Whether to display output in JSON format."
             )
             parser.add_argument(
-                "--to-file",
+                "-f", "--to-file",
                 action="store_true",
                 help="Whether to store output to file."
             )

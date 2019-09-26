@@ -25,11 +25,11 @@ import {
 } from './notebook'
 
 import * as utils from './utils'
-import { RequirementsLockedProxy } from './requirements';
+import { RequirementsLockedProxy } from "./requirements"
 
 import * as io from './types/io'
 import { CodeCell, Context } from './types/nb';
-import { Meta, Requirements, RequirementsLocked } from './types/requirements';
+import { Meta, Requirements, RequirementsLocked } from "./types/requirements"
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -363,6 +363,97 @@ export function lock_requirements(
         }
 
         await execute_python_script( command, { iopub: { output: callback } } )
+    } )
+}
+
+export function lock_requirements_with_pipenv(
+    dev_packages = false,
+    pre_releases = false,
+    sync = true
+): Promise<RequirementsLocked> {
+    return new Promise( async ( resolve, reject ) => {
+        let requirements_locked: RequirementsLocked
+
+        /**
+         * Logging callback
+         */
+        let iopub_callback = ( msg: io.Message ) => {
+            console.debug( "Execution logging callback: ", msg )
+
+            if ( msg.msg_type == "error" ) {
+                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            }
+
+            else if ( msg.msg_type == "stream" ) {  // pipenv log messages
+                const stream = msg.content.name || "stdout"
+                const text = utils.parse_console_output( msg.content.text )
+
+                if ( stream === "stderr" ) {
+                    console.warn( `[pipenv]: `, text )
+                } else
+                    console.log( `[pipenv]: `, text )
+            }
+        }
+
+        /**
+         * Output callback
+         */
+        let output_callback = ( msg: io.Message ) => {
+            console.debug( "Execution output callback: ", msg )
+
+            if ( msg.msg_type == "error" ) {
+                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            }
+            else if ( msg.msg_type == "stream" ) {  // pipenv output
+                const content: string = msg.content.text
+
+                requirements_locked = RequirementsLockedProxy.Parse( content )
+            }
+        }
+
+        /**
+         * Execution done callback
+         */
+        let shell_callback = ( msg: io.Message ) => {
+            console.debug( "Execution shell callback: ", msg )
+
+            if ( msg.content.status == "error" ) {
+                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            }
+
+            if ( _.isUndefined( requirements_locked ) ) {
+                reject( new Error( "Requirements locked are not defined." ) )
+                return
+            }
+
+            console.log( "Requirements have been successfully locked." )
+
+            if ( sync ) {
+                // sync requirements locked with Pipfile.lock
+                set_requirements_locked( Jupyter.notebook, requirements_locked )
+                console.log( "Locked requirements have been synced with Pipfile." )
+            }
+
+            resolve( requirements_locked )
+        }
+
+
+        let opts = ""
+
+        if ( dev_packages ) opts += "--dev "
+        if ( pre_releases ) opts += "--pre"
+
+        console.log( "Locking requirements w/ Pipenv: " )
+
+        await execute_shell_command(
+            `pipenv lock ${ opts }`,
+            { iopub: { output: iopub_callback } }
+        )
+
+        await execute_shell_command(
+            `cat Pipfile.lock`,
+            { iopub: { output: output_callback }, shell: { reply: shell_callback } }
+        )
     } )
 }
 

@@ -277,6 +277,24 @@ class RequirementsMagic(Magics):
                 description="Lock (pin down) dependencies."
             )
             parser_lock.add_argument(
+                "--engine",
+                choices=["thoth", "pipenv"],
+                help="Overwrite default dependency resolution engine."
+            )
+            parser_lock.add_argument(
+                "-d", "--dev",
+                action="store_true",
+                help=(
+                    "Install both develop and default packages.\n"
+                    "Only applicable when `engine='pipenv'`"
+                )
+            )
+            parser_lock.add_argument(
+                "--pre",
+                action="store_true",
+                help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`"
+            )
+            parser_lock.add_argument(
                 "--sync",
                 action="store_true",
                 help="Whether to sync notebook metadata with the Pipfile.lock."

@@ -11,15 +11,22 @@
 
 import _ from 'lodash'
 
-import { Requirements, RequirementsLocked } from './types/requirements';
+import { Requirements, RequirementsLocked, ResolutionEngine } from './types/requirements';
 
 import { KernelInfo, KernelInfoProxy } from './kernel';
-import { gather_library_usage, lock_requirements } from './thoth'
-import { PackageVersion, Source } from './thoth'
+import {
+    PackageVersion,
+    Source,
+    gather_library_usage,
+    lock_requirements,
+    lock_requirements_with_pipenv
+} from "./thoth"
 
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+
+declare const DEFAULT_RESOLUTION_ENGINE: ResolutionEngine
 
 // Hang the functions on Jupyter.Notebook prototype for easier usage
 Jupyter.Notebook.prototype.set_requirements = _.partial( set_requirements, Jupyter.notebook )
@@ -106,7 +113,14 @@ export function set_requirements_locked( notebook: Jupyter.Notebook, requirement
     console.log( "Notebook locked requirements have been set successfully." )
 }
 
-export function get_requirements_locked( notebook: Jupyter.Notebook, ignore_metadata = false, sync = true ): Promise<RequirementsLocked> {
+export function get_requirements_locked(
+    notebook: Jupyter.Notebook,
+    ignore_metadata = false,
+    dev_packages = false,
+    pre_releases = false,
+    sync = true,
+    engine: ResolutionEngine = DEFAULT_RESOLUTION_ENGINE
+): Promise<RequirementsLocked> {
     return new Promise( async ( resolve, reject ) => {
         console.log( "Reading notebook locked requirements." )
 
@@ -114,13 +128,20 @@ export function get_requirements_locked( notebook: Jupyter.Notebook, ignore_meta
         if ( _.isUndefined( requirements_locked ) || ignore_metadata ) {
             console.log( "Locked requirements are not defined." )
 
-            lock_requirements( undefined, sync )
-                .then( ( req_locked: RequirementsLocked ) => {
-                    console.log( "Successfully locked notebook requirements.", req_locked )
+            if ( engine == "thoth" ) {
+                lock_requirements( undefined, sync )
+                    .then( ( req_locked: RequirementsLocked ) => {
+                        resolve( req_locked )
+                    } )
+                    .catch( ( err: string ) => reject( new Error( err ) ) )
+            } else {
+                lock_requirements_with_pipenv( dev_packages, pre_releases, sync )
+                    .then( ( req_locked: RequirementsLocked ) => {
+                        resolve( req_locked )
+                    } )
+                    .catch( ( err: string ) => reject( new Error( err ) ) )
 
-                    resolve( req_locked )
-                } )
-                .catch( ( err: string ) => reject( new Error( err ) ) )
+            }
         } else {
             resolve( requirements_locked )
         }

@@ -22,12 +22,14 @@ import {
 import * as utils from '../utils'
 
 import * as io from '../types/io'
-import { Requirements, SourcesEntity } from '../types/requirements';
+import { Requirements, SourcesEntity, ResolutionEngine, RequirementsLocked } from "../types/requirements"
 import { get_python_version } from "../notebook"
 
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+
+declare const DEFAULT_RESOLUTION_ENGINE: ResolutionEngine
 
 
 export class Help extends Command {
@@ -265,6 +267,12 @@ namespace Lock {
     export interface Arguments extends DefaultArguments {
         // Whether to sync notebook metadata with the Pipfile.lock
         sync: boolean
+        // Resolution engine: {thoth, pipenv} (defaults to thoth)
+        engine: ResolutionEngine
+        // Only applicable if engine == 'pipenv'
+        dev_packages?: boolean,
+        // Only applicable if engine == 'pipenv'
+        pre_releases?: boolean,
     }
 
 }
@@ -280,8 +288,21 @@ export class Lock extends Command {
      * @memberof Lock
      */
     public async run( args: Lock.Arguments, element: HTMLDivElement ): Promise<void> {
-        get_requirements_locked( Jupyter.notebook, args.ignore_metadata, args.sync )
-            .then( async ( req_locked ) => {
+        args.engine = args.engine || DEFAULT_RESOLUTION_ENGINE
+        if ( args.engine === "pipenv" ) {
+            args.dev_packages = args.dev_packages || false
+            args.pre_releases = args.pre_releases || false
+        }
+
+        get_requirements_locked(
+            Jupyter.notebook,
+            args.ignore_metadata,
+            args.sync,
+            args.dev_packages,
+            args.pre_releases,
+            args.engine
+        )
+            .then( async ( req_locked: RequirementsLocked ) => {
                 if ( args.to_file ) {
                     return await PipfileLock.create( { requirements_locked: req_locked } )
                         .then( () => {
@@ -295,7 +316,7 @@ export class Lock extends Command {
                 // default, display requirements in Pipfile.lock format
                 utils.display( req_locked, element )
             } )
-            .catch( ( err ) => {
+            .catch( ( err: string ) => {
                 console.error( "Failed to lock requirements.\n", err )
                 throw new Error( err )
             } )

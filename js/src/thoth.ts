@@ -301,7 +301,7 @@ export function lock_requirements(
             requirements = await get_requirements( Jupyter.notebook )
 
         // we want Pipfile to be synced with Pipfile.lock, always overwrite
-        await Pipfile.create( { requirements, overwrite: true } )
+        await Pipfile.create( { requirements, overwrite: true, sync: sync } )
 
         // TODO: send REST request (ajax?) directly instead of using Python lib here
         const command = `

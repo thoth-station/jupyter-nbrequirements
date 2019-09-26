@@ -16,6 +16,7 @@ import { Context } from '../types';
 import { OutputError } from "../types/nb"
 
 import {
+    Ensure,
     Add,
     Get,
     Set,
@@ -38,6 +39,16 @@ import {
 export async function cli( command: string, args: DefaultArguments, element?: HTMLDivElement, context?: Context ) {
     let cmd: Command;
     switch ( command ) {
+
+        /**
+         * Ensure gets a project into a complete, reproducible, and likely compilable state.
+         *
+         * @param {Get.Arguments} args
+         * @param {HTMLDivElement} element
+         * @returns {Promise<void>}
+         * @memberof Ensure
+         */
+        case 'ensure': cmd = new Ensure(); break
 
         /**
          * Add dependency to the notebook metadata without installing it.

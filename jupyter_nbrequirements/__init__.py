@@ -29,7 +29,7 @@ import sys
 import json
 
 from pathlib import Path
-from textwrap import dedent
+from textwrap import dedent, wrap
 
 from IPython.core.magic import line_cell_magic
 from IPython.core.magic import magics_class
@@ -319,10 +319,40 @@ class RequirementsMagic(Magics):
             )
             parser_kernel_set.add_argument(
                 "name",
+                type=str,
                 nargs="?",
                 help="[optional] Kernel name, otherwise use notebook name."
             )
             parser_kernel.set_defaults(func=_requirements)
+
+            parser_ensure = subparsers.add_parser(
+                "ensure",
+                description="\n".join(
+                    wrap(
+                        "Make sure that the notebook metadata and local files are in sync\n"
+                        "with the virtual environment and the Jupyter kernel.\n\n"
+                        "Ensure gets a project into a complete, reproducible, and likely compilable state.",
+                        width=200,
+                        replace_whitespace=False
+                    )
+                ),
+                formatter_class=argparse.RawTextHelpFormatter
+            )
+            parser_ensure.add_argument(
+                "-I", "--install-kernel",
+                action="store_true",
+                help="Whether to install and set the Jupyter kernel as well."
+            )
+            parser_ensure.add_argument(
+                "name",
+                type=str,
+                nargs="?",
+                help=(
+                    "[optional] Kernel name, otherwise use notebook name.\n"
+                    "Only applicable when `--install-kernel = true`."
+                )
+            )
+            parser_ensure.set_defaults(func=_requirements)
 
             opts = line.split()
 

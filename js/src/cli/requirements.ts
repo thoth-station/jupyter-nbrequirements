@@ -11,6 +11,7 @@ import {
 import {
     Pipfile,
     PipfileLock,
+    lock_requirements,
     install_requirements,
     install_kernel,
     load_kernel,
@@ -43,6 +44,58 @@ export class Help extends Command {
         // Append to the cell output
         utils.display( this.message, element )
     }
+}
+
+namespace Ensure {
+
+    export interface Arguments extends DefaultArguments {
+        // Whether to install and set the Jupyter kernel as well.
+        install_kernel: boolean
+        // [optional] Kernel name, otherwise use notebook name.
+        name: string
+    }
+
+}
+export class Ensure extends Command {
+
+    /**
+     * Ensure gets a project into a complete, reproducible, and likely compilable state.
+     *
+     * @param {Get.Arguments} args
+     * @param {HTMLDivElement} element
+     * @returns {Promise<void>}
+     * @memberof Ensure
+     */
+    public async run( args: Ensure.Arguments, element: HTMLDivElement ): Promise<void> {
+
+        // Stage 1: get & set notebook requirements
+        // We want to ignore the metadata here, the purpose of ensure
+        // is to have a working environment, hence missing dependencies
+        // are not acceptable
+        const req: Requirements = await get_requirements( Jupyter.notebook, true )
+
+        console.info( "[Ensure] requirements: ", req )
+
+        // Stage 2: lock down the dependencies and write them to the Pipfile.lock
+        // This command also makes sure that the requirements are written to the Pipfile
+        const req_locked = await lock_requirements( req, true )
+
+        console.info( "[Ensure] locked requirements: ", req_locked )
+
+        // Stage 3: install the requirements along with the dev packages
+        // empty [] makes sure that the requirements are installed from the Pipfile.lock
+        await install_requirements( [], true )
+
+        // [Optional] Stage 4: install the Jupyter kernel
+        await install_kernel( args.name )
+            .then( ( name: string ) => load_kernel( name ) )
+            .then( ( name: string ) => set_kernel( name ) )
+            .then( ( name: string ) => console.info( "[Ensure] Successfully set Kernel: ", name ) )
+            .catch( ( err: string | Error ) => {
+                throw typeof err === "string" ? new Error( err ) : err
+            } )
+    }
+
 }
 
 namespace Add {

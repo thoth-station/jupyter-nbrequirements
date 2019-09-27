@@ -178,7 +178,8 @@ export class Add extends Command {
             req = {
                 packages: {},
                 requires: { python_version: python_version },
-                sources: [ new Source() ]
+                sources: [ new Source() ],
+                "dev-packages": {}
             }
         }
 
@@ -199,9 +200,9 @@ export class Add extends Command {
 
         // resolve development package
         if ( args.dev )
-            _.assign( req[ "dev-packages" ], { [ args.dependency ]: spec } )
+            req[ "dev-packages" ] = _.assign( req[ "dev-packages" ] || {}, { [ args.dependency ]: spec } )
         else
-            _.assign( req.packages, { [ args.dependency ]: spec } )
+            req.packages = _.assign( req.packages || {}, { [ args.dependency ]: spec } )
 
         set_requirements( Jupyter.notebook, req )
 

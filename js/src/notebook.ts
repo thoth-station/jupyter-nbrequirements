@@ -174,6 +174,8 @@ export async function load_kernelspecs( notebook: Jupyter.Notebook, name: string
     if ( _.isUndefined( kernelspecs[ name ] ) )
         throw new Error( `Unknown kernel: ${ name }` )
 
+    Jupyter.notebook.kernel_selector.kernelspecs = kernelspecs
+
     const spec: KernelSpec = kernelspecs[ name ]
     const menu = $( "#menu-change-kernel-submenu" )
 

@@ -401,8 +401,6 @@ export class Kernel extends Command {
                 .catch( ( err: Error ) => { throw err } )
         }
         else if ( args.command === "set" ) {
-            console.log( `Setting kernel '${ name }'` )
-
             set_kernel( args.name )
                 .then( ( name: string ) => console.log( `Kernel '${ name }' has been set.` ) )
                 .catch( ( err: Error ) => { throw err } )

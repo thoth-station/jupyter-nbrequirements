@@ -193,12 +193,13 @@ export async function load_kernelspecs( notebook: Jupyter.Notebook, name: string
     menu.append( Array.from( children ).sort() )
 }
 
-export function set_kernel( name: string ): Promise<string> {
+export function set_kernel( name: string | undefined ): Promise<string> {
     return new Promise( async ( resolve, reject ) => {
-        const kernel_name: string = name || Jupyter.notebook.notebook_name
+        let kernel_name: string = name || Jupyter.notebook.notebook_name
             .replace( ".ipynb", "" )
             .replace( /\s+/g, "_" )
 
+        kernel_name = kernel_name.toLowerCase()
         const kernel_selector = Jupyter.notebook.kernel_selector
 
         console.log( `Setting kernel: ${ kernel_name }.` )

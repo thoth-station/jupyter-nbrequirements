@@ -398,12 +398,14 @@ export class Kernel extends Command {
             install_kernel( args.name )
                 .then( ( name: string ) => load_kernel( name ) )
                 .then( ( name: string ) => console.log( `Kernel spec '${ name }' is ready.` ) )
+                .catch( ( err: Error ) => { throw err } )
         }
         else if ( args.sub_command === "set" ) {
             console.log( `Setting kernel '${ name }'` )
 
             set_kernel( args.name )
                 .then( ( name: string ) => console.log( `Kernel '${ name }' has been set.` ) )
+                .catch( ( err: Error ) => { throw err } )
         }
         else {// display kernel info and exit
             kernel.kernel_info( ( msg: io.Message ) => {

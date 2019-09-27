@@ -32,8 +32,8 @@ from pathlib import Path
 from textwrap import dedent, wrap
 
 from IPython.core.magic import line_cell_magic
-from IPython.core.magic import magics_class
-from IPython.core.magic import Magics
+from IPython.core.magic import line_magic
+from IPython.core.magic import magics_class, Magics
 
 from jupyter_require import execute as executejs
 
@@ -48,8 +48,31 @@ from .magic_parser import MagicParser, MagicParserError
 _HERE = Path(__file__).parent
 
 
-def _requirements(args, params: dict = None, **kwargs) -> str:
-    """Return script to be executed on `requirements` command."""
+def _default_kernel_handler(args, params: dict = None, **kwargs) -> str:
+    """Return script to be executed on `kernel` command."""
+    script = """
+    require(['nbrequirements'], ({cli, version}) => {
+        cli('kernel', $$magic_args, element, context)
+    })
+    """
+
+    args = {
+        arg: re.sub("[\"']", "", v) if isinstance(v, str) else v
+        for arg, v in args._get_kwargs()
+    }
+
+    def _serialize(arg): return repr(arg)  # noqa
+
+    params = params or dict()
+
+    params.update(kwargs)
+    params["magic_args"] = json.dumps(args, default=_serialize)
+
+    return script, params
+
+
+def _default_requirements_handler(args, params: dict = None, **kwargs) -> str:
+    """Return script to be executed on `requirements` or `dep` command."""
     params = params or dict()
 
     default_command = "get"
@@ -59,7 +82,7 @@ def _requirements(args, params: dict = None, **kwargs) -> str:
         # %requirements is an alias to 'get' if no command is provided
         command = default_command
 
-    if command == "get" and getattr(args, "from_file") != None:
+    if command == "get" and getattr(args, "from_file", None) != None:
         # read the requirements from the file and change the command to set
         with args.from_file as f:
             requirements = Pipfile.from_string(f.read()).to_dict()
@@ -124,9 +147,9 @@ def _requirements_config(args):
 
 def _requirements_lock(args):
     """Return script to be executed on `requirements config` command."""
-    args.command = "lock"  # Workaround for subparsers with parser parser
+    args.command = "lock"  # Workaround for subparsers with parser
 
-    return _requirements(args)
+    return _default_requirements_handler(args)
 
 
 @magics_class
@@ -138,20 +161,76 @@ class RequirementsMagic(Magics):
         """Alias for `requirements` magic."""
         return self.requirements(line, cell)
 
+    @line_magic
+    def kernel(self, line: str):
+        """Notebook kernel management.
+
+        :param line: arguments to `%kernel` magic (see `%kernel --help`)
+        :return: None
+        """
+        parser = MagicParser(
+            prog="%kernel",
+            description="""
+            Install and manage Jupyter kernels.
+            """
+        )
+        parser.set_defaults(func=_default_kernel_handler)
+
+        subparsers = parser.add_subparsers(dest="command")
+
+        # command: install
+        parser_install = subparsers.add_parser(
+            "install",
+            description="Install new Jupyter kernel."
+        )
+        parser_install.add_argument(
+            "name",
+            nargs="?",
+            help="[optional] Kernel name, otherwise use notebook name."
+        )
+        parser_install.set_defaults(func=_default_kernel_handler)
+
+        # command: load
+        parser_set = subparsers.add_parser(
+            "set",
+            description="Set existing kernel as current kernel."
+        )
+        parser_set.add_argument(
+            "name",
+            type=str,
+            nargs="?",
+            help="[optional] Kernel name, otherwise use notebook name."
+        )
+        parser_set.set_defaults(func=_default_kernel_handler)
+
+        opts = line.split()
+
+        try:
+            args = parser.parse_args(opts)
+        except MagicParserError as exc:
+            print(f"\n{exc.args[0]}", file=sys.stderr)
+            return
+
+        if any([opt in {"-h", "--help"} for opt in opts]):
+            # print help and return
+            return
+
+        script, params = args.func(args)
+
+        return executejs(script, **params)
+
     @line_cell_magic
     def requirements(self, line: str, cell: str = None):
-        """
-        Get or set notebook requirements.
+        """Notebook requirements management.
 
         Line magic: Print notebook requirements
 
-        :param line: arguments to `%requirements` magic (see `%%requiremnts --help`)
+        :param line: arguments to `%requirements` magic (see `%requiremnts --help`)
         :param cell: <empty>
         :return: None
 
         Cell magic: Set notebook requirements
 
-        :param line: arguments to `%%requirements` magic (see `%requiremnts --help`)
         :param cell: Notebook requirements in Pipfile format.
         :return: None
         """
@@ -174,7 +253,7 @@ class RequirementsMagic(Magics):
                 Jupyter magic for managing notebook requirements.
                 """
             )
-            parser.set_defaults(func=_requirements)
+            parser.set_defaults(func=_default_requirements_handler)
 
             # main
             parser.add_argument(
@@ -240,7 +319,7 @@ class RequirementsMagic(Magics):
                 type=str,
                 help="The dependency to be added to notebook metadata."
             )
-            parser_add.set_defaults(func=_requirements)
+            parser_add.set_defaults(func=_default_requirements_handler)
 
             # command: add-source
             parser_source = subparsers.add_parser(
@@ -337,37 +416,7 @@ class RequirementsMagic(Magics):
                 action="store_true",
                 help="Allow pre-releases."
             )
-            parser_install.set_defaults(func=_requirements)
-
-            # command: kernel
-            parser_kernel = subparsers.add_parser(
-                "kernel",
-                description="Install and manage Jupyter kernels."
-            )
-            parser_kernel_subparser = parser_kernel.add_subparsers(
-                dest="sub_command")
-
-            parser_kernel_install = parser_kernel_subparser.add_parser(
-                "install",
-                description="Install new Jupyter kernel."
-            )
-            parser_kernel_install.add_argument(
-                "name",
-                nargs="?",
-                help="[optional] Kernel name, otherwise use notebook name."
-            )
-
-            parser_kernel_set = parser_kernel_subparser.add_parser(
-                "set",
-                description="Set existing kernel as current kernel."
-            )
-            parser_kernel_set.add_argument(
-                "name",
-                type=str,
-                nargs="?",
-                help="[optional] Kernel name, otherwise use notebook name."
-            )
-            parser_kernel.set_defaults(func=_requirements)
+            parser_install.set_defaults(func=_default_requirements_handler)
 
             # command: ensure
             parser_ensure = subparsers.add_parser(
@@ -415,14 +464,14 @@ class RequirementsMagic(Magics):
                     "Only applicable when `--skip-kernel=false`."
                 )
             )
-            parser_ensure.set_defaults(func=_requirements)
+            parser_ensure.set_defaults(func=_default_requirements_handler)
 
             # command: clear
             parser_clear = subparsers.add_parser(
                 "clear",
                 description="Clear notebook requirements and locked requirements metadata."
             )
-            parser_clear.set_defaults(func=_requirements)
+            parser_clear.set_defaults(func=_default_requirements_handler)
 
             opts = line.split()
 
@@ -449,7 +498,7 @@ def load_ipython_extension(ipython):
 
     import json
     import distutils
-            
+
     from pathlib import Path
 
     import invectio

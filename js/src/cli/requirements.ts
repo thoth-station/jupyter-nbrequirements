@@ -376,8 +376,8 @@ namespace Kernel {
     type KernelCommand = "info" | "install" | "set"
 
     export interface Arguments extends DefaultArguments {
+        command: KernelCommand
         name: string
-        sub_command: KernelCommand
     }
 
 }
@@ -394,13 +394,13 @@ export class Kernel extends Command {
     public async run( args: Kernel.Arguments, element: HTMLDivElement ): Promise<void> {
         const kernel = Jupyter.notebook.kernel
 
-        if ( args.sub_command === "install" ) {
+        if ( args.command === "install" ) {
             install_kernel( args.name )
                 .then( ( name: string ) => load_kernel( name ) )
                 .then( ( name: string ) => console.log( `Kernel spec '${ name }' is ready.` ) )
                 .catch( ( err: Error ) => { throw err } )
         }
-        else if ( args.sub_command === "set" ) {
+        else if ( args.command === "set" ) {
             console.log( `Setting kernel '${ name }'` )
 
             set_kernel( args.name )

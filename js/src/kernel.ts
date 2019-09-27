@@ -1,5 +1,5 @@
-import { KernelInfo, LanguageInfo } from './types/kernel';
-export { KernelInfo, LanguageInfo }
+import { KernelInfo, LanguageInfo, KernelSpec } from './types/kernel';
+export { KernelInfo, LanguageInfo, KernelSpec }
 
 let obj: any = null;
 export class KernelInfoProxy {

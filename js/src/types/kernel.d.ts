@@ -1,3 +1,17 @@
+export interface KernelSpec {
+  name: string
+  resources: any
+  spec: Spec
+}
+
+export interface Spec {
+  argv: string[]
+  display_name: string
+  interrupt_mode: string
+  language: string
+  metadata: any
+}
+
 export interface KernelInfo {
   status: string;
   protocol_version: string;
@@ -5,7 +19,7 @@ export interface KernelInfo {
   implementation_version: string;
   language_info: LanguageInfo;
   banner: string;
-  help_links?: (HelpLinksEntity)[] | null;
+  help_links?: ( HelpLinksEntity )[] | null;
 }
 export interface LanguageInfo {
   name: string;

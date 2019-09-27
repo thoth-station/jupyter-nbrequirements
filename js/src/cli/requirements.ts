@@ -7,6 +7,8 @@ import {
     get_requirements,
     set_requirements,
     get_requirements_locked,
+    load_kernel,
+    set_kernel
 } from '../notebook'
 import {
     Pipfile,
@@ -15,8 +17,6 @@ import {
     lock_requirements,
     install_requirements,
     install_kernel,
-    load_kernel,
-    set_kernel
 } from '../thoth'
 
 import * as utils from '../utils'

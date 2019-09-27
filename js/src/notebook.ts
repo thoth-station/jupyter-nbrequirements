@@ -9,11 +9,12 @@
  * @since  0.0.1
  */
 
+import $ from 'jquery'
 import _ from 'lodash'
 
 import { Requirements, RequirementsLocked, ResolutionEngine } from './types/requirements';
 
-import { KernelInfo, KernelInfoProxy } from './kernel';
+import { KernelInfo, KernelInfoProxy, KernelSpec } from './kernel';
 import {
     PackageVersion,
     Source,
@@ -25,6 +26,9 @@ import {
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+// @ts-ignore
+import nbutils = require( "base/js/utils" )
+
 
 declare const DEFAULT_RESOLUTION_ENGINE: ResolutionEngine
 
@@ -145,6 +149,74 @@ export function get_requirements_locked(
         } else {
             resolve( requirements_locked )
         }
+    } )
+}
+
+export function load_kernel( name: string ): Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+        const kernel_name: string = name.toLowerCase()
+        const kernel_selector = Jupyter.notebook.kernel_selector
+
+        if ( !_.has( kernel_selector.kernelspecs, kernel_name ) )
+            // Request kernel specifications
+            // This function adds kernels to the notebook toolbar as well
+            await load_kernelspecs( Jupyter.notebook, kernel_name )
+
+        resolve( kernel_name )
+    } )
+}
+
+export async function load_kernelspecs( notebook: Jupyter.Notebook, name: string ): Promise<void> {
+    const url = nbutils.url_path_join( notebook.base_url, 'api/kernelspecs' );
+
+    const data: { kernelspecs: any } = await nbutils.promising_ajax( url )
+    const kernelspecs = data.kernelspecs
+    if ( _.isUndefined( kernelspecs[ name ] ) )
+        throw new Error( `Unknown kernel: ${ name }` )
+
+    const spec: KernelSpec = kernelspecs[ name ]
+    const menu = $( "#menu-change-kernel-submenu" )
+
+    menu.append(
+        $( "<li>" ).attr( "id", "kernel-submenu-" + spec.name ).append(
+            $( '<a>' )
+                .attr( 'href', '#' )
+                .click( function () {
+                    set_kernel( spec.name );
+                } )
+                .text( spec.spec.display_name )
+        )
+    )
+
+    const children = menu.children( "li" )
+
+    menu.append( Array.from( children ).sort() )
+}
+
+export function set_kernel( name: string ): Promise<string> {
+    return new Promise( async ( resolve, reject ) => {
+        const kernel_name: string = name || Jupyter.notebook.notebook_name
+            .replace( ".ipynb", "" )
+            .replace( /\s+/g, "_" )
+
+        const kernel_selector = Jupyter.notebook.kernel_selector
+
+        console.log( `Setting kernel: ${ kernel_name }.` )
+
+        if ( kernel_selector.current_selection === kernel_name ) {
+            console.log( `Kernel ${ kernel_name } is already set.` )
+
+            return resolve( kernel_name )
+        }
+
+        // make sure kernelspec exists
+        if ( !_.has( kernel_selector.kernelspecs, kernel_name ) ) {
+            return reject( new Error( `Missing kernel spec: ${ kernel_name }` ) )
+        }
+
+        kernel_selector.set_kernel( kernel_name )
+
+        resolve( kernel_name )
     } )
 }
 

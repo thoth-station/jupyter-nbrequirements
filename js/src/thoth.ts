@@ -21,7 +21,7 @@ import {
     set_requirements,
     get_requirements,
     set_requirements_locked,
-    get_requirements_locked
+    get_requirements_locked,
 } from './notebook'
 
 import * as utils from './utils'
@@ -543,9 +543,11 @@ export function install_kernel( name: string ): Promise<string> {
             }
         }
 
-        const kernel_name: string = name || Jupyter.notebook.notebook_name
+        let kernel_name: string = name || Jupyter.notebook.notebook_name
             .replace( ".ipynb", "" )
             .replace( /\s+/g, "_" )
+
+        kernel_name = kernel_name.toLowerCase()
 
         // check if ipython and ipykernel are both installed
         const script = utils.dedent( `
@@ -570,60 +572,6 @@ export function install_kernel( name: string ): Promise<string> {
                 console.log( `Kernel '${ kernel_name }' has been installed.` )
             } )
             .catch( reject )
-
-        resolve( kernel_name )
-    } )
-}
-
-export function load_kernel( name: string | undefined ): Promise<string> {
-    return new Promise( async ( resolve, reject ) => {
-        const kernel_name: string = name || Jupyter.notebook.notebook_name
-            .replace( ".ipynb", "" )
-            .replace( /\s+/g, "_" )
-
-        const kernel_selector = Jupyter.notebook.kernel_selector
-
-        // Request kernel specifications
-        // This function adds kernels to the notebook toolbar as well
-        kernel_selector.request_kernelspecs()
-
-        let wait_for_kernelspec = () => {
-            if ( _.has( kernel_selector.kernelspecs, kernel_name ) )
-                resolve( kernel_name )
-            else
-                setTimeout( wait_for_kernelspec, 50 )  // check again in 50ms
-        }
-
-        setTimeout( () => reject(
-            new Error( `Timeout exceeded while waiting for kernel spec: ${ kernel_name }` )
-        ), 1000 )
-
-        wait_for_kernelspec()
-    } )
-}
-
-export function set_kernel( name: string ): Promise<string> {
-    return new Promise( async ( resolve, reject ) => {
-        const kernel_name: string = name || Jupyter.notebook.notebook_name
-            .replace( ".ipynb", "" )
-            .replace( /\s+/g, "_" )
-
-        const kernel_selector = Jupyter.notebook.kernel_selector
-
-        console.log( `Setting kernel: ${ kernel_name }.` )
-
-        if ( kernel_selector.current_selection === kernel_name ) {
-            console.log( `Kernel ${ kernel_name } is already set.` )
-
-            return resolve( kernel_name )
-        }
-
-        // make sure kernelspec exists
-        if ( !_.has( kernel_selector.kernelspecs, kernel_name ) ) {
-            return reject( new Error( `Missing kernel spec: ${ kernel_name }` ) )
-        }
-
-        kernel_selector.set_kernel( kernel_name )
 
         resolve( kernel_name )
     } )

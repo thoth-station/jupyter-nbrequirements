@@ -145,7 +145,7 @@ export class Pipfile {
                 }
                 if ( msg.msg_type === "stream" ) {
                     // let codecell handle the callback and append the stream to the output
-                    const context: Context | undefined = get_execute_context()
+                    const context: Context | undefined = get_execute_context( Logger )
                     if ( !_.isUndefined( context ) ) {
                         const cell: CodeCell = context.cell
 
@@ -168,7 +168,7 @@ export class Pipfile {
                 }
             }
 
-            await execute_python_script( script, { iopub: { output: callback } } )
+            await execute_python_script( script, { iopub: { output: callback } }, { logger: Logger } )
         } )
     }
 }
@@ -214,7 +214,7 @@ export class PipfileLock {
                 resolve()
             }
 
-            await execute_python_script( script, { shell: { reply: callback } } )
+            await execute_python_script( script, { shell: { reply: callback } }, { logger: Logger } )
         } )
     }
 }
@@ -289,7 +289,7 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
             resolve( requirements )
         }
 
-        await execute_python_script( script, { iopub: { output: callback } } )
+        await execute_python_script( script, { iopub: { output: callback } }, { logger: Logger } )
     } )
 }
 
@@ -365,7 +365,7 @@ export function lock_requirements(
                 reject( new Error( `Unknown message type: ${ msg.msg_type }` ) )
         }
 
-        await execute_python_script( command, { iopub: { output: callback } } )
+        await execute_python_script( command, { iopub: { output: callback } }, { logger: Logger } )
     } )
 }
 
@@ -455,7 +455,7 @@ export function lock_requirements_with_pipenv(
 
         await execute_shell_command(
             "cat Pipfile.lock",
-            { iopub: { output: output_callback }, shell: { reply: shell_callback } }
+            { iopub: { output: output_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
     } )
 }
@@ -516,7 +516,7 @@ export function install_requirements(
 
         await execute_shell_command(
             `pipenv install --ignore-pipfile --keep-outdated ${ opts } ${ requirements }`,
-            { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }
+            { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
     } )
 }
@@ -570,7 +570,8 @@ export function install_kernel( name: string ): Promise<string> {
             .then( async () => {
                 await execute_shell_command(
                     `pipenv run ipython kernel install --user --name=${ kernel_name }`,
-                    { iopub: { output: iopub_callback } }
+                    { iopub: { output: iopub_callback } },
+                    { logger: Logger }
                 )
                 Logger.log( `Kernel '${ kernel_name }' has been installed.` )
             } )

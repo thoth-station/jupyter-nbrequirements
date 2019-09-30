@@ -15,6 +15,7 @@ import { Logger } from "./config"
 
 import * as io from "./types/io"
 import { Context, CodeCell } from "./types/nb"
+import { ILogger } from "js-logger/src/types"
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -23,6 +24,10 @@ import Jupyter = require( "base/js/namespace" )
 
 export function execute_request( request: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
     return new Promise( resolve => {
+        let logger = Logger
+        if ( !_.isUndefined( options ) && !_.isUndefined( options.logger ) )
+            logger = options.logger
+
         const default_options = {
             silent: false,
             store_history: true,
@@ -30,7 +35,8 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
         }
 
         if ( _.isUndefined( context ) ) {
-            context = get_execute_context()
+            // passing the logger here makes logs more consistent
+            context = get_execute_context( logger )
         }
         const cell = context.cell
 
@@ -39,7 +45,7 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
 
         const kernel = Jupyter.notebook.kernel
 
-        Logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
+        logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
 
         const msg_id = kernel.execute( request, callbacks, options )
         kernel.events.on( "finished_iopub.Kernel", ( e: Event, d: io.Message ) => {
@@ -50,10 +56,12 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
     } )
 }
 
-export function get_execute_context(): Context | undefined {
+export function get_execute_context( logger?: ILogger ): Context | undefined {
     const cell: CodeCell = Jupyter.notebook.get_executed_cell()
+
+    logger = logger || Logger
     if ( _.isUndefined( cell ) ) {
-        Logger.warn( "Execution context could not be determined." )
+        logger.warn( "Execution context could not be determined." )
         return
     }
 

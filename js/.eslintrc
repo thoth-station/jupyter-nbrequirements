@@ -59,7 +59,7 @@
         ]
       }
     ],
-    "@typescript-eslint/no-use-before-define": "warn",
+    "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/type-annotation-spacing": "off"
   }
 }

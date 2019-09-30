@@ -11,12 +11,14 @@
  * @since  0.0.1
  */
 
+/* eslint-disable */
+
 const __extension__ = "jupyter_nbrequirements"
 
 // Some static assets may be required by the custom widget javascript. The base
 // url for the notebook is not known at build time and is therefore computed
 // dynamically.
-__webpack_public_path__ = document.querySelector( 'body' ).getAttribute( 'data-base-url' ) + 'nbextensions/jupyter-nbrequirements/';
+__webpack_public_path__ = document.querySelector( "body" ).getAttribute( 'data-base-url' ) + 'nbextensions/jupyter-nbrequirements/';
 
 // Constants
 window.DEFAULT_RESOLUTION_ENGINE = "thoth"

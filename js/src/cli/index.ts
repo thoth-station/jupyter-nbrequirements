@@ -9,10 +9,10 @@
  * @since  0.0.1
  */
 
-import _ from "lodash";
+import _ from "lodash"
 
-import Command, { DefaultArguments } from './command';
-import { Context } from '../types';
+import Command, { DefaultArguments } from "./command"
+import { Context } from "../types"
 import { OutputError } from "../types/nb"
 
 import {
@@ -25,7 +25,7 @@ import {
     Install,
     Kernel,
     Help,
-} from './requirements'
+} from "./requirements"
 
 /**
  * Execute given command in the current runtime context.
@@ -38,7 +38,7 @@ import {
  * @returns
  */
 export async function cli( command: string, args: DefaultArguments, element?: HTMLDivElement, context?: Context ) {
-    let cmd: Command;
+    let cmd: Command
     switch ( command ) {
 
         /**
@@ -47,7 +47,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @param {Clear.Arguments} args
          * @memberof Clear
          */
-        case 'clear': cmd = new Clear(); break
+        case "clear": cmd = new Clear(); break
 
         /**
          * Ensure gets a project into a complete, reproducible, and likely compilable state.
@@ -57,7 +57,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @returns {Promise<void>}
          * @memberof Ensure
          */
-        case 'ensure': cmd = new Ensure(); break
+        case "ensure": cmd = new Ensure(); break
 
         /**
          * Add dependency to the notebook metadata without installing it.
@@ -66,7 +66,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @returns {Promise<void>}
          * @memberof Get
          */
-        case 'add': cmd = new Add(); break
+        case "add": cmd = new Add(); break
 
         /**
          * Get notebook requirements from the notebook metadata.
@@ -77,7 +77,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @returns {Promise<void>}
          * @memberof Get
          */
-        case 'get': cmd = new Get(); break
+        case "get": cmd = new Get(); break
 
         /**
          * Set notebook requirements.
@@ -86,7 +86,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @param {Set.Arguments} args
          * @memberof Set
          */
-        case 'set': cmd = new Set(); break
+        case "set": cmd = new Set(); break
 
         /**
          * Lock notebook requirements.
@@ -97,7 +97,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @returns {Promise<void>}
          * @memberof Lock
          */
-        case 'lock': cmd = new Lock(); break
+        case "lock": cmd = new Lock(); break
 
         /**
          * Install notebook requirements to a virtual environment.
@@ -107,7 +107,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @returns {Promise<void>}
          * @memberof Install
          */
-        case 'install': cmd = new Install(); break
+        case "install": cmd = new Install(); break
 
         /**
          * Create and/or set a new Jupyter kernel.
@@ -117,7 +117,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @returns {Promise<void>}
          * @memberof Kernel
          */
-        case 'kernel': cmd = new Kernel(); break
+        case "kernel": cmd = new Kernel(); break
 
 
         /** Display help and exit */
@@ -133,15 +133,13 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         console.error( err )
 
         if ( context && !_.isUndefined( context.cell ) ) {
-            if ( typeof err === "string" ) {
-                err = new Error( err )
-            }
+            const exc = typeof err === "string" ? new Error( err ) : err
 
             const obj: OutputError = {
                 output_type: "error",
-                ename: err.name,
-                evalue: err.message,
-                traceback: err.stack.split( "\n" )
+                ename: exc.name,
+                evalue: exc.message,
+                traceback: exc.stack.split( "\n" )
             }
 
             // append the error output

@@ -1,53 +1,54 @@
 export interface Callbacks {
-    iopub?: iopubCallback
-    shell?: shellCallback
+    iopub?: IOPubCallback
+    shell?: ShellCallback
 }
 
-export interface iopubCallback {
-    output?: (msg: Message) => any
+export interface IOPubCallback {
+    output?: ( msg: Message ) => any
 }
 
-export interface shellCallback {
-    output?: (msg: Message) => any
-    reply ?: (msg: Message) => any
+export interface ShellCallback {
+    output?: ( msg: Message ) => any
+    reply?: ( msg: Message ) => any
 }
 
 export interface Message {
-    buffers      : (null)[] | null
-    channel      : string
-    content      : iopubMessageContent
-    msg_id       : string
-    msg_type     : string
-    header       : iopubMessageHeader
-    parent_header: iopubMessageHeader
-    metadata     : Metadata
+    buffers: ( null )[] | null
+    channel: string
+    content: IOPubMessageContent
+    msg_id: string
+    msg_type: string
+    header: IOPubMessageHeader
+    parent_header: IOPubMessageHeader
+    metadata: Metadata
 }
 
-export interface iopubMessageContent {
-    status          : string
-    data            : iopubMessageData
-    name            : string
-    text            : string
-    metadata        : any
+export interface IOPubMessageContent {
+    status: string
+    data: IOPubMessageData
+    name: string
+    text: string
+    metadata: any
     execution_count?: number
-    ename?          : string
-    evalue?         : string
-    traceback?      : string
+    ename?: string
+    evalue?: string
+    traceback?: string
 }
 
-export interface iopubMessageData {
-    name        : string
-    text        : string
+export interface IOPubMessageData {
+    name: string
+    text: string
     "text/plain": string
 }
 
-export interface iopubMessageHeader {
-    date    : string
-    msg_id  : string
+export interface IOPubMessageHeader {
+    date: string
+    msg_id: string
     msg_type: string
-    session : string
+    session: string
     username: string
-    version : string
+    version: string
 }
 
+// eslint-disable-next-line
 export interface Metadata { }

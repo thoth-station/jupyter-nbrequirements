@@ -9,5 +9,5 @@
  * @since  0.0.1
  */
 
-export { cli } from './cli'
-export { version } from '../package.json'
+export { cli } from "./cli"
+export { version } from "../package.json"

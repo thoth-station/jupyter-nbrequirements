@@ -9,26 +9,26 @@
  * @since  0.0.1
  */
 
-import _ from 'lodash'
+import _ from "lodash"
 
 import {
     execute_python_script,
     get_execute_context,
     execute_shell_command,
     execute_shell_script
-} from './core'
+} from "./core"
 import {
     set_requirements,
     get_requirements,
     set_requirements_locked,
     get_requirements_locked,
-} from './notebook'
+} from "./notebook"
 
-import * as utils from './utils'
+import * as utils from "./utils"
 import { RequirementsLockedProxy } from "./requirements"
 
-import * as io from './types/io'
-import { CodeCell, Context } from './types/nb';
+import * as io from "./types/io"
+import { CodeCell, Context } from "./types/nb"
 import { Meta, Requirements, RequirementsLocked } from "./types/requirements"
 
 // Jupyter runtime environment
@@ -61,7 +61,7 @@ export class PackageVersion {
      * @returns {{ [name: string]: any }}
      * @memberof PackageVersion
      */
-    get_pipfile_entry(): { [ name: string ]: any } {
+    public get_pipfile_entry(): { [ name: string ]: any } {
         const result: any = {}
         console.log( "Generating Pipfile entry for package: ", this.name )
 
@@ -145,8 +145,8 @@ export class Pipfile {
                     if ( !_.isUndefined( context ) ) {
                         const cell: CodeCell = context.cell
 
-                        cell.events.trigger( 'set_dirty.Notebook', { value: true } );
-                        cell.output_area.handle_output( msg );
+                        cell.events.trigger( "set_dirty.Notebook", { value: true } )
+                        cell.output_area.handle_output( msg )
                     }
                     return
                 }
@@ -193,7 +193,7 @@ export class PipfileLock {
 
             console.log( "Writing notebook locked requirements to the Pipfile.lock." )
 
-            let script = `
+            const script = `
             requirements_locked = json.loads("""${JSON.stringify( requirements_locked, null, 4 ) }""")
 
             Path("Pipfile.lock").write_text(
@@ -226,12 +226,12 @@ export class Source {
 }
 
 
-export function gather_library_usage( cells?: Array<CodeCell> ): Promise<string[]> {
-    const default_python_indent: number = 4
+export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
+    const default_python_indent = 4
 
     return new Promise( async ( resolve, reject ) => {
 
-        cells = cells || Jupyter.notebook.toJSON().cells as Array<CodeCell>
+        cells = cells || Jupyter.notebook.toJSON().cells as CodeCell[]
         console.log( "Gathering requirements from cells, ", cells )
 
         cells.forEach( ( c, i: number ) => {
@@ -246,7 +246,6 @@ export function gather_library_usage( cells?: Array<CodeCell> ): Promise<string[
 
         cells = cells.filter( c => ( c.cell_type === "code" ) && ( !c.source.startsWith( "%%" ) ) )
 
-        let kernel = Jupyter.notebook.kernel
         let notebook_content: string = cells.map( c => c.source ).join( "\n" )
 
         notebook_content = utils.indent( notebook_content, default_python_indent * 3 )
@@ -271,7 +270,7 @@ export function gather_library_usage( cells?: Array<CodeCell> ): Promise<string[
                 lambda k: k not in _STD_LIB | set(sys.builtin_module_names), report
             )
             list(libs)
-        `)
+        ` )
 
         const callback = ( msg: io.Message ) => {
             console.debug( "Execution callback: ", msg )
@@ -280,7 +279,7 @@ export function gather_library_usage( cells?: Array<CodeCell> ): Promise<string[
                 return
             }
 
-            const result: string = msg.content.data[ "text/plain" ].replace( /\'/g, '"' )
+            const result: string = msg.content.data[ "text/plain" ].replace( /\'/g, "\"" )
             const requirements: string[] = JSON.parse( result )
 
             resolve( requirements )
@@ -332,7 +331,7 @@ export function lock_requirements(
             reject( new Error( "Timeout exceeded: Locking requirements was not successful." ) )
         }, 3000 * 60 )
 
-        let callback = ( msg: io.Message ) => {
+        const callback = ( msg: io.Message ) => {
             console.debug( "Execution callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
@@ -340,7 +339,7 @@ export function lock_requirements(
                 return
             }
             if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
-                console.info( `[Thamos]: `, msg.content.text )
+                console.info( "[Thamos]: ", msg.content.text )
                 return
             }
 
@@ -377,7 +376,7 @@ export function lock_requirements_with_pipenv(
         /**
          * Logging callback
          */
-        let iopub_callback = ( msg: io.Message ) => {
+        const iopub_callback = ( msg: io.Message ) => {
             console.debug( "Execution logging callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
@@ -389,16 +388,16 @@ export function lock_requirements_with_pipenv(
                 const text = utils.parse_console_output( msg.content.text )
 
                 if ( stream === "stderr" ) {
-                    console.warn( `[pipenv]: `, text )
+                    console.warn( "[pipenv]: ", text )
                 } else
-                    console.log( `[pipenv]: `, text )
+                    console.log( "[pipenv]: ", text )
             }
         }
 
         /**
          * Output callback
          */
-        let output_callback = ( msg: io.Message ) => {
+        const output_callback = ( msg: io.Message ) => {
             console.debug( "Execution output callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
@@ -414,7 +413,7 @@ export function lock_requirements_with_pipenv(
         /**
          * Execution done callback
          */
-        let shell_callback = ( msg: io.Message ) => {
+        const shell_callback = ( msg: io.Message ) => {
             console.debug( "Execution shell callback: ", msg )
 
             if ( msg.content.status == "error" ) {
@@ -451,7 +450,7 @@ export function lock_requirements_with_pipenv(
         )
 
         await execute_shell_command(
-            `cat Pipfile.lock`,
+            "cat Pipfile.lock",
             { iopub: { output: output_callback }, shell: { reply: shell_callback } }
         )
     } )
@@ -469,7 +468,7 @@ export function install_requirements(
         /**
          * Logging callback
          */
-        let iopub_callback = ( msg: io.Message ) => {
+        const iopub_callback = ( msg: io.Message ) => {
             console.debug( "Execution logging callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
@@ -481,9 +480,9 @@ export function install_requirements(
                 const text = utils.parse_console_output( msg.content.text )
 
                 if ( stream === "stderr" ) {
-                    console.warn( `[pipenv]: `, text )
+                    console.warn( "[pipenv]: ", text )
                 } else
-                    console.log( `[pipenv]: `, text )
+                    console.log( "[pipenv]: ", text )
 
             }
         }
@@ -491,7 +490,7 @@ export function install_requirements(
         /**
          * Execution done callback
          */
-        let shell_callback = ( msg: io.Message ) => {
+        const shell_callback = ( msg: io.Message ) => {
             console.debug( "Execution shell callback: ", msg )
 
             if ( msg.content.status == "error" ) {
@@ -524,7 +523,7 @@ export function install_kernel( name: string ): Promise<string> {
         /**
          * Logging callback
          */
-        let iopub_callback = ( msg: io.Message ) => {
+        const iopub_callback = ( msg: io.Message ) => {
             console.debug( "Execution logging callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
@@ -536,9 +535,9 @@ export function install_kernel( name: string ): Promise<string> {
                 const text = utils.parse_console_output( msg.content.text )
 
                 if ( stream === "stderr" ) {
-                    console.warn( `[pipenv]: `, text )
+                    console.warn( "[pipenv]: ", text )
                 } else
-                    console.log( `[pipenv]: `, text )
+                    console.log( "[pipenv]: ", text )
 
             }
         }
@@ -559,7 +558,7 @@ export function install_kernel( name: string ): Promise<string> {
                 echo "Installing required packages: 'ipython', 'ipykernel'"
                 pipenv run pip install ipython ipykernel
             fi
-        `)
+        ` )
 
         console.log( `Installing kernel ${ kernel_name }.` )
 

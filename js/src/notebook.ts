@@ -9,12 +9,12 @@
  * @since  0.0.1
  */
 
-import $ from 'jquery'
-import _ from 'lodash'
+import $ from "jquery"
+import _ from "lodash"
 
-import { Requirements, RequirementsLocked, ResolutionEngine } from './types/requirements';
+import { Requirements, RequirementsLocked, ResolutionEngine } from "./types/requirements"
 
-import { KernelInfo, KernelInfoProxy, KernelSpec } from './kernel';
+import { KernelInfo, KernelInfoProxy, KernelSpec } from "./kernel"
 import {
     PackageVersion,
     Source,
@@ -43,7 +43,7 @@ Jupyter.Notebook.prototype.get_kernel_info = _.partial( get_kernel_info, Jupyter
 
 
 export function set_requirements( notebook: Jupyter.Notebook, requirements: Requirements ): void {
-    let metadata = notebook.metadata
+    const metadata = notebook.metadata
 
     if ( _.isUndefined( metadata.requirements ) ) {
         metadata.requirements = requirements
@@ -153,7 +153,7 @@ export function get_requirements_locked(
 }
 
 export function load_kernel( name: string ): Promise<string> {
-    return new Promise( async ( resolve, reject ) => {
+    return new Promise( async ( resolve ) => {
         const kernel_name: string = name.toLowerCase()
         const kernel_selector = Jupyter.notebook.kernel_selector
 
@@ -167,7 +167,7 @@ export function load_kernel( name: string ): Promise<string> {
 }
 
 export async function load_kernelspecs( notebook: Jupyter.Notebook, name: string ): Promise<void> {
-    const url = nbutils.url_path_join( notebook.base_url, 'api/kernelspecs' );
+    const url = nbutils.url_path_join( notebook.base_url, "api/kernelspecs" )
 
     const data: { kernelspecs: any } = await nbutils.promising_ajax( url )
     const kernelspecs = data.kernelspecs
@@ -181,10 +181,10 @@ export async function load_kernelspecs( notebook: Jupyter.Notebook, name: string
 
     menu.append(
         $( "<li>" ).attr( "id", "kernel-submenu-" + spec.name ).append(
-            $( '<a>' )
-                .attr( 'href', '#' )
+            $( "<a>" )
+                .attr( "href", "#" )
                 .click( function () {
-                    set_kernel( spec.name );
+                    set_kernel( spec.name )
                 } )
                 .text( spec.spec.display_name )
         )
@@ -226,7 +226,7 @@ export function set_kernel( name: string | undefined ): Promise<string> {
 export function get_kernel_info( notebook: Jupyter.Notebook ): KernelInfo {
     const json: string = JSON.stringify( notebook.kernel.info_reply )
     if ( _.isUndefined( json ) ) {
-        throw Error( 'Unable to retrieve Kernel info' )
+        throw Error( "Unable to retrieve Kernel info" )
     }
 
     // Parse and perform type check

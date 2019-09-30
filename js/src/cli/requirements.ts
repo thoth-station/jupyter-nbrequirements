@@ -1,15 +1,15 @@
-import _ from "lodash";
+import _ from "lodash"
 
-import Command, { DefaultArguments } from './command'
+import Command, { DefaultArguments } from "./command"
 
-import { execute_python_script } from '../core'
+import { execute_python_script } from "../core"
 import {
     get_requirements,
     set_requirements,
     get_requirements_locked,
     load_kernel,
     set_kernel
-} from '../notebook'
+} from "../notebook"
 import {
     Pipfile,
     PipfileLock,
@@ -17,11 +17,11 @@ import {
     lock_requirements,
     install_requirements,
     install_kernel,
-} from '../thoth'
+} from "../thoth"
 
-import * as utils from '../utils'
+import * as utils from "../utils"
 
-import * as io from '../types/io'
+import * as io from "../types/io"
 import { Requirements, SourcesEntity, ResolutionEngine, RequirementsLocked } from "../types/requirements"
 import { get_python_version } from "../notebook"
 import { lock_requirements_with_pipenv } from "../thoth"
@@ -51,20 +51,14 @@ export class Help extends Command {
     }
 }
 
-namespace Clear {
-
-    export interface Arguments extends DefaultArguments { }
-
-}
 export class Clear extends Command {
 
     /**
      * Clear notebook requirements and locked requirements metadata.
      *
-     * @param {Clear.Arguments} args
      * @memberof Clear
      */
-    public run( args: Clear.Arguments ): void {
+    public run(): void {
         delete Jupyter.notebook.metadata.requirements
         delete Jupyter.notebook.metadata.requirements_locked
     }
@@ -92,11 +86,10 @@ export class Ensure extends Command {
      * Ensure gets a project into a complete, reproducible, and likely compilable state.
      *
      * @param {Ensure.Arguments} args
-     * @param {HTMLDivElement} element
      * @returns {Promise<void>}
      * @memberof Ensure
      */
-    public async run( args: Ensure.Arguments, element: HTMLDivElement ): Promise<void> {
+    public async run( args: Ensure.Arguments ): Promise<void> {
 
         // Stage 1: get & set notebook requirements
         // We don't want to ignore the metadata here, the purpose of ensure
@@ -223,6 +216,7 @@ export class Add extends Command {
 
 namespace Get {
 
+    // eslint-disable-next-line
     export interface Arguments extends DefaultArguments { }
 
 }
@@ -239,7 +233,7 @@ export class Get extends Command {
      */
     public async run( args: Get.Arguments, element: HTMLDivElement ): Promise<void> {
         this.validate( args )
-        let req = await get_requirements( Jupyter.notebook, args.ignore_metadata )
+        const req = await get_requirements( Jupyter.notebook, args.ignore_metadata )
 
         if ( args.to_json ) {
             // Append to the cell output

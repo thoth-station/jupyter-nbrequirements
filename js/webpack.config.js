@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const path = require( 'path' )
 
 const __library__ = 'nbrequirements'

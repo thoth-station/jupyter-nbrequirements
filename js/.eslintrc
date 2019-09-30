@@ -16,21 +16,22 @@
     "prettier/@typescript-eslint",
   ],
   "rules": {
-    "semi": [
+    "array-bracket-spacing": [
       "warn",
-      "never"
+      "always"
+    ],
+    "no-useless-escape": "warn",
+    "object-curly-spacing": [
+      "warn",
+      "always"
     ],
     "quotes": [
       "warn",
       "double"
     ],
-    "array-bracket-spacing": [
+    "semi": [
       "warn",
-      "always"
-    ],
-    "object-curly-spacing": [
-      "warn",
-      "always"
+      "never"
     ],
     "space-in-parens": [
       "error",

@@ -14,13 +14,13 @@
   },
   "private": true,
   "scripts": {
-    "lint": "tsc --noEmit && eslint \"**/*.ts\" --quiet --fix",
-    "build": "webpack -d",
-    "build-prod": "webpack -p --config webpack.config.prod.js",
+    "lint": "tsc --noEmit && eslint \"**/*.ts\" --fix",
+    "build": "npm run lint && webpack -d",
+    "build-prod": "npm run lint && webpack -p --config webpack.config.prod.js",
     "watch": "webpack -d --watch",
     "build-ts": "rm -rf dist/ && tsc",
     "watch-ts": "tsc --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "eslint \"**/*.ts\" --quiet"
   },
   "keywords": [
     "dependencies",

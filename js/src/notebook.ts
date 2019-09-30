@@ -12,6 +12,8 @@
 import $ from "jquery"
 import _ from "lodash"
 
+import { Logger } from "./config"
+
 import { Requirements, RequirementsLocked, ResolutionEngine } from "./types/requirements"
 
 import { KernelInfo, KernelInfoProxy, KernelSpec } from "./kernel"
@@ -29,8 +31,8 @@ import Jupyter = require( "base/js/namespace" )
 // @ts-ignore
 import nbutils = require( "base/js/utils" )
 
-
 declare const DEFAULT_RESOLUTION_ENGINE: ResolutionEngine
+
 
 // Hang the functions on Jupyter.Notebook prototype for easier usage
 Jupyter.Notebook.prototype.set_requirements = _.partial( set_requirements, Jupyter.notebook )
@@ -48,20 +50,20 @@ export function set_requirements( notebook: Jupyter.Notebook, requirements: Requ
     if ( _.isUndefined( metadata.requirements ) ) {
         metadata.requirements = requirements
     } else {
-        console.debug( "Notebook requirements already exist. Updating." )
+        Logger.debug( "Notebook requirements already exist. Updating." )
         // update the notebook metadata
         _.assign( metadata.requirements, requirements )
     }
 
-    console.log( "Notebook requirements have been set successfully." )
+    Logger.log( "Notebook requirements have been set successfully." )
 }
 
 export function get_requirements( notebook: Jupyter.Notebook, ignore_metadata: boolean = false ): Promise<Requirements> {
     return new Promise( async ( resolve, reject ) => {
-        console.log( "Reading notebook requirements." )
+        Logger.log( "Reading notebook requirements." )
         let notebook_metadata: Requirements | {} = notebook.metadata.requirements || {}
 
-        console.log( "Gathering library usage." )
+        Logger.log( "Gathering library usage." )
         try {
             const library_usage: string[] = await gather_library_usage()
             const python_packages: { [ name: string ]: any } = {}
@@ -109,12 +111,12 @@ export function set_requirements_locked( notebook: Jupyter.Notebook, requirement
     if ( _.isUndefined( metadata.requirements_locked ) ) {
         metadata.requirements_locked = requirements_locked
     } else {
-        console.debug( "requirements_locked already exist. Updating." )
+        Logger.debug( "requirements_locked already exist. Updating." )
         // update the notebook metadata
         _.assign( metadata.requirements_locked, requirements_locked )
     }
 
-    console.log( "Notebook locked requirements have been set successfully." )
+    Logger.log( "Notebook locked requirements have been set successfully." )
 }
 
 export function get_requirements_locked(
@@ -126,11 +128,11 @@ export function get_requirements_locked(
     engine: ResolutionEngine = DEFAULT_RESOLUTION_ENGINE
 ): Promise<RequirementsLocked> {
     return new Promise( async ( resolve, reject ) => {
-        console.log( "Reading notebook locked requirements." )
+        Logger.log( "Reading notebook locked requirements." )
 
         const requirements_locked: RequirementsLocked | undefined = notebook.metadata.requirements_locked
         if ( _.isUndefined( requirements_locked ) || ignore_metadata ) {
-            console.log( "Locked requirements are not defined." )
+            Logger.log( "Locked requirements are not defined." )
 
             if ( engine == "thoth" ) {
                 lock_requirements( undefined, sync )
@@ -204,10 +206,10 @@ export function set_kernel( name: string | undefined ): Promise<string> {
         kernel_name = kernel_name.toLowerCase()
         const kernel_selector = Jupyter.notebook.kernel_selector
 
-        console.log( `Setting kernel: ${ kernel_name }.` )
+        Logger.log( `Setting kernel: ${ kernel_name }.` )
 
         if ( kernel_selector.current_selection === kernel_name ) {
-            console.log( `Kernel ${ kernel_name } is already set.` )
+            Logger.log( `Kernel ${ kernel_name } is already set.` )
 
             return resolve( kernel_name )
         }

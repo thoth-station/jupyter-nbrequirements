@@ -9,7 +9,7 @@
  * @since  0.0.1
  */
 
-import { Context } from '../types';
+import { Context } from "../types"
 
 export interface DefaultArguments {
     // show this help message and exit

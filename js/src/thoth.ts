@@ -11,6 +11,8 @@
 
 import _ from "lodash"
 
+import { getLogger } from "./config"
+
 import {
     execute_python_script,
     get_execute_context,
@@ -35,6 +37,8 @@ import { Meta, Requirements, RequirementsLocked } from "./types/requirements"
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
 
+
+const Logger = getLogger( "thoth" )
 
 /**
  * A package version as described in the Pipfile.lock entry.
@@ -63,7 +67,7 @@ export class PackageVersion {
      */
     public get_pipfile_entry(): { [ name: string ]: any } {
         const result: any = {}
-        console.log( "Generating Pipfile entry for package: ", this.name )
+        Logger.log( "Generating Pipfile entry for package: ", this.name )
 
         if ( !_.isUndefined( this.index ) )
             result[ "index" ] = this.index.name
@@ -108,7 +112,7 @@ export class Pipfile {
             if ( _.isUndefined( requirements ) )
                 requirements = await get_requirements( Jupyter.notebook )
 
-            console.log( "Writing notebook requirements to the Pipfile." )
+            Logger.log( "Writing notebook requirements to the Pipfile." )
 
             const script = `
             import os
@@ -134,7 +138,7 @@ export class Pipfile {
             pipfile.to_string()
             `
             const callback = ( msg: io.Message ) => {
-                console.debug( "Execution callback: ", msg )
+                Logger.debug( "Execution callback: ", msg )
                 if ( msg.msg_type == "error" ) {
                     reject( `ERROR: ${ msg.content.ename }: ${ msg.content.evalue }` )
                     return
@@ -153,12 +157,12 @@ export class Pipfile {
 
                 if ( msg.msg_type === "execute_result" ) {
 
-                    console.log( "Pipfile has been created successfully: ", msg.content.data[ "text/plain" ] )
+                    Logger.log( "Pipfile has been created successfully: ", msg.content.data[ "text/plain" ] )
 
                     if ( sync ) {
                         // sync notebook metadata with the Pipfile
                         set_requirements( Jupyter.notebook, requirements )
-                        console.log( "Notebook requirements have been synced with Pipfile." )
+                        Logger.log( "Notebook requirements have been synced with Pipfile." )
                     }
                     resolve( requirements )
                 }
@@ -191,7 +195,7 @@ export class PipfileLock {
                 )
             }
 
-            console.log( "Writing notebook locked requirements to the Pipfile.lock." )
+            Logger.log( "Writing notebook locked requirements to the Pipfile.lock." )
 
             const script = `
             requirements_locked = json.loads("""${JSON.stringify( requirements_locked, null, 4 ) }""")
@@ -202,7 +206,7 @@ export class PipfileLock {
             )`
 
             const callback = ( msg: io.Message ) => {
-                console.debug( "Execution callback: ", msg )
+                Logger.debug( "Execution callback: ", msg )
                 if ( msg.msg_type == "error" ) {
                     reject( new Error( `ERROR: ${ msg.content.ename }: ${ msg.content.evalue }` ) )
                 }
@@ -232,9 +236,9 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
     return new Promise( async ( resolve, reject ) => {
 
         cells = cells || Jupyter.notebook.toJSON().cells as CodeCell[]
-        console.log( "Gathering requirements from cells, ", cells )
+        Logger.log( "Gathering requirements from cells, ", cells )
 
-        cells.forEach( ( c, i: number ) => {
+        cells.forEach( ( c ) => {
             const source: string = c.source
                 .trim()
                 .replace( "?", "" )  // remove Jupyter magic to display help
@@ -250,7 +254,7 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
 
         notebook_content = utils.indent( notebook_content, default_python_indent * 3 )
 
-        console.debug( "Notebook content: ", notebook_content )
+        Logger.debug( "Notebook content: ", notebook_content )
 
         // TODO: Move this to templates
         const script: string = utils.dedent( `
@@ -273,7 +277,7 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
         ` )
 
         const callback = ( msg: io.Message ) => {
-            console.debug( "Execution callback: ", msg )
+            Logger.debug( "Execution callback: ", msg )
             if ( msg.msg_type == "error" ) {
                 reject( `ERROR: ${ msg.content.ename }: ${ msg.content.evalue }` )
                 return
@@ -332,14 +336,14 @@ export function lock_requirements(
         }, 3000 * 60 )
 
         const callback = ( msg: io.Message ) => {
-            console.debug( "Execution callback: ", msg )
+            Logger.debug( "Execution callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
                 return
             }
             if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
-                console.info( "[Thamos]: ", msg.content.text )
+                Logger.info( "[Thamos]: ", msg.content.text )
                 return
             }
 
@@ -352,7 +356,7 @@ export function lock_requirements(
                 if ( sync ) {
                     // sync requirements locked with Pipfile.lock
                     set_requirements_locked( Jupyter.notebook, requirements_locked )
-                    console.log( "Locked requirements have been synced with Pipfile." )
+                    Logger.log( "Locked requirements have been synced with Pipfile." )
                 }
 
                 resolve( requirements_locked )
@@ -377,7 +381,7 @@ export function lock_requirements_with_pipenv(
          * Logging callback
          */
         const iopub_callback = ( msg: io.Message ) => {
-            console.debug( "Execution logging callback: ", msg )
+            Logger.debug( "Execution logging callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
@@ -388,9 +392,9 @@ export function lock_requirements_with_pipenv(
                 const text = utils.parse_console_output( msg.content.text )
 
                 if ( stream === "stderr" ) {
-                    console.warn( "[pipenv]: ", text )
+                    Logger.warn( "[pipenv]: ", text )
                 } else
-                    console.log( "[pipenv]: ", text )
+                    Logger.log( "[pipenv]: ", text )
             }
         }
 
@@ -398,7 +402,7 @@ export function lock_requirements_with_pipenv(
          * Output callback
          */
         const output_callback = ( msg: io.Message ) => {
-            console.debug( "Execution output callback: ", msg )
+            Logger.debug( "Execution output callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
@@ -414,7 +418,7 @@ export function lock_requirements_with_pipenv(
          * Execution done callback
          */
         const shell_callback = ( msg: io.Message ) => {
-            console.debug( "Execution shell callback: ", msg )
+            Logger.debug( "Execution shell callback: ", msg )
 
             if ( msg.content.status == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
@@ -425,12 +429,12 @@ export function lock_requirements_with_pipenv(
                 return
             }
 
-            console.log( "Requirements have been successfully locked." )
+            Logger.log( "Requirements have been successfully locked." )
 
             if ( sync ) {
                 // sync requirements locked with Pipfile.lock
                 set_requirements_locked( Jupyter.notebook, requirements_locked )
-                console.log( "Locked requirements have been synced with Pipfile." )
+                Logger.log( "Locked requirements have been synced with Pipfile." )
             }
 
             resolve( requirements_locked )
@@ -442,7 +446,7 @@ export function lock_requirements_with_pipenv(
         if ( dev_packages ) opts += "--dev "
         if ( pre_releases ) opts += "--pre"
 
-        console.log( "Locking requirements w/ Pipenv: " )
+        Logger.log( "Locking requirements w/ Pipenv: " )
 
         await execute_shell_command(
             `pipenv lock ${ opts }`,
@@ -469,7 +473,7 @@ export function install_requirements(
          * Logging callback
          */
         const iopub_callback = ( msg: io.Message ) => {
-            console.debug( "Execution logging callback: ", msg )
+            Logger.debug( "Execution logging callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
@@ -480,9 +484,9 @@ export function install_requirements(
                 const text = utils.parse_console_output( msg.content.text )
 
                 if ( stream === "stderr" ) {
-                    console.warn( "[pipenv]: ", text )
+                    Logger.warn( "[pipenv]: ", text )
                 } else
-                    console.log( "[pipenv]: ", text )
+                    Logger.log( "[pipenv]: ", text )
 
             }
         }
@@ -491,13 +495,13 @@ export function install_requirements(
          * Execution done callback
          */
         const shell_callback = ( msg: io.Message ) => {
-            console.debug( "Execution shell callback: ", msg )
+            Logger.debug( "Execution shell callback: ", msg )
 
             if ( msg.content.status == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
             }
 
-            console.log( "Requirements have been successfully installed" )
+            Logger.log( "Requirements have been successfully installed" )
 
             resolve()
         }
@@ -508,7 +512,7 @@ export function install_requirements(
         if ( dev_packages ) opts += "--dev "
         if ( pre_releases ) opts += "--pre"
 
-        console.log( "Installing requirements." )
+        Logger.log( "Installing requirements." )
 
         await execute_shell_command(
             `pipenv install --ignore-pipfile --keep-outdated ${ opts } ${ requirements }`,
@@ -524,7 +528,7 @@ export function install_kernel( name: string ): Promise<string> {
          * Logging callback
          */
         const iopub_callback = ( msg: io.Message ) => {
-            console.debug( "Execution logging callback: ", msg )
+            Logger.debug( "Execution logging callback: ", msg )
 
             if ( msg.msg_type == "error" ) {
                 reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
@@ -535,9 +539,9 @@ export function install_kernel( name: string ): Promise<string> {
                 const text = utils.parse_console_output( msg.content.text )
 
                 if ( stream === "stderr" ) {
-                    console.warn( "[pipenv]: ", text )
+                    Logger.warn( "[pipenv]: ", text )
                 } else
-                    console.log( "[pipenv]: ", text )
+                    Logger.log( "[pipenv]: ", text )
 
             }
         }
@@ -560,7 +564,7 @@ export function install_kernel( name: string ): Promise<string> {
             fi
         ` )
 
-        console.log( `Installing kernel ${ kernel_name }.` )
+        Logger.log( `Installing kernel ${ kernel_name }.` )
 
         await execute_shell_script( script, { iopub: { output: iopub_callback } } )
             .then( async () => {
@@ -568,7 +572,7 @@ export function install_kernel( name: string ): Promise<string> {
                     `pipenv run ipython kernel install --user --name=${ kernel_name }`,
                     { iopub: { output: iopub_callback } }
                 )
-                console.log( `Kernel '${ kernel_name }' has been installed.` )
+                Logger.log( `Kernel '${ kernel_name }' has been installed.` )
             } )
             .catch( reject )
 

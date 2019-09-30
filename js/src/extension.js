@@ -21,6 +21,7 @@ const __extension__ = "jupyter_nbrequirements"
 __webpack_public_path__ = document.querySelector( "body" ).getAttribute( 'data-base-url' ) + 'nbextensions/jupyter-nbrequirements/';
 
 // Constants
+window.DEFAULT_LOGGING_LEVEL = { value: 2, name: "DEBUG" }
 window.DEFAULT_RESOLUTION_ENGINE = "thoth"
 
 // Load the extension

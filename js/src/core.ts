@@ -10,6 +10,9 @@
  */
 
 import _ from "lodash"
+
+import { Logger } from "./config"
+
 import * as io from "./types/io"
 import { Context, CodeCell } from "./types/nb"
 
@@ -36,7 +39,7 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
 
         const kernel = Jupyter.notebook.kernel
 
-        console.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
+        Logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
 
         const msg_id = kernel.execute( request, callbacks, options )
         kernel.events.on( "finished_iopub.Kernel", ( e: Event, d: io.Message ) => {
@@ -50,7 +53,7 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
 export function get_execute_context(): Context | undefined {
     const cell: CodeCell = Jupyter.notebook.get_executed_cell()
     if ( _.isUndefined( cell ) ) {
-        console.warn( "Execution context could not be determined." )
+        Logger.warn( "Execution context could not be determined." )
         return
     }
 

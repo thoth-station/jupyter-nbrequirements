@@ -1,5 +1,6 @@
 import _ from "lodash"
 
+import { Logger } from "../config"
 import Command, { DefaultArguments } from "./command"
 
 import { execute_python_script } from "../core"
@@ -64,7 +65,7 @@ export class Clear extends Command {
     }
 }
 
-namespace Ensure {
+namespace Ensure {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
         // Resolution engine: {thoth, pipenv} (defaults to thoth)
@@ -97,7 +98,7 @@ export class Ensure extends Command {
         // and notebook requirements
         const req: Requirements = await get_requirements( Jupyter.notebook, false )
 
-        console.info( "[Ensure] requirements: ", req )
+        Logger.info( "[Ensure] requirements: ", req )
 
         // Stage 2: lock down the dependencies and write them to the Pipfile.lock
         // This command also makes sure that the requirements are written to the Pipfile
@@ -118,7 +119,7 @@ export class Ensure extends Command {
             default: throw new Error( `Unknown resolution engine: ${ engine }` )
         }
 
-        console.info( "[Ensure] locked requirements: ", req_locked )
+        Logger.info( "[Ensure] locked requirements: ", req_locked )
 
         // Stage 3: install the requirements along with the dev packages
         // empty [] makes sure that the requirements are installed from the Pipfile.lock
@@ -130,7 +131,7 @@ export class Ensure extends Command {
         await install_kernel( args.name )
             .then( ( name: string ) => load_kernel( name ) )
             .then( ( name: string ) => set_kernel( name ) )
-            .then( ( name: string ) => console.info( "[Ensure] Successfully set Kernel: ", name ) )
+            .then( ( name: string ) => Logger.info( "[Ensure] Successfully set Kernel: ", name ) )
             .catch( ( err: string | Error ) => {
                 throw typeof err === "string" ? new Error( err ) : err
             } )
@@ -138,7 +139,7 @@ export class Ensure extends Command {
 
 }
 
-namespace Add {
+namespace Add {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
         dependency: string
@@ -201,20 +202,20 @@ export class Add extends Command {
 
         // resolve sync
         if ( args.sync ) {
-            console.log( "Updating Pipfile." )
+            Logger.log( "Updating Pipfile." )
             await Pipfile.create( { requirements: req, overwrite: true } )
                 .then( () => {
-                    console.log( "Pipfile has been successfully updated." )
+                    Logger.log( "Pipfile has been successfully updated." )
                 } )
                 .catch( ( err: string | Error ) => {
-                    console.error( err )
+                    Logger.error( err )
                     throw typeof err === "string" ? new Error( err ) : err
                 } )
         }
     }
 }
 
-namespace Get {
+namespace Get {// eslint-disable-line
 
     // eslint-disable-next-line
     export interface Arguments extends DefaultArguments { }
@@ -242,10 +243,10 @@ export class Get extends Command {
         else if ( args.to_file ) {// Create the Pipfile in the current repository
             return await Pipfile.create( { requirements: req, overwrite: args.overwrite } )
                 .then( () => {
-                    console.log( "Pipfile has been successfully created." )
+                    Logger.log( "Pipfile has been successfully created." )
                 } )
                 .catch( ( err: string | Error ) => {
-                    console.error( err )
+                    Logger.error( err )
                 } )
         }
         else {// default, display requirements in Pipfile format
@@ -258,7 +259,7 @@ export class Get extends Command {
     }
 }
 
-namespace Set {
+namespace Set {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
         requirements: Requirements
@@ -281,7 +282,7 @@ export class Set extends Command {
     }
 }
 
-namespace Lock {
+namespace Lock {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
         // Whether to sync notebook metadata with the Pipfile.lock
@@ -325,10 +326,10 @@ export class Lock extends Command {
                 if ( args.to_file ) {
                     return await PipfileLock.create( { requirements_locked: req_locked } )
                         .then( () => {
-                            console.log( "Pipfile.lock has been successfully created." )
+                            Logger.log( "Pipfile.lock has been successfully created." )
                         } )
                         .catch( ( err ) => {
-                            console.error( "Failed to lock down dependencies.\n", err )
+                            Logger.error( "Failed to lock down dependencies.\n", err )
                         } )
                 }
 
@@ -336,13 +337,13 @@ export class Lock extends Command {
                 utils.display( req_locked, element )
             } )
             .catch( ( err: string ) => {
-                console.error( "Failed to lock requirements.\n", err )
+                Logger.error( "Failed to lock requirements.\n", err )
                 throw new Error( err )
             } )
     }
 }
 
-namespace Install {
+namespace Install {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
         requirements: string[]
@@ -366,7 +367,7 @@ export class Install extends Command {
     }
 }
 
-namespace Kernel {
+namespace Kernel {// eslint-disable-line
 
     type KernelCommand = "info" | "install" | "set"
 
@@ -392,12 +393,12 @@ export class Kernel extends Command {
         if ( args.command === "install" ) {
             install_kernel( args.name )
                 .then( ( name: string ) => load_kernel( name ) )
-                .then( ( name: string ) => console.log( `Kernel spec '${ name }' is ready.` ) )
+                .then( ( name: string ) => Logger.log( `Kernel spec '${ name }' is ready.` ) )
                 .catch( ( err: Error ) => { throw err } )
         }
         else if ( args.command === "set" ) {
             set_kernel( args.name )
-                .then( ( name: string ) => console.log( `Kernel '${ name }' has been set.` ) )
+                .then( ( name: string ) => Logger.log( `Kernel '${ name }' has been set.` ) )
                 .catch( ( err: Error ) => { throw err } )
         }
         else {// display kernel info and exit

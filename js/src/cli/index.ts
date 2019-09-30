@@ -11,6 +11,8 @@
 
 import _ from "lodash"
 
+import { Logger } from "../config"
+
 import Command, { DefaultArguments } from "./command"
 import { Context } from "../types"
 import { OutputError } from "../types/nb"
@@ -130,7 +132,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         await cmd.run( args, element, context )
 
     } catch ( err ) {
-        console.error( err )
+        Logger.error( err )
 
         if ( context && !_.isUndefined( context.cell ) ) {
             const exc = typeof err === "string" ? new Error( err ) : err

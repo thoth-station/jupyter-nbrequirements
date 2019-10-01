@@ -35,13 +35,18 @@ jobs:
       with:
         node-version: "12.x"
     
-    - name: Build
+    - name: Build JS
       run: |
         pushd js/
+        pwd && tree
         npm install
         npm run build-prod
         npm test
         popd
+
+    - name: Build Python package
+      run: |
+        pwd && tree -I node_modules
         pipenv run python setup.py sdist bdist_wheel
     
     - name: Twine check

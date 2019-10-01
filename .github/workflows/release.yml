@@ -58,9 +58,9 @@ jobs:
 
     - name: TEST Publish to PyPI
       run: |
-        pipenv run twine upload -repository-url https://test.pypi.org/legacy/ dist/* -u macermak -p ${{ secrets.PYPI_TEST_PASSWORD }}
+        pipenv run twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u macermak -p ${{ secrets.PYPI_TEST_PASSWORD }}
         
     - name: Publish to PyPI
       run: |
-        pipenv run twine upload -repository-url https://upload.pypi.org/legacy/ dist/* -u macermak -p ${{ secrets.PYPI_UPLOAD_PASSWORD }}
+        pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/* -u macermak -p ${{ secrets.PYPI_UPLOAD_PASSWORD }}
       if: github.branch != 'test'

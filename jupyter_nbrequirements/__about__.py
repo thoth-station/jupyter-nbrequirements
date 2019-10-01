@@ -12,7 +12,7 @@ __all__ = [
 ]
 
 __title__ = "jupyter-nbrequirements"
-__summary__ = "Jupyter magic extension for managing notebook requirements."
+__summary__ = "Dependency manager for Jupyter Notebooks"
 __uri__ = "https://github.com/CermakM/jupyter-nbrequirements"
 
 __version__ = "0.1.0-dev"

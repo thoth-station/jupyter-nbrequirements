@@ -13,5 +13,4 @@ thoth-python
 
 # Development packages
 flake8
-black
 twine

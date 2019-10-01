@@ -1,14 +1,23 @@
 # jupyter-nbrequirements
 
-Jupyter magic extension for managing notebook requirements
+Dependency management and optimization in Jupyter Notebooks.
 
 <br>
 
-#### About
+## About
+
+This extension provides control over the notebook dependencies.
+
+The main goals of the project are the following:
+
+  - manage notebook requirements without leaving the notebook
+  - provide a unique and optimized* environment for each notebook
+
+*The requirements are optimized using the [Thoth] resolution engine
 
 <br>
 
-#### Installation
+## Installation
 
 ```bash
 pip install jupyter-nbrequirements
@@ -17,22 +26,83 @@ pip install jupyter-nbrequirements
 And enable the required extensions (might not be needed with the latest version, but to be sure..)
 
 ```bash
-jupyter nbextension install --sys-prefix --py jupyter_require
-jupyter nbextension enable jupyter-require/extension
+jupyter nbextension install --user --py jupyter_nbrequirements
 ```
 
 <br>
 
-#### Usage
+## Usage
 
-```python
+#### Create the environment for the notebook to run in
+
+Say we want to do an EDA, we will probably need [pandas](https://pandas.pydata.org), a visualization library like [plotly](https://plot.ly) and some additional libraries to make our lives easier, like [sklearn](https://scikit-learn.org/stable/) and [pandas-profiling](https://github.com/pandas-profiling/pandas-profiling).
+
+In a Jupyter notebook cell:
+
 ```
+%dep add pandas --version ">=0.24.0"
+%dep add plotly
+%dep add sklearn
+%dep add pandas-profiling
+```
+
+And perhaps our code would need some refactoring and linter checks later on, so let's add a `dev` dependency.
+
+```
+%dep add --dev black
+```
+
+You can now check the requirements that your notebook has by issuing `%requirements` (or `%dep`, which is just an alias for it) command:
+
+```
+%requirements
+```
+```
+[packages]
+pandas = ">=0.24.0"
+plotly = "*"
+sklearn = "*"
+pandas-profiling = "*"
+
+[dev-packages]
+black = "*"
+
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[requires]
+python_version = "3.6"
+```
+
+Up to this point, we've been working only with the metadata. In order to create the environment and actually install the dependencies, you run the `%dep ensure` command (insipired by the golang's [dep](https://github.com/golang/dep), for those familiar with Golang).
+
+```
+%dep ensure
+```
+
+> Since this package is still under development and it uses the [Thoth] resolution engine to optimize the notebook dependencies (which is also still under development as well), in case something goes wrong, `ensure` accepts the `engine` parameter, which can be set to `pipenv`
+
+```
+%dep ensure --engine pipenv
+```
+
+Check out the [examples](/examples/) for more info.
 
 <br>
 
-#### The future plans:
+## Future plans:
+
+See the [Project Board](https://github.com/CermakM/jupyter-nbrequirements/projects).
+
+<br>
     
 ---
 
 > Author: Marek Cermak <macermak@redhat.com>, @AICoE - Project Thoth
 
+
+<!-- References -->
+
+[Thoth]: https://github.com/thoth-station

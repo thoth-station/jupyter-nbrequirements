@@ -1,0 +1,6 @@
+# include the manifest files
+include Pipfile
+include requirements.txt
+
+include LICENSE
+include README.md

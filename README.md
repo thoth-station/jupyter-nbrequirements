@@ -1,4 +1,6 @@
 # jupyter-nbrequirements
+[![Node CI](https://github.com/cermakm/jupyter-nbrequirements/workflows/Node%20CI/badge.svg)](https://github.com/cermakm/jupyter-nbrequirements/actions)
+
 
 Dependency management and optimization in Jupyter Notebooks.
 

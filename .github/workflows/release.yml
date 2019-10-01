@@ -20,8 +20,11 @@ jobs:
         python-version: "3.6"
     - name: Install dependencies
       run: |
+        sudo apt-get install tree
+        # python dependencies
         python -m pip install --upgrade pip pipenv twine
         pipenv install --dev
+
     - name: Lint with flake8
       run: |
         pipenv run pip install flake8

@@ -83,7 +83,7 @@ def _default_requirements_handler(args, params: dict = None, **kwargs) -> str:
         # %requirements is an alias to 'get' if no command is provided
         command = default_command
 
-    if command == "get" and getattr(args, "from_file", None) != None:
+    if command == "get" and getattr(args, "from_file", None) is not None:
         # read the requirements from the file and change the command to set
         with args.from_file as f:
             requirements = Pipfile.from_string(f.read()).to_dict()
@@ -329,8 +329,10 @@ class RequirementsMagic(Magics):
             parser_source = subparsers.add_parser(
                 "add-source", description="Add source index to the notebook metadata."
             )
-            parser_source.add_argument("--name", type=str, help="Name for this index.")
-            parser_source.add_argument("--url", type=str, help="URL for this index.")
+            parser_source.add_argument(
+                "--name", type=str, help="Name for this index.")
+            parser_source.add_argument(
+                "--url", type=str, help="URL for this index.")
             parser_source.add_argument(
                 "--verify-ssl",
                 type=bool,

@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import json
 import os
-import platform
 import sys
 
 from distutils import log
@@ -104,23 +103,25 @@ class NPM(Command):
 
     def has_npm(self):
         try:
-            ## shell=True needs to be passed for windows to look at non .exe files.
+            # shell=True needs to be passed for windows to look at non .exe files.
             shell = (sys.platform == 'win32')
             check_call(['npm', '--version'], shell=shell)
             return True
-        except:
+        except Exception:
             return False
 
     def run(self):
         has_npm = self.has_npm()
         if not has_npm:
-            log.error("`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
+            log.error(
+                "`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
 
         env = os.environ.copy()
         env['PATH'] = npm_path
 
         if self.has_npm():
-            log.info("Installing build dependencies with npm.  This may take a while...")
+            log.info(
+                "Installing build dependencies with npm.  This may take a while...")
             check_call(['npm', 'install'], cwd=HERE, stdout=sys.stdout, stderr=sys.stderr,
                        shell=(sys.platform == 'win32'))
             os.utime(self.node_modules, None)
@@ -131,7 +132,6 @@ class NPM(Command):
                 if not has_npm:
                     msg += '\nnpm is required to build a development version of widgetsnbextension'
                 raise ValueError(msg)
-
 
         # update package data in case this created new files
         update_package_data(self.distribution)
@@ -159,7 +159,6 @@ setup_args = dict(
         "Natural Language :: English",
         "Operating System :: OS Independent",
         "Programming Language :: JavaScript",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Topic :: Utilities"

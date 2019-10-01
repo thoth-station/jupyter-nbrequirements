@@ -15,7 +15,7 @@ __title__ = "jupyter-nbrequirements"
 __summary__ = "Jupyter magic extension for managing notebook requirements."
 __uri__ = "https://github.com/CermakM/jupyter-nbrequirements"
 
-__version__ = "0.0.1-dev"
+__version__ = "0.1.0-dev"
 
 __author__ = "Marek Cermak"
 __email__ = "macermak@redhat.com"

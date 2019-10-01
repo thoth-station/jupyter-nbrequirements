@@ -3,11 +3,13 @@ ipykernel = "*"
 ipython = "*"
 jupyter-require = "*"
 invectio = "*"
-thoth-python = "*"
 thamos = "*"
+thoth-python = "*"
 
 [dev-packages]
-autopep8 = "*"
+flake8 = "*"
+black = "*"
+twine = "*"
 
 [[source]]
 url = "https://pypi.org/simple"

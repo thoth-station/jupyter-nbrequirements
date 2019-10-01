@@ -8,7 +8,6 @@ thoth-python = "*"
 
 [dev-packages]
 flake8 = "*"
-black = "*"
 twine = "*"
 
 [[source]]

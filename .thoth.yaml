@@ -12,7 +12,7 @@ runtime_environments:
     python_version: '3.6'
     recommendation_type: STABLE
 
-managers:
+managers: &managers
 - name: info
 
 - name: pipfile-requirements
@@ -37,3 +37,8 @@ managers:
       - kebechet
     maintainers:
       - cermakm
+
+repositories:
+  - slug: CermakM/jupyter-nbrequirements
+    token: '{KEBECHET_TOKEN}'
+    managers: *managers

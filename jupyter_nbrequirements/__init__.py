@@ -61,7 +61,8 @@ def _default_kernel_handler(args, params: dict = None, **kwargs) -> str:
         for arg, v in args._get_kwargs()
     }
 
-    def _serialize(arg): return repr(arg)  # noqa
+    def _serialize(arg):
+        return repr(arg)  # noqa
 
     params = params or dict()
 
@@ -90,18 +91,22 @@ def _default_requirements_handler(args, params: dict = None, **kwargs) -> str:
 
         command = "set"
 
-    script = """
+    script = (
+        """
     require(['nbrequirements'], ({cli, version}) => {
         cli('%s', $$magic_args, element, context)
     })
-    """ % command
+    """
+        % command
+    )
 
     args = {
         arg: re.sub("[\"']", "", v) if isinstance(v, str) else v
         for arg, v in args._get_kwargs()
     }
 
-    def _serialize(arg): return repr(arg)  # noqa
+    def _serialize(arg):
+        return repr(arg)  # noqa
 
     params.update(kwargs)
     params["magic_args"] = json.dumps(args, default=_serialize)
@@ -121,7 +126,8 @@ def _requirements_config(args):
 
             if fp.exists() and not args.overwrite:
                 raise Exception(
-                    "Config file already exists and `overwrite` is not set.")
+                    "Config file already exists and `overwrite` is not set."
+                )
 
             thoth_config.create_default_config()
 
@@ -138,9 +144,7 @@ def _requirements_config(args):
         print(json.dumps(thoth_config.content, indent=4))
     else:
         with workdir(thoth_config.CONFIG_NAME) as config_dir:
-            print(
-                Path(config_dir, thoth_config.CONFIG_NAME).read_text()
-            )
+            print(Path(config_dir, thoth_config.CONFIG_NAME).read_text())
 
     return script, {}
 
@@ -172,7 +176,7 @@ class RequirementsMagic(Magics):
             prog="%kernel",
             description="""
             Install and manage Jupyter kernels.
-            """
+            """,
         )
         parser.set_defaults(func=_default_kernel_handler)
 
@@ -180,26 +184,24 @@ class RequirementsMagic(Magics):
 
         # command: install
         parser_install = subparsers.add_parser(
-            "install",
-            description="Install new Jupyter kernel."
+            "install", description="Install new Jupyter kernel."
         )
         parser_install.add_argument(
             "name",
             nargs="?",
-            help="[optional] Kernel name, otherwise use notebook name."
+            help="[optional] Kernel name, otherwise use notebook name.",
         )
         parser_install.set_defaults(func=_default_kernel_handler)
 
         # command: load
         parser_set = subparsers.add_parser(
-            "set",
-            description="Set existing kernel as current kernel."
+            "set", description="Set existing kernel as current kernel."
         )
         parser_set.add_argument(
             "name",
             type=str,
             nargs="?",
-            help="[optional] Kernel name, otherwise use notebook name."
+            help="[optional] Kernel name, otherwise use notebook name.",
         )
         parser_set.set_defaults(func=_default_kernel_handler)
 
@@ -251,35 +253,38 @@ class RequirementsMagic(Magics):
                 prog="%requirements",
                 description="""
                 Jupyter magic for managing notebook requirements.
-                """
+                """,
             )
             parser.set_defaults(func=_default_requirements_handler)
 
             # main
             parser.add_argument(
-                "-I", "--ignore-metadata",
+                "-I",
+                "--ignore-metadata",
                 action="store_true",
-                help="Whether to ignore embedded notebook metadata."
+                help="Whether to ignore embedded notebook metadata.",
             )
             parser.add_argument(
-                "-f", "--from-file",
-                type=argparse.FileType('r', encoding='utf-8'),
-                help="Whether to store output to file."
+                "-f",
+                "--from-file",
+                type=argparse.FileType("r", encoding="utf-8"),
+                help="Whether to store output to file.",
             )
             parser.add_argument(
                 "--to-json",
                 action="store_true",
-                help="Whether to display output in JSON format."
+                help="Whether to display output in JSON format.",
             )
             parser.add_argument(
                 "--to-file",
                 action="store_true",
-                help="Whether to store output to file."
+                help="Whether to store output to file.",
             )
             parser.add_argument(
-                "-w", "--overwrite",
+                "-w",
+                "--overwrite",
                 action="store_true",
-                help="Whether to overwrite existing file."
+                help="Whether to overwrite existing file.",
             )
 
             subparsers = parser.add_subparsers(dest="command")
@@ -287,65 +292,55 @@ class RequirementsMagic(Magics):
             # command: add
             parser_add = subparsers.add_parser(
                 "add",
-                description="Add dependency to notebook metadata without installing it."
+                description="Add dependency to notebook metadata without installing it.",
             )
             parser_add.add_argument(
-                "-d", "--dev",
+                "-d",
+                "--dev",
                 action="store_true",
-                help="Whether to store the dependency as dev-package."
+                help="Whether to store the dependency as dev-package.",
             )
             parser_add.add_argument(
-                "-v", "--version",
-                type=str,
-                default="*",
-                help="Version constraint."
+                "-v", "--version", type=str, default="*", help="Version constraint."
             )
             parser_add.add_argument(
-                "-i", "--index",
+                "-i",
+                "--index",
                 type=str,
                 default="pypi",
                 help=(
                     "Index (source name) for this dependency."
                     "NOTE: The source of that name must be present!"
-                )
+                ),
             )
             parser_add.add_argument(
                 "--sync",
                 action="store_true",
-                help="Whether to sync notebook metadata with the Pipfile."
+                help="Whether to sync notebook metadata with the Pipfile.",
             )
             parser_add.add_argument(
                 "dependency",
                 type=str,
-                help="The dependency to be added to notebook metadata."
+                help="The dependency to be added to notebook metadata.",
             )
             parser_add.set_defaults(func=_default_requirements_handler)
 
             # command: add-source
             parser_source = subparsers.add_parser(
-                "add-source",
-                description="Add source index to the notebook metadata."
+                "add-source", description="Add source index to the notebook metadata."
             )
-            parser_source.add_argument(
-                "--name",
-                type=str,
-                help="Name for this index."
-            )
-            parser_source.add_argument(
-                "--url",
-                type=str,
-                help="URL for this index.",
-            )
+            parser_source.add_argument("--name", type=str, help="Name for this index.")
+            parser_source.add_argument("--url", type=str, help="URL for this index.")
             parser_source.add_argument(
                 "--verify-ssl",
                 type=bool,
                 default=False,
-                help="Whether to set verify_ssl=true"
+                help="Whether to set verify_ssl=true",
             )
             parser_source.add_argument(
                 "--sync",
                 action="store_true",
-                help="Whether to sync notebook metadata with the Pipfile."
+                help="Whether to sync notebook metadata with the Pipfile.",
             )
 
             # command: lock
@@ -353,30 +348,31 @@ class RequirementsMagic(Magics):
                 "lock",
                 add_help=False,
                 parents=[parser],
-                description="Lock (pin down) dependencies."
+                description="Lock (pin down) dependencies.",
             )
             parser_lock.add_argument(
                 "--engine",
                 choices=["thoth", "pipenv"],
-                help="Overwrite default dependency resolution engine."
+                help="Overwrite default dependency resolution engine.",
             )
             parser_lock.add_argument(
-                "-d", "--dev-packages",
+                "-d",
+                "--dev-packages",
                 action="store_true",
                 help=(
                     "Install both develop and default packages.\n"
                     "Only applicable when `engine='pipenv'`"
-                )
+                ),
             )
             parser_lock.add_argument(
                 "--pre-releases",
                 action="store_true",
-                help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`"
+                help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`",
             )
             parser_lock.add_argument(
                 "--sync",
                 action="store_true",
-                help="Whether to sync notebook metadata with the Pipfile.lock."
+                help="Whether to sync notebook metadata with the Pipfile.lock.",
             )
             parser_lock.set_defaults(func=_requirements_lock)
 
@@ -385,7 +381,7 @@ class RequirementsMagic(Magics):
                 "config",
                 add_help=False,
                 parents=[parser],
-                description="Generate Thoth config."
+                description="Generate Thoth config.",
             )
             parser_config.set_defaults(func=_requirements_config)
 
@@ -395,7 +391,7 @@ class RequirementsMagic(Magics):
                 description=(
                     "Installs provided packages and adds them to Pipfile, "
                     "or (if no packages are given), installs all packages from Pipfile.lock."
-                )
+                ),
             )
             parser_install.add_argument(
                 "requirements",
@@ -404,17 +400,16 @@ class RequirementsMagic(Magics):
                 help=(
                     "[optional] Packages to be installed. "
                     "If not provided, install all packages from Pipfile.lock."
-                )
+                ),
             )
             parser_install.add_argument(
-                "-d", "--dev",
+                "-d",
+                "--dev",
                 action="store_true",
-                help="Install both develop and default packages."
+                help="Install both develop and default packages.",
             )
             parser_install.add_argument(
-                "--pre",
-                action="store_true",
-                help="Allow pre-releases."
+                "--pre", action="store_true", help="Allow pre-releases."
             )
             parser_install.set_defaults(func=_default_requirements_handler)
 
@@ -427,33 +422,35 @@ class RequirementsMagic(Magics):
                         "with the virtual environment and the Jupyter kernel.\n\n"
                         "Ensure gets a project into a complete, reproducible, and likely compilable state.",
                         width=200,
-                        replace_whitespace=False
+                        replace_whitespace=False,
                     )
                 ),
-                formatter_class=argparse.RawTextHelpFormatter
+                formatter_class=argparse.RawTextHelpFormatter,
             )
             parser_ensure.add_argument(
                 "--engine",
                 choices=["thoth", "pipenv"],
-                help="Overwrite default dependency resolution engine."
+                help="Overwrite default dependency resolution engine.",
             )
             parser_ensure.add_argument(
-                "-d", "--dev-packages",
+                "-d",
+                "--dev-packages",
                 action="store_true",
                 help=(
                     "Install both develop and default packages.\n"
                     "Only applicable when `engine='pipenv'`"
-                )
+                ),
             )
             parser_ensure.add_argument(
                 "--pre-releases",
                 action="store_true",
-                help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`"
+                help="Allow pre-releases.\nOnly applicable when `engine='pipenv'`",
             )
             parser_ensure.add_argument(
-                "-I", "--skip-kernel",
+                "-I",
+                "--skip-kernel",
                 action="store_true",
-                help="Skip installation of the Jupyter kernel."
+                help="Skip installation of the Jupyter kernel.",
             )
             parser_ensure.add_argument(
                 "name",
@@ -462,14 +459,14 @@ class RequirementsMagic(Magics):
                 help=(
                     "[optional] Kernel name, otherwise use notebook name.\n"
                     "Only applicable when `--skip-kernel=false`."
-                )
+                ),
             )
             parser_ensure.set_defaults(func=_default_requirements_handler)
 
             # command: clear
             parser_clear = subparsers.add_parser(
                 "clear",
-                description="Clear notebook requirements and locked requirements metadata."
+                description="Clear notebook requirements and locked requirements metadata.",
             )
             parser_clear.set_defaults(func=_default_requirements_handler)
 
@@ -518,9 +515,11 @@ def load_ipython_extension(ipython):
 
 
 def _jupyter_nbextension_paths():
-    return [{
-        'section': 'notebook',
-        'src': 'static',
-        'dest': 'jupyter-nbrequirements',
-        'require': 'jupyter-nbrequirements/extension'
-    }]
+    return [
+        {
+            "section": "notebook",
+            "src": "static",
+            "dest": "jupyter-nbrequirements",
+            "require": "jupyter-nbrequirements/extension",
+        }
+    ]

@@ -82,7 +82,7 @@ Up to this point, we've been working only with the metadata. In order to create 
 %dep ensure
 ```
 
-> Since this package is still under development and it uses the [Thoth] resolution engine to optimize the notebook dependencies (which is also still under development as well), in case something goes wrong, `ensure` accepts the `engine` parameter, which can be set to `pipenv`
+> Since this project is still under development and it uses the [Thoth] resolution engine to optimize the notebook dependencies (which is also still under development as well), in case something goes wrong, `ensure` accepts the `engine` parameter, which can be set to `pipenv`
 
 ```
 %dep ensure --engine pipenv

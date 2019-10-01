@@ -20,28 +20,23 @@ from subprocess import check_call
 
 
 HERE = Path(__file__).parent
-NAME = 'jupyter_nbrequirements'
+NAME = "jupyter_nbrequirements"
 
 ABOUT = dict()
-exec(Path(HERE, NAME, '__about__.py').read_text(), ABOUT)
+exec(Path(HERE, NAME, "__about__.py").read_text(), ABOUT)
 
-README: str = Path(HERE, "README.md").read_text(encoding='utf-8')
-REQUIREMENTS: list = Path(HERE, 'requirements.txt').read_text().splitlines()
+README: str = Path(HERE, "README.md").read_text(encoding="utf-8")
+REQUIREMENTS: list = Path(HERE, "requirements.txt").read_text().splitlines()
 
 npm_path = os.pathsep.join(
-    [
-        os.path.join(HERE, "node_modules", ".bin"),
-        os.environ.get("PATH", os.defpath),
-    ]
+    [os.path.join(HERE, "node_modules", ".bin"), os.environ.get("PATH", os.defpath)]
 )
 is_repo = HERE.joinpath(".git").exists()
 
 
 # Load JS version from package.json
 def js_version():
-    path = Path(
-        HERE, "package.json"
-    )
+    path = Path(HERE, "package.json")
     package_json = json.loads(path.read_text)
     version = package_json["version"]
 
@@ -50,6 +45,7 @@ def js_version():
 
 def js_prerelease(command, strict=False):
     """Build minified js/css prior to another command."""
+
     class DecoratedCommand(command):
         def run(self):
             jsdeps = self.distribution.get_command_obj("jsdeps")
@@ -104,8 +100,8 @@ class NPM(Command):
     def has_npm(self):
         try:
             # shell=True needs to be passed for windows to look at non .exe files.
-            shell = (sys.platform == 'win32')
-            check_call(['npm', '--version'], shell=shell)
+            shell = sys.platform == "win32"
+            check_call(["npm", "--version"], shell=shell)
             return True
         except Exception:
             return False
@@ -114,23 +110,30 @@ class NPM(Command):
         has_npm = self.has_npm()
         if not has_npm:
             log.error(
-                "`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
+                "`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo"
+            )
 
         env = os.environ.copy()
-        env['PATH'] = npm_path
+        env["PATH"] = npm_path
 
         if self.has_npm():
             log.info(
-                "Installing build dependencies with npm.  This may take a while...")
-            check_call(['npm', 'install'], cwd=HERE, stdout=sys.stdout, stderr=sys.stderr,
-                       shell=(sys.platform == 'win32'))
+                "Installing build dependencies with npm.  This may take a while..."
+            )
+            check_call(
+                ["npm", "install"],
+                cwd=HERE,
+                stdout=sys.stdout,
+                stderr=sys.stderr,
+                shell=(sys.platform == "win32"),
+            )
             os.utime(self.node_modules, None)
 
         for t in self.targets:
             if not os.path.exists(t):
                 msg = "Missing file: %s" % t
                 if not has_npm:
-                    msg += '\nnpm is required to build a development version of widgetsnbextension'
+                    msg += "\nnpm is required"
                 raise ValueError(msg)
 
         # update package data in case this created new files
@@ -138,19 +141,15 @@ class NPM(Command):
 
 
 setup_args = dict(
-    name=ABOUT['__title__'],
-    version=ABOUT['__version__'],
-
-    author=ABOUT['__author__'],
-    author_email=ABOUT['__email__'],
-    url=ABOUT['__uri__'],
-
-    license=ABOUT['__license__'],
-
-    description=ABOUT['__summary__'],
+    name=ABOUT["__title__"],
+    version=ABOUT["__version__"],
+    author=ABOUT["__author__"],
+    author_email=ABOUT["__email__"],
+    url=ABOUT["__uri__"],
+    license=ABOUT["__license__"],
+    description=ABOUT["__summary__"],
     long_description=README,
-    long_description_content_type='text/markdown',
-
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Framework :: IPython",
@@ -161,40 +160,29 @@ setup_args = dict(
         "Programming Language :: JavaScript",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Topic :: Utilities"
+        "Topic :: Utilities",
     ],
-
     packages=find_packages(),
-
-    package_data={
-        NAME: ["snippets/*.js", "static/*.js"]
-    },
+    package_data={NAME: ["static/*.js"]},
     include_package_data=True,
-
     data_files=[
         (
-            "share/jupyter/nbextensions/jupyter-nbrequirements", [
-                NAME + "/static/extension.js",
-                NAME + "/static/index.js"
-            ],
+            "share/jupyter/nbextensions/jupyter-nbrequirements",
+            [NAME + "/static/extension.js", NAME + "/static/index.js"],
         ),
         (
-            "etc/jupyter/nbconfig/notebook.d", [
-                "jupyter-config/notebook.d/jupyter-nbrequirements.json"
-            ]
+            "etc/jupyter/nbconfig/notebook.d",
+            ["jupyter-config/notebook.d/jupyter-nbrequirements.json"],
         ),
     ],
-
     zip_safe=False,
-
     cmdclass=dict(
         build_py=js_prerelease(build_py),
         sdist=js_prerelease(sdist, strict=True),
         jsdeps=NPM,
     ),
-
     install_requires=REQUIREMENTS,
 )
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup(**setup_args)

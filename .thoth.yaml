@@ -1,0 +1,39 @@
+# Thoth configuration file for Kebechet
+host: 'khemenu.thoth-station.ninja'
+
+tls_verify: false
+requirements_format: pipenv
+
+runtime_environments:
+  - name: 'ubi:8'
+    operating_system:
+      name: 'ubi'
+      version: '8'
+    python_version: '3.6'
+    recommendation_type: STABLE
+
+managers:
+- name: info
+
+- name: pipfile-requirements
+
+- name: thoth-advise
+  configuration:
+    labels: [bot, kebechet]
+
+- name: thoth-provenance
+  configuration:
+    labels: [bot, kebechet]
+
+- name: update
+  configuration:
+    labels: [bot, kebechet]
+
+- name: version
+  configuration:
+    labels:
+      # Labels for opened issues and pull requests.
+      - bot
+      - kebechet
+    maintainers:
+      - cermakm

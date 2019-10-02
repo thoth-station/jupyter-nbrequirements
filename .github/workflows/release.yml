@@ -2,10 +2,12 @@ name: Python package release
 
 on:
   push:
+    branches-ignore:
+    - master
     branches:
     - stable
-    - test
     - v*
+    - test  # only submit the package to PyPI Test instance
 
 jobs:
   build:

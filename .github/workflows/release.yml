@@ -3,10 +3,7 @@ name: Python package release
 on:
   push:
     branches:
-    - '!master'
-    - 'stable'
     - 'v*'
-    - 'test'  # only submit the package to PyPI Test instance
 
 jobs:
   build:
@@ -26,7 +23,8 @@ jobs:
         python -m pip install --upgrade pip pipenv twine
         pipenv install --dev
 
-    - name: Lint with flake8
+    - name: Lint with flake8instance
+
       run: |
         pipenv run pip install flake8
         # stop the build if there are Python syntax errors or undefined names
@@ -56,12 +54,7 @@ jobs:
     - name: Twine check
       run: |
         pipenv run twine check dist/*
-
-    - name: Publish to PyPI
-      run: |
-        pipenv run twine upload --repository-url https://test.pypi.org/legacy/ dist/* -u macermak -p ${{ secrets.PYPI_PASSWORD }}
         
     - name: Publish to PyPI
       run: |
         pipenv run twine upload --repository-url https://upload.pypi.org/legacy/ dist/* -u macermak -p ${{ secrets.PYPI_PASSWORD }}
-      if: github.branch != 'test'

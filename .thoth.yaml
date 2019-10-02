@@ -36,7 +36,7 @@ managers: &managers
       - bot
       - kebechet
     maintainers:
-      - cermakm
+      - CermakM
 
 repositories:
   - slug: CermakM/jupyter-nbrequirements

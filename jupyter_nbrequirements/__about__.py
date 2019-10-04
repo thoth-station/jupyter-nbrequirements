@@ -15,7 +15,7 @@ __title__ = "jupyter-nbrequirements"
 __summary__ = "Dependency manager for Jupyter Notebooks"
 __uri__ = "https://github.com/CermakM/jupyter-nbrequirements"
 
-__version__ = "0.1.0-rc0"
+__version__ = "0.2.0"
 
 __author__ = "Marek Cermak"
 __email__ = "macermak@redhat.com"

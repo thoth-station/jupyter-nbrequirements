@@ -1,16 +1,6 @@
-ipython
-ipykernel
-
-# JS execution
-jupyter-require
-
-# Library usage
 invectio
-
-# Software stack resolution
+ipykernel
+ipython
+jupyter-require
 thamos
 thoth-python
-
-# Development packages
-flake8
-twine

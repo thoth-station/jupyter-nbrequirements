@@ -1,7 +1,9 @@
 # jupyter-nbrequirements &nbsp;[![License](https://img.shields.io/github/license/mashape/apistatus.svg?label=License)](https://github.com/CermakM/jupyter-nbrequirements/blob/master/LICENSE)
 
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=CermakM/jupyter-nbrequirements)](https://dependabot.com)
 [![Node CI](https://github.com/cermakm/jupyter-nbrequirements/workflows/Node%20CI/badge.svg)](https://github.com/cermakm/jupyter-nbrequirements/actions) &nbsp;
 [![Release](https://img.shields.io/github/v/tag/cermakm/jupyter-nbrequirements.svg?sort=semver&label=Release)](https://github.com/CermakM/jupyter-nbrequirements/releases/latest)
+
 
 
 Dependency management and optimization in Jupyter Notebooks.

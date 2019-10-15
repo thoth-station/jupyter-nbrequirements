@@ -314,7 +314,7 @@ export class Lock extends Command {
             args.pre_releases = args.pre_releases || false
         }
 
-        get_requirements_locked(
+        await get_requirements_locked(
             Jupyter.notebook,
             args.ignore_metadata,
             args.sync,

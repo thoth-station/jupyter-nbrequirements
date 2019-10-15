@@ -12,6 +12,7 @@
 import _ from "lodash"
 
 import { Logger } from "../config"
+import { notify } from "../utils"
 
 import Command, { DefaultArguments } from "./command"
 import { Context } from "../types"
@@ -126,10 +127,13 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         default: cmd = new Help( command )
     }
 
+    let status: "Success" | "Failed" = "Failed"
     try {
 
         // Run the command
         await cmd.run( args, element, context )
+
+        status = "Success"
 
     } catch ( err ) {
         Logger.error( err )
@@ -148,4 +152,6 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
             context.cell.output_area.append_error( obj )
         }
     }
+
+    notify( `Execution finished: ${ status }`, { renotify: true, tag: command } )
 }

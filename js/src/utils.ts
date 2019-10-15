@@ -9,6 +9,8 @@
  */
 
 import _ from "lodash"
+
+import { Logger } from "./config";
 // @ts-ignore
 import nbutils = require( "base/js/utils" )
 
@@ -96,4 +98,35 @@ export function indent( text: string, indent = 4 ) {
         .split( "\n" )
         .map( ( line ) => `${ indentation }${ line }` )
         .join( "\n" )
+}
+
+
+export function notify( title: string, options?: NotificationOptions ): void {
+    options = _.merge( {
+        icon: "https://github.com/CermakM/jupyter-nbrequirements/blob/notify/assets/main-logo.png?raw=true",
+    }, options )
+
+    if ( !( "Notification" in window ) ) {
+        Logger.warn( "This browser does not support desktop notifications. Notification: ", title )
+    }
+
+    // Let's check whether notification permissions have already been granted
+    else if ( Notification.permission === "granted" ) {
+        // If it's okay let's create a notification
+        const notification = new Notification( title, options )
+        Logger.debug( "Notification has been sent: ", notification )
+    }
+
+    // Otherwise, we need to ask the user for permission
+    else if ( Notification.permission !== "denied" ) {
+        Notification.requestPermission().then( function ( permission ) {
+            // If the user accepts, let's create a notification
+            if ( permission === "granted" ) {
+                const notification = new Notification( title, options )
+                Logger.debug( "Notification has been sent: ", notification )
+            } else {
+                Logger.debug( "Notifications are disabled for notification: ", title )
+            }
+        } )
+    }
 }

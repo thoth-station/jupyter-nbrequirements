@@ -20,8 +20,12 @@ const __extension__ = "jupyter_nbrequirements"
 // dynamically.
 __webpack_public_path__ = document.querySelector( "body" ).getAttribute( 'data-base-url' ) + 'nbextensions/jupyter-nbrequirements/';
 
-// Constants
+/** Constants **/
+// Logging level
 window.DEFAULT_LOGGING_LEVEL = { value: 2, name: "DEBUG" }
+// Notification timeout in ms
+window.DEFAULT_NOTIFICATION_TIMEOUT = 30000
+// Resolution engine {pipenv, thoth}
 window.DEFAULT_RESOLUTION_ENGINE = "thoth"
 
 // Load the extension

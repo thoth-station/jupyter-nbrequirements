@@ -12,6 +12,7 @@
 import _ from "lodash"
 
 import { Logger } from "../config"
+import { notify } from "../utils"
 
 import Command, { DefaultArguments } from "./command"
 import { Context } from "../types"
@@ -28,6 +29,8 @@ import {
     Kernel,
     Help,
 } from "./requirements"
+
+declare const DEFAULT_NOTIFICATION_TIMEOUT: number
 
 /**
  * Execute given command in the current runtime context.
@@ -121,15 +124,20 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          */
         case "kernel": cmd = new Kernel(); break
 
-
         /** Display help and exit */
         default: cmd = new Help( command )
     }
 
+    let should_notify = false
+    let status: "Success" | "Failed" = "Failed"
+
     try {
 
+        setTimeout( () => { should_notify = true }, DEFAULT_NOTIFICATION_TIMEOUT )
         // Run the command
         await cmd.run( args, element, context )
+
+        status = "Success"
 
     } catch ( err ) {
         Logger.error( err )
@@ -147,5 +155,9 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
             // append the error output
             context.cell.output_area.append_error( obj )
         }
+    }
+
+    if ( should_notify && !document.hasFocus() ) {
+        notify( `Execution finished: ${ status }`, { renotify: true, tag: command } )
     }
 }

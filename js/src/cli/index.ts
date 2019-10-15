@@ -157,7 +157,7 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         }
     }
 
-    if ( should_notify ) {
+    if ( should_notify && !document.hasFocus() ) {
         notify( `Execution finished: ${ status }`, { renotify: true, tag: command } )
     }
 }

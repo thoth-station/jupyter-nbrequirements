@@ -1,6 +1,9 @@
 name: Kebechet
 
-on: [issues, issue_comment]
+on:
+  push:
+    branches:
+    - 'kebechet/*'
 
 jobs:
   build:

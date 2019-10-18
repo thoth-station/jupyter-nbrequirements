@@ -1,6 +1,6 @@
 name: Kebechet
 
-on: [issues, issue_comment]
+on: []
 
 jobs:
   build:

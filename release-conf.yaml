@@ -1,0 +1,6 @@
+author_email: macermak@redhat.com
+author_name: Marek Cermak
+labels:
+- bot
+- release
+trigger_on_issue: true

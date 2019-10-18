@@ -29,14 +29,14 @@ managers: &managers
   configuration:
     labels: [bot, kebechet]
 
-- name: version
-  configuration:
-    labels:
-      # Labels for opened issues and pull requests.
-      - bot
-      - kebechet
-    maintainers:
-      - CermakM
+# - name: version
+#   configuration:
+#     labels:
+#       # Labels for opened issues and pull requests.
+#       - bot
+#       - kebechet
+#     maintainers:
+#       - CermakM
 
 repositories:
   - slug: CermakM/jupyter-nbrequirements

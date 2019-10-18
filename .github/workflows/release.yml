@@ -17,7 +17,7 @@ jobs:
 
     - name: Configure
       run: |
-        pip install release-bot jinja2
+        pip install -U release-bot jinja2 jinja2-cli
         # Template the configuration
         jinja2 .conf.yaml -o conf.yaml
       env:

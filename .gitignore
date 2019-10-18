@@ -53,3 +53,6 @@ yarn.lock
 
 # Compiled TS
 **/dist/
+
+# Release Bot configuration
+conf.yaml

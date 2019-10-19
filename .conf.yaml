@@ -1,8 +1,0 @@
----
-# This is the configuration for the Release Bot
-gitchangelog    : true
-github_token    : {{ environ('GITHUB_TOKEN') }}
-github_username : CermakM
-refresh_interval: 180
-repository_name : {{ environ('GITHUB_REPOSITORY').split('/')[1] }}
-repository_owner: {{ environ('GITHUB_REPOSITORY').split('/')[0] }}

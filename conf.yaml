@@ -1,8 +1,0 @@
----
-# This is the configuration for the Release Bot
-gitchangelog    : true
-github_token    : b0299433413b6e9bc67953ede708ff9d24361932
-github_username : CermakM
-refresh_interval: 180
-repository_name : jupyter-nbrequirements
-repository_owner: CermakM

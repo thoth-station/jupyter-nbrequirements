@@ -1,9 +1,8 @@
 name: Python package release
 
 on:
-  push:
-    branches:
-    - 'release/v*'
+  release:
+    types: [created]
 
 jobs:
   build:

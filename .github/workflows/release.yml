@@ -1,21 +1,13 @@
 name: Release
 
-on: [issues, issue_comment]
+on: [issues]
 
 jobs:
-  build:
+  release:
 
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v1
-
-    - name: Setup Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: "3.6"
-
-    
     - name: Release
       uses: cermakm/python-release-action@experimental
       env: 

@@ -2,8 +2,24 @@ Changelog
 =========
 
 
-v0.2.0
+v0.2.1
 ------
+- Fix incorrect indentation of notebook content. [Marek Cermak]
+
+  Fixes: #42
+
+  There seemed to have been an issue with the first line of notebook content being
+  incorrectly indented, causing successive python calls to fail.
+
+
+v0.2.0 (2019-10-22)
+-------------------
+- Release 0.2.0. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   CHANGELOG.md
+  modified:   jupyter_nbrequirements/__about__.py
 - Update Release workflow. [Marek Cermak]
 - Read release version from environment. [Marek Cermak]
 - Generate CHANGELOG. [Marek Cermak]

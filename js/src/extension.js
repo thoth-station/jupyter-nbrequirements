@@ -26,7 +26,7 @@ window.DEFAULT_LOGGING_LEVEL = { value: 2, name: "DEBUG" }
 // Notification timeout in ms
 window.DEFAULT_NOTIFICATION_TIMEOUT = 30000
 // Resolution engine {pipenv, thoth}
-window.DEFAULT_RESOLUTION_ENGINE = "thoth"
+window.DEFAULT_RESOLUTION_ENGINE = "pipenv"
 
 // Load the extension
 if ( window.require ) {

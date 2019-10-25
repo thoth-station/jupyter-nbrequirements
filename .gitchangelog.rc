@@ -66,7 +66,7 @@ ignore_regexps = [
     r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[p|P]kg:',
     r'^(.{3,3}\s*:)?\s*([fF]irst|[Ii]nitial) commit.?\s*$',
     r'^Bump',     ## ignore dependency updates by @dependabot
-    r'^Release',  ## ignore release commits in overview
+    r'[Mm]erge|[Rr]elease',  ## ignore release commits in overview
     r'^$',        ## ignore commits with empty messages
 ]
 

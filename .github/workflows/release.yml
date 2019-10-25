@@ -1,17 +1,31 @@
 name: Release
 
-on: [release]
+on:
+  push:
+    branches:
+    - release-*
 
 jobs:
   release:
 
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Release
-      uses: cermakm/python-release-action@experimental
-      env: 
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - uses: actions/checkout@v1
+
+    - name: Setup Python
+      uses: actions/setup-python@v1
       with:
-        # Whether to generate changelog
-        changelog: true
+        python-version: "3.6"
+
+    - name: Release
+      run: |
+        git config --local user.name  "Marek Cermak"
+        git config --local user.email "macermak@redhat.com"
+
+        make release  # generates CHANGELOG and a new tag from the release branch
+
+        git push
+          --follow-tags \
+          "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+          "HEAD:${{ github.ref }}"

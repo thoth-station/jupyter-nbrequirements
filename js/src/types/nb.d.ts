@@ -4,6 +4,7 @@ import { Requirements } from "./requirements"
 export interface Context {
     cell: CodeCell
     output_area?: OutputArea
+    status?: string
 }
 
 export interface CodeCell {

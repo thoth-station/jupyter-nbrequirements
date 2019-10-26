@@ -47,14 +47,49 @@ from .magic_parser import MagicParser, MagicParserError
 
 _HERE = Path(__file__).parent
 
+SCRIPT_TEMPLATE = """
+    /**
+     *  Default NBRequirements executor
+     */
+
+    context.status = "pending"
+
+    CodeCell = require("notebook/js/codecell").CodeCell
+    CodeCell.prototype._handle_execute_reply = function ( msg ) {
+
+        if ( context.status == "pending" ) {
+            _.execution_count += 1
+        }
+        else {
+            this.set_input_prompt(msg.content.execution_count - _.execution_count)
+
+            this.element.removeClass( "running" )
+            this.events.trigger( "set_dirty.Notebook", { value: true } )
+        }
+
+        context.execution_count = msg.content.execution_count - _.execution_count
+    }
+
+    require(['nbrequirements'], ({cli, version}) => {
+        cli('%s', $$magic_args, element, context)
+            .then( (status) => {
+                cell = context.cell
+                setTimeout(() => {
+                    context.status = "finished"
+
+                    cell.set_input_prompt(context.execution_count)
+
+                    cell.element.removeClass( "running" )
+                    cell.events.trigger( "set_dirty.Notebook", { value: true } )
+                }, 200)
+            } )
+    })
+"""
+
 
 def _default_kernel_handler(args, params: dict = None, **kwargs) -> str:
     """Return script to be executed on `kernel` command."""
-    script = """
-    require(['nbrequirements'], ({cli, version}) => {
-        cli('kernel', $$magic_args, element, context)
-    })
-    """
+    script = SCRIPT_TEMPLATE % "kernel"
 
     args = {
         arg: re.sub("[\"']", "", v) if isinstance(v, str) else v
@@ -91,14 +126,7 @@ def _default_requirements_handler(args, params: dict = None, **kwargs) -> str:
 
         command = "set"
 
-    script = (
-        """
-    require(['nbrequirements'], ({cli, version}) => {
-        cli('%s', $$magic_args, element, context)
-    })
-    """
-        % command
-    )
+    script = SCRIPT_TEMPLATE % command
 
     args = {
         arg: re.sub("[\"']", "", v) if isinstance(v, str) else v

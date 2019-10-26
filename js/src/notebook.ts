@@ -30,6 +30,8 @@ import {
 import Jupyter = require( "base/js/namespace" )
 // @ts-ignore
 import nbutils = require( "base/js/utils" )
+// @ts-ignore
+import events = require( "base/js/events" )
 
 declare const DEFAULT_RESOLUTION_ENGINE: ResolutionEngine
 
@@ -42,6 +44,14 @@ Jupyter.Notebook.prototype.set_requirements_locked = _.partial( set_requirements
 Jupyter.Notebook.prototype.get_requirements_locked = _.partial( get_requirements_locked, Jupyter.notebook )
 
 Jupyter.Notebook.prototype.get_kernel_info = _.partial( get_kernel_info, Jupyter.notebook )
+
+Object.defineProperty( _, "execution_count", {
+    // Defines total number of executions in the current session
+    value: 0,
+    writable: true
+} )
+// @ts-ignore
+events.on( "kernel_ready.Kernel", () => { _.execution_count = 0 } )
 
 
 export function set_requirements( notebook: Jupyter.Notebook, requirements: Requirements ): void {

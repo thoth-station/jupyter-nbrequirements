@@ -12,7 +12,6 @@
 import _ from "lodash"
 
 import { Logger } from "./config"
-import { dedent } from "./utils"
 
 import * as io from "./types/io"
 import { Context, CodeCell } from "./types/nb"

@@ -41,7 +41,7 @@ ifeq (${GIT_TAG},)
 GIT_TAG = $(shell git rev-parse --abbrev-ref HEAD)
 endif
 
-CLIENT_VERSION  ?= $(shell echo $${GIT_BRANCH/release-/})
+CLIENT_VERSION  ?= $(shell v=$(GIT_BRANCH); echo $${v/release-/})
 PYPI_REPOSITORY ?= https://upload.pypi.org/legacy/
 
 
@@ -62,7 +62,7 @@ release: validate
 	git tag -a "v${CLIENT_VERSION}" -m "Release $${CLIENT_VERSION:0:3}"
 
 validate:
-	@echo "Validating version '${CLIENT_VERSION}' on branch '{GIT_BRANCH}'"
+	@echo "Validating version '${CLIENT_VERSION}' on branch '${GIT_BRANCH}'"
 
 	if [ "$(shell python -c \
 		"from semantic_version import validate; print( validate('${CLIENT_VERSION}') )" \

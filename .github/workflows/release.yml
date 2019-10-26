@@ -18,6 +18,11 @@ jobs:
       with:
         python-version: "3.6"
 
+    - name: Setup environment
+      run: |
+        pip install .
+        pip install twine semantic_version
+
     - name: Release
       run: |
         git config --local user.name  "Marek Cermak"

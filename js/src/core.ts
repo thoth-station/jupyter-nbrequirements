@@ -46,9 +46,17 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
         options = _.assign( default_options, options )
         callbacks = _.assign( cell.get_callbacks(), callbacks || {} )
 
+        // Make sure to mark the cell as running so that the output
+        // is positioned correctly
+        cell.running = true
+
         // @ts-ignore
         const shell_reply = callbacks.shell.reply
         const shell_reply_wrapper = async ( msg: io.Message ) => {
+
+            if ( msg.msg_type === "execute_reply" ) {
+                cell.running = false
+            }
 
             msg.metadata.status = kernel._msg_callbacks[ msg_id ].status
             msg.metadata.output = kernel._msg_callbacks[ msg_id ].output
@@ -67,6 +75,8 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
 
             let status = 0
             let output = ""
+
+            cell.running = true
 
             if ( msg.msg_type == "error" ) {
                 status = -1

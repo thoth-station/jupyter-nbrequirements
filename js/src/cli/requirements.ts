@@ -46,7 +46,7 @@ export class Help extends Command {
             this.message = "Provide a valid JS command. See --help for more info."
     }
 
-    public run( args: any, element: HTMLDivElement ): void {
+    public async run( args: any, element: HTMLDivElement ) {
         // Append to the cell output
         utils.display( this.message, element )
     }
@@ -59,7 +59,7 @@ export class Clear extends Command {
      *
      * @memberof Clear
      */
-    public run(): void {
+    public async run() {
         delete Jupyter.notebook.metadata.requirements
         delete Jupyter.notebook.metadata.requirements_locked
     }
@@ -282,7 +282,7 @@ export class Set extends Command {
      * @param {Set.Arguments} args
      * @memberof Set
      */
-    public run( args: Set.Arguments ): void {
+    public async run( args: Set.Arguments ) {
         const req: Requirements = args.requirements
 
         set_requirements( Jupyter.notebook, req )

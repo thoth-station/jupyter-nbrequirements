@@ -35,7 +35,7 @@ export default abstract class Command {
     public static help?(): string
 
     // Run the command
-    public abstract run( args: DefaultArguments, element?: HTMLDivElement, context?: Context ): void | Promise<any>
+    public abstract run( args: DefaultArguments, element?: HTMLDivElement, context?: Context ): Promise<any>
 
     // Validate arguments
     protected validate( args: DefaultArguments ): void | never { }

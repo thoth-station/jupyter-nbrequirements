@@ -139,11 +139,10 @@ export class Pipfile {
             `
             const callback = ( msg: io.Message ) => {
                 Logger.debug( "Execution callback: ", msg )
-                if ( msg.msg_type == "error" ) {
-                    reject( `ERROR: ${ msg.content.ename }: ${ msg.content.evalue }` )
-                    return
+                if ( msg.metadata.status != 0 ) {
+                    reject( msg.metadata.output )
                 }
-                if ( msg.msg_type === "stream" ) {
+                else if ( msg.msg_type === "stream" ) {
                     // let codecell handle the callback and append the stream to the output
                     const context: Context | undefined = get_execute_context( Logger )
                     if ( !_.isUndefined( context ) ) {
@@ -155,7 +154,7 @@ export class Pipfile {
                     return
                 }
 
-                if ( msg.msg_type === "execute_result" ) {
+                else if ( msg.msg_type === "execute_result" ) {
 
                     Logger.log( "Pipfile has been created successfully: ", msg.content.data[ "text/plain" ] )
 
@@ -207,11 +206,12 @@ export class PipfileLock {
 
             const callback = ( msg: io.Message ) => {
                 Logger.debug( "Execution callback: ", msg )
-                if ( msg.msg_type == "error" ) {
-                    reject( new Error( `ERROR: ${ msg.content.ename }: ${ msg.content.evalue }` ) )
-                }
 
-                resolve()
+                if ( msg.metadata.status != 0 ) {
+                    reject( msg.metadata.output )
+                } else {
+                    resolve()
+                }
             }
 
             await execute_python_script( script, { shell: { reply: callback } }, { logger: Logger } )
@@ -278,15 +278,16 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
 
         const callback = ( msg: io.Message ) => {
             Logger.debug( "Execution callback: ", msg )
-            if ( msg.msg_type == "error" ) {
-                reject( `ERROR: ${ msg.content.ename }: ${ msg.content.evalue }` )
-                return
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
+            else {
 
-            const result: string = msg.content.data[ "text/plain" ].replace( /\'/g, "\"" )
-            const requirements: string[] = JSON.parse( result )
+                const result: string = msg.content.data[ "text/plain" ].replace( /\'/g, "\"" )
+                const requirements: string[] = JSON.parse( result )
 
-            resolve( requirements )
+                resolve( requirements )
+            }
         }
 
         await execute_python_script( script, { iopub: { output: callback } }, { logger: Logger } )
@@ -338,16 +339,15 @@ export function lock_requirements(
         const callback = ( msg: io.Message ) => {
             Logger.debug( "Execution callback: ", msg )
 
-            if ( msg.msg_type == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
-                return
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
-            if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
-                Logger.info( "[Thamos]: ", msg.content.text )
+            else if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
+                Logger.info( "[Thamos]: ", msg.metadata.output )
                 return
             }
 
-            if ( msg.msg_type == "execute_result" ) {
+            else if ( msg.msg_type == "execute_result" ) {
                 clearTimeout( timeout )
 
                 const result = msg.content.data[ "text/plain" ].replace( /(^')|('$)/g, "" )
@@ -383,13 +383,13 @@ export function lock_requirements_with_pipenv(
         const iopub_callback = ( msg: io.Message ) => {
             Logger.debug( "Execution logging callback: ", msg )
 
-            if ( msg.msg_type == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
 
             else if ( msg.msg_type == "stream" ) {  // pipenv log messages
                 const stream = msg.content.name || "stdout"
-                const text = utils.parse_console_output( msg.content.text )
+                const text = utils.parse_console_output( msg.metadata.output )
 
                 if ( stream === "stderr" ) {
                     Logger.warn( "[pipenv]: ", text )
@@ -404,11 +404,11 @@ export function lock_requirements_with_pipenv(
         const output_callback = ( msg: io.Message ) => {
             Logger.debug( "Execution output callback: ", msg )
 
-            if ( msg.msg_type == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
             else if ( msg.msg_type == "stream" ) {  // pipenv output
-                const content: string = msg.content.text
+                const content: string = msg.metadata.output
 
                 requirements_locked = RequirementsLockedProxy.Parse( content )
             }
@@ -420,24 +420,27 @@ export function lock_requirements_with_pipenv(
         const shell_callback = ( msg: io.Message ) => {
             Logger.debug( "Execution shell callback: ", msg )
 
-            if ( msg.content.status == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
 
-            if ( _.isUndefined( requirements_locked ) ) {
+            else if ( _.isUndefined( requirements_locked ) ) {
                 reject( new Error( "Requirements locked are not defined." ) )
-                return
             }
 
-            Logger.log( "Requirements have been successfully locked." )
+            else {
 
-            if ( sync ) {
-                // sync requirements locked with Pipfile.lock
-                set_requirements_locked( Jupyter.notebook, requirements_locked )
-                Logger.log( "Locked requirements have been synced with Pipfile." )
+                Logger.log( "Requirements have been successfully locked." )
+
+                if ( sync ) {
+                    // sync requirements locked with Pipfile.lock
+                    set_requirements_locked( Jupyter.notebook, requirements_locked )
+                    Logger.log( "Locked requirements have been synced with Pipfile." )
+                }
+
+                resolve( requirements_locked )
+
             }
-
-            resolve( requirements_locked )
         }
 
 
@@ -475,13 +478,13 @@ export function install_requirements(
         const iopub_callback = ( msg: io.Message ) => {
             Logger.debug( "Execution logging callback: ", msg )
 
-            if ( msg.msg_type == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
 
             else if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
                 const stream = msg.content.name || "stdout"
-                const text = utils.parse_console_output( msg.content.text )
+                const text = utils.parse_console_output( msg.metadata.output )
 
                 if ( stream === "stderr" ) {
                     Logger.warn( "[pipenv]: ", text )
@@ -497,8 +500,8 @@ export function install_requirements(
         const shell_callback = ( msg: io.Message ) => {
             Logger.debug( "Execution shell callback: ", msg )
 
-            if ( msg.content.status == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
 
             Logger.log( "Requirements have been successfully installed" )
@@ -530,13 +533,13 @@ export function install_kernel( name: string ): Promise<string> {
         const iopub_callback = ( msg: io.Message ) => {
             Logger.debug( "Execution logging callback: ", msg )
 
-            if ( msg.msg_type == "error" ) {
-                reject( new Error( `${ msg.content.ename }: ${ msg.content.evalue }` ) )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
             }
 
             else if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
                 const stream = msg.content.name || "stdout"
-                const text = utils.parse_console_output( msg.content.text )
+                const text = utils.parse_console_output( msg.metadata.output )
 
                 if ( stream === "stderr" ) {
                     Logger.warn( "[pipenv]: ", text )

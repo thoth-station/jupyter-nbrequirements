@@ -12,6 +12,7 @@
 import _ from "lodash"
 
 import { Logger } from "./config"
+import { dedent } from "./utils"
 
 import * as io from "./types/io"
 import { Context, CodeCell } from "./types/nb"
@@ -23,7 +24,7 @@ import Jupyter = require( "base/js/namespace" )
 
 
 export function execute_request( request: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
-    return new Promise( resolve => {
+    return new Promise( ( resolve, reject ) => {
         let logger = Logger
         if ( !_.isUndefined( options ) && !_.isUndefined( options.logger ) )
             logger = options.logger
@@ -38,21 +39,83 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
             // passing the logger here makes logs more consistent
             context = get_execute_context( logger )
         }
+
         const cell = context.cell
+        const kernel = Jupyter.notebook.kernel
 
         options = _.assign( default_options, options )
         callbacks = _.assign( cell.get_callbacks(), callbacks || {} )
 
-        const kernel = Jupyter.notebook.kernel
+        // @ts-ignore
+        const shell_reply = callbacks.shell.reply
+        const shell_reply_wrapper = async ( msg: io.Message ) => {
+
+            msg.metadata.status = kernel._msg_callbacks[ msg_id ].status
+            msg.metadata.output = kernel._msg_callbacks[ msg_id ].output
+
+            try {
+                // @ts-ignore
+                shell_reply( msg )
+            } catch ( err ) {
+                Logger.error( err )
+            }
+        }
+
+        // @ts-ignore
+        const iopub_output_callback = callbacks.iopub.output
+        const iopub_output_wrapper = async ( msg: io.Message ) => {
+
+            let status = 0
+            let output = ""
+
+            if ( msg.msg_type == "error" ) {
+                status = -1
+                output = `${ msg.content.ename }: ${ msg.content.evalue }`
+            }
+
+            else if ( msg.msg_type == "stream" ) {
+                const m = msg.content.text.search( /\[exit\]: ([^0])/m )
+                if ( m >= 0 ) {
+                    status = Number( msg.content.text[ m ] )
+                    // Use output of the parent message instead
+                    output = kernel._msg_callbacks[ msg_id ].output
+                } else {
+                    output = msg.content.text
+                }
+            }
+
+            msg.metadata.status = status
+            msg.metadata.output = output.replace( /\[exit\]: (\d+)/m, "" )
+
+            kernel._msg_callbacks[ msg_id ].status = msg.metadata.status
+            kernel._msg_callbacks[ msg_id ].output = msg.metadata.output
+
+            try {
+                // @ts-ignore
+                iopub_output_callback( msg )
+            } catch ( err ) {
+                Logger.error( err )
+            }
+        }
+
+        callbacks = _.assign(
+            callbacks,
+            {
+                iopub: { output: iopub_output_wrapper },
+                shell: { reply: shell_reply_wrapper }
+            }
+        )
 
         logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
-
         const msg_id = kernel.execute( request, callbacks, options )
-        kernel.events.on( "finished_iopub.Kernel", ( e: Event, d: io.Message ) => {
-            if ( d.msg_id === msg_id ) {
-                resolve()
-            }
-        } )
+
+        kernel.events.on(
+            "finished_iopub.Kernel",
+            ( e: Event, d: { kernel: any, msg_id: string } ) => {
+                if ( d.msg_id === msg_id ) {
+                    kernel._msg_callbacks[ msg_id ].status != 0 ? reject() : resolve()
+                }
+            } )
     } )
 }
 
@@ -72,6 +135,8 @@ export function get_execute_context( logger?: ILogger ): Context | undefined {
 }
 
 export function execute_shell_command( command: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+    // wrap it so that we could get the exit status code
+    command = `${ command } ; >&2 echo "[exit]: $?"`
 
     return execute_request( `!${ command }`, callbacks, options, context )
 }

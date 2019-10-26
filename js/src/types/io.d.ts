@@ -51,4 +51,4 @@ export interface IOPubMessageHeader {
 }
 
 // eslint-disable-next-line
-export interface Metadata { }
+export interface Metadata { [ name: string ]: any }

@@ -2,8 +2,63 @@ Changelog
 =========
 
 
-v0.2.1
-------
+0.3.0
+-----
+
+New
+~~~
+- Cell execution count is now chornological. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/core.ts
+  modified:   js/src/notebook.ts
+  modified:   js/src/types/nb.d.ts
+  modified:   jupyter_nbrequirements/__init__.py
+
+Changes
+~~~~~~~
+- "pipenv" as default resolution engine. [Marek Cermak]
+
+  Until Thoth resolution engine becomes stable, pipenv has been chosen as
+  the default resolution engine.
+
+Fix
+~~~
+- Fix CLIENT_VERSION inference from branch. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   .github/workflows/release.yml
+  modified:   Makefile
+- Cells are marked as finished properly. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/command.ts
+  modified:   js/src/cli/index.ts
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/core.ts
+- :pushpin: Use jupyter-require>=0.4.0. [Marek Cermak]
+
+  Fixes: https://github.com/CermakM/jupyter-nbrequirements/issues/41
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   Pipfile
+  modified:   Pipfile.lock
+  modified:   requirements.txt
+- Error messages are more informative. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/core.ts
+  modified:   js/src/thoth.ts
+  modified:   js/src/types/io.d.ts
+
+
+v0.2.1 (2019-10-22)
+-------------------
 - Fix incorrect indentation of notebook content. [Marek Cermak]
 
   Fixes: #42
@@ -14,53 +69,15 @@ v0.2.1
 
 v0.2.0 (2019-10-22)
 -------------------
-- Release 0.2.0. [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  modified:   CHANGELOG.md
-  modified:   jupyter_nbrequirements/__about__.py
-- Update Release workflow. [Marek Cermak]
-- Read release version from environment. [Marek Cermak]
 - Generate CHANGELOG. [Marek Cermak]
 
   Signed-off-by: Marek Cermak <macermak@redhat.com>
 
   modified:   .gitchangelog.rc
   new file:   CHANGELOG.md
-- Rename the release job to be more intuitive. [Marek Cermak]
-- Run Python package release on `release` event. [Marek Cermak]
-- Provide GITHUB_TOKEN to the Release Bot. [Marek Cermak]
-- Start using Python Release Action (experimental) [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  deleted:    conf.yaml
-  deleted:    markdown.tpl
-  deleted:    .conf.yaml
-  modified:   .github/workflows/release.yml
 - Disable Kebechet until it is stable. [Marek Cermak]
 - Fixed missing jinja2-cli. [Marek Cermak]
-- Added new release workflow. [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  new file:   .github/workflows/package-release.yml
-  modified:   .github/workflows/release.yml
-  modified:   .gitignore
-  modified:   release-conf.yaml
-- Added configuration for Release Bot. [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  new file:   .gitchangelog.rc
-  new file:   .conf.yaml
-  new file:   markdown.tpl
-  new file:   release-conf.yaml
 - Disable Kebechet version manager. [Marek Cermak]
-- Merge pull request #31 from CermakM/notify. [Marek Čermák]
-
-  Send notification after execution finishes
 - Notify only if the windows is not focused. [Marek Cermak]
 - Notify only if execution takes more than 30sec. [Marek Cermak]
 
@@ -83,81 +100,11 @@ v0.2.0 (2019-10-22)
 
   new file:   assets/main-logo.png
   new file:   assets/main-logo.svg
-- Merge pull request #22 from
-  CermakM/dependabot/npm_and_yarn/js/types/node-12.7.12. [Marek Čermák]
-
-  Bump @types/node from 12.7.5 to 12.7.12 in /js
-- Bump @types/node from 12.7.5 to 12.7.12 in /js. [dependabot-
-  preview[bot]]
-
-  Bumps [@types/node](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/HEAD/types/node) from 12.7.5 to 12.7.12.
-  - [Release notes](https://github.com/DefinitelyTyped/DefinitelyTyped/releases)
-  - [Commits](https://github.com/DefinitelyTyped/DefinitelyTyped/commits/HEAD/types/node)
-- Merge pull request #23 from CermakM/dependabot/npm_and_yarn/js/eslint-
-  config-prettier-6.4.0. [Marek Čermák]
-
-  Bump eslint-config-prettier from 6.3.0 to 6.4.0 in /js
-- Bump eslint-config-prettier from 6.3.0 to 6.4.0 in /js. [dependabot-
-  preview[bot]]
-
-  Bumps [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier) from 6.3.0 to 6.4.0.
-  - [Release notes](https://github.com/prettier/eslint-config-prettier/releases)
-  - [Changelog](https://github.com/prettier/eslint-config-prettier/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/prettier/eslint-config-prettier/compare/v6.3.0...v6.4.0)
-- Merge pull request #29 from
-  CermakM/dependabot/npm_and_yarn/js/webpack-4.41.1. [Marek Čermák]
-
-  Bump webpack from 4.40.2 to 4.41.1 in /js
-- Bump webpack from 4.40.2 to 4.41.1 in /js. [dependabot-preview[bot]]
-
-  Bumps [webpack](https://github.com/webpack/webpack) from 4.40.2 to 4.41.1.
-  - [Release notes](https://github.com/webpack/webpack/releases)
-  - [Commits](https://github.com/webpack/webpack/compare/v4.40.2...v4.41.1)
-- Merge pull request #20 from CermakM/dependabot/npm_and_yarn/js/ts-
-  loader-6.2.0. [Marek Čermák]
-
-  Bump ts-loader from 6.1.2 to 6.2.0 in /js
-- Bump ts-loader from 6.1.2 to 6.2.0 in /js. [dependabot-preview[bot]]
-
-  Bumps [ts-loader](https://github.com/TypeStrong/ts-loader) from 6.1.2 to 6.2.0.
-  - [Release notes](https://github.com/TypeStrong/ts-loader/releases)
-  - [Changelog](https://github.com/TypeStrong/ts-loader/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/TypeStrong/ts-loader/compare/v6.1.2...v6.2.0)
-- Merge pull request #27 from
-  CermakM/dependabot/npm_and_yarn/js/typescript-3.6.4. [Marek Čermák]
-
-  Bump typescript from 3.6.3 to 3.6.4 in /js
-- Bump typescript from 3.6.3 to 3.6.4 in /js. [dependabot-preview[bot]]
-
-  Bumps [typescript](https://github.com/Microsoft/TypeScript) from 3.6.3 to 3.6.4.
-  - [Release notes](https://github.com/Microsoft/TypeScript/releases)
-  - [Commits](https://github.com/Microsoft/TypeScript/compare/v3.6.3...v3.6.4)
-- Merge pull request #19 from CermakM/dependabot/pip/jupyter-
-  require-0.3.3. [Marek Čermák]
-
-  Bump jupyter-require from 0.3.2 to 0.3.3
-- Bump jupyter-require from 0.3.2 to 0.3.3. [dependabot-preview[bot]]
-
-  Bumps [jupyter-require](https://github.com/CermakM/jupyter-require) from 0.3.2 to 0.3.3.
-  - [Release notes](https://github.com/CermakM/jupyter-require/releases)
-  - [Changelog](https://github.com/CermakM/jupyter-require/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/CermakM/jupyter-require/compare/v0.3.2...v0.3.3)
 - Add dependabot badge. [Marek Čermák]
-- Update release.yml. [Marek Čermák]
-
-  Use release/v* branch to trigger release.
 
 
 v0.1.0 (2019-10-04)
 -------------------
-- Merge pull request #18 from CermakM/v0.1.0. [Marek Čermák]
-
-  Release of version 0.1.0
-- Release of version 0.1.0. [Kebechet]
-- Merge pull request #17 from CermakM/pipfile-requirements-sync. [Marek
-  Čermák]
-
-  Update requirements.txt respecting requirements in Pipfile
 - Update requirements.txt respecting requirements in Pipfile. [Kebechet]
 - Fix maintainer name and remove Kebechet issue labels. [Marek Cermak]
 
@@ -167,14 +114,9 @@ v0.1.0 (2019-10-04)
   modified:   .github/ISSUE_TEMPLATE/patch-release.md
   modified:   .github/ISSUE_TEMPLATE/pre-release.md
   modified:   .thoth.yaml
-- Add more License and Release badges. [Marek Cermak]
 - Update issue templates. [Marek Čermák]
 
   Add Kebechet release templates
-- Update release.yml. [Marek Cermak]
-
-  Only trigger PyPI release for v* branches
-- Release candidate 0.1.0-rc0. [Marek Cermak]
 - Get rid of the static/ folder. [Marek Cermak]
 
   The static files are built during the package release workflow.
@@ -187,31 +129,12 @@ v0.1.0 (2019-10-04)
 
   Node CI can ignore stable and v* branches as the test runs in the
   release workflow anyway.
-- Update release.yml. [Marek Cermak]
-
-  Both `branches-ignore` and `branches` can't be used at the same time,
-  use negative pattern instead.
-- Update release.yml. [Marek Cermak]
-
-  - ignore master branch
-- Merge pull request #9 from CermakM/kebechet-initial-lock. [Marek
-  Čermák]
-
-  Initial dependency lock
 - Initial dependency lock. [root]
 - Fix Kebechet missing `repositories` key. [Marek Cermak]
-- Merge pull request #7 from CermakM/kebechet. [Marek Čermák]
-
-  Kebechet
 - Kebechet workflow. [Marek Cermak]
 - Add Kebechet configuration file. [Marek Cermak]
 - Add Node CI badge. [Marek Cermak]
 - Update summary. [Marek Cermak]
-- Merge pull request #6 from CermakM/setup. [Marek Čermák]
-
-  Setup
-- Update release.yml. [Marek Cermak]
-- Fix typo in release.yml. [Marek Cermak]
 - Create the MANIFEST.in file. [Marek Cermak]
 - Get rid of the unused JS setup.py cmdclasses. [Marek Cermak]
 
@@ -219,19 +142,8 @@ v0.1.0 (2019-10-04)
   don't need to run the NPM build during the python build.
 - Format setup.py using black. [Marek Cermak]
 - Install the tree command. [Marek Cermak]
-- Add mode verbosity to the release action. [Marek Cermak]
 - Run production build as part of nodejs workflow. [Marek Cermak]
 - Fix missing externals in production mode. [Marek Cermak]
-- Do not specify black as it only provides pre-releases. [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  modified:   Pipfile
-  modified:   requirements.txt
-- Fix typo in release.yml. [Marek Cermak]
-- Update and rename pythonpackage.yml to release.yml. [Marek Čermák]
-
-  Action to release the package to PyPI
 - Add dev dependencies and do minor fixes. [Marek Cermak]
 
   Signed-off-by: Marek Cermak <macermak@redhat.com>
@@ -247,9 +159,6 @@ v0.1.0 (2019-10-04)
 
   modified:   jupyter_nbrequirements/__about__.py
   modified:   jupyter_nbrequirements/__init__.py
-- Merge pull request #4 from CermakM/actions. [Marek Čermák]
-
-  Setup Node.js CI
 - Update nodejs workflow. [Marek Cermak]
 
   - pushd before running npm

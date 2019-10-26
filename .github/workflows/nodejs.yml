@@ -2,7 +2,8 @@ name: Node CI
 
 on:
   push:
-    branches-ignore:
+    branches-ignore:  # CI is running as part of releases
+    - 'release-*'
     - 'stable'
     - 'v*'
 

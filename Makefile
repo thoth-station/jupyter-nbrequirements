@@ -58,8 +58,8 @@ release: validate
 	python setup.py sdist bdist_wheel
 	twine check dist/* || (echo "Twine check did not pass. Aborting."; exit 1)
 
-	git commit -a -m ":tada: Release $${CLIENT_VERSION:0:3}" --signoff
-	git tag -a "v${CLIENT_VERSION}" -m "Release $${CLIENT_VERSION:0:3}"
+	git commit -a -m ":tada: Release ${CLIENT_VERSION}" --signoff
+	git tag -a "v${CLIENT_VERSION}" -m "Release ${CLIENT_VERSION}"
 
 validate:
 	@echo "Validating version '${CLIENT_VERSION}' on branch '${GIT_BRANCH}'"
@@ -72,4 +72,4 @@ validate:
 	fi
 
 changelog:
-	RELEASE_VERSION=${CLIENT_VERSION} ./scripts/generate_changelog.sh
+	RELEASE_VERSION=${CLIENT_VERSION} gitchangelog

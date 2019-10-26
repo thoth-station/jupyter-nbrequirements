@@ -1,7 +1,7 @@
 [packages]
 ipykernel = "*"
 ipython = "*"
-jupyter-require = "*"
+jupyter-require = ">=0.4.0"
 invectio = "*"
 thamos = "*"
 thoth-python = "*"

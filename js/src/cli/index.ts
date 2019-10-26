@@ -144,11 +144,12 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
 
         if ( context && !_.isUndefined( context.cell ) ) {
             const exc = typeof err === "string" ? new Error( err ) : err
+            const msg = exc.message.replace( /Error: /, "" )
 
             const obj: OutputError = {
                 output_type: "error",
                 ename: exc.name,
-                evalue: exc.message,
+                evalue: msg,
                 traceback: exc.stack.split( "\n" )
             }
 

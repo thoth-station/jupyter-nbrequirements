@@ -167,7 +167,11 @@ export class Pipfile {
                 }
             }
 
-            await execute_python_script( script, { iopub: { output: callback } }, { logger: Logger } )
+            await execute_python_script(
+                script,
+                { iopub: { output: callback } }, { logger: Logger }
+            )
+                .catch( err => { throw err } )
         } )
     }
 }
@@ -214,7 +218,11 @@ export class PipfileLock {
                 }
             }
 
-            await execute_python_script( script, { shell: { reply: callback } }, { logger: Logger } )
+            await execute_python_script(
+                script,
+                { shell: { reply: callback } }, { logger: Logger }
+            )
+                .catch( err => { throw err } )
         } )
     }
 }
@@ -290,7 +298,11 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
             }
         }
 
-        await execute_python_script( script, { iopub: { output: callback } }, { logger: Logger } )
+        await execute_python_script(
+            script,
+            { iopub: { output: callback } }, { logger: Logger }
+        )
+            .catch( err => { throw err } )
     } )
 }
 
@@ -365,7 +377,11 @@ export function lock_requirements(
                 reject( new Error( `Unknown message type: ${ msg.msg_type }` ) )
         }
 
-        await execute_python_script( command, { iopub: { output: callback } }, { logger: Logger } )
+        await execute_python_script(
+            command,
+            { iopub: { output: callback } }, { logger: Logger }
+        )
+            .catch( err => { throw err } )
     } )
 }
 
@@ -393,7 +409,7 @@ export function lock_requirements_with_pipenv(
 
                 if ( stream === "stderr" ) {
                     Logger.warn( "[pipenv]: ", text )
-                } else
+                } else if ( text.length > 0 )
                     Logger.log( "[pipenv]: ", text )
             }
         }
@@ -455,11 +471,13 @@ export function lock_requirements_with_pipenv(
             `pipenv lock ${ opts }`,
             { iopub: { output: iopub_callback } }
         )
+            .catch( err => { throw err } )
 
         await execute_shell_command(
             "cat Pipfile.lock",
             { iopub: { output: output_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
+            .catch( err => { throw err } )
     } )
 }
 
@@ -521,6 +539,7 @@ export function install_requirements(
             `pipenv install --ignore-pipfile --keep-outdated ${ opts } ${ requirements }`,
             { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
+            .catch( err => { throw err } )
     } )
 }
 

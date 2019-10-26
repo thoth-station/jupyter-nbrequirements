@@ -108,11 +108,18 @@ export class Ensure extends Command {
         switch ( engine ) {
             case "thoth": {
                 req_locked = await lock_requirements( req, true )
+                    .catch( err => { throw err } )
+
                 break
             }
 
             case "pipenv": {
-                req_locked = await lock_requirements_with_pipenv( args.dev_packages, args.pre_releases, true )
+                req_locked = await lock_requirements_with_pipenv(
+                    args.dev_packages,
+                    args.pre_releases, true
+                )
+                    .catch( err => { throw err } )
+
                 break
             }
 
@@ -123,7 +130,7 @@ export class Ensure extends Command {
 
         // Stage 3: install the requirements along with the dev packages
         // empty [] makes sure that the requirements are installed from the Pipfile.lock
-        await install_requirements( [], true )
+        await install_requirements( [], true ).catch( err => { throw err } )
 
         // [Optional] Stage 4: install the Jupyter kernel
         if ( args.skip_kernel ) return

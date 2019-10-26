@@ -77,15 +77,18 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
                 const m = msg.content.text.search( /\[exit\]: ([^0])/m )
                 if ( m >= 0 ) {
                     status = Number( msg.content.text[ m ] )
-                    // Use output of the parent message instead
+                    // Use preferably output of the parent message instead
                     output = kernel._msg_callbacks[ msg_id ].output
+                    if ( _.isUndefined( output ) ) {
+                        output = msg.content.text
+                    }
                 } else {
                     output = msg.content.text
                 }
             }
 
             msg.metadata.status = status
-            msg.metadata.output = output.replace( /\[exit\]: (\d+)/m, "" )
+            msg.metadata.output = output.replace( /\[exit\]: (\d)+[\s\n\r]*$/m, "" )
 
             kernel._msg_callbacks[ msg_id ].status = msg.metadata.status
             kernel._msg_callbacks[ msg_id ].output = msg.metadata.output

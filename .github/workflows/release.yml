@@ -18,6 +18,21 @@ jobs:
       with:
         python-version: "3.6"
 
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+
+    - name: npm install, build, and test
+      run: |
+        pushd js/
+        npm install
+        npm run build-prod --if-present
+        npm test
+        popd
+      env:
+        CI: true
+
     - name: Setup environment
       run: |
         pip install .

@@ -16,11 +16,7 @@ export interface CodeCell {
     outputs?: any
 }
 
-export interface CellMetadata {
-    ExecuteTime: ExecuteTime
-    require?: Requirements
-    trusted: boolean
-}
+export interface CellMetadata { [ key: string ]: any }
 
 export interface ExecuteTime {
     start_time: string

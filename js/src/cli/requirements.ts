@@ -202,7 +202,7 @@ export class Add extends Command {
             spec = { version: args.version, index: args.index }
         }
 
-        req.aliases[ args.alias ] = args.dependency
+        if ( args.alias ) req.aliases[ args.alias ] = args.dependency
 
         // resolve development package
         if ( args.dev )

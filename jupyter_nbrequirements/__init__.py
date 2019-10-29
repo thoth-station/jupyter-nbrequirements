@@ -525,6 +525,8 @@ def load_ipython_extension(ipython):
 
     import json
     import distutils
+    # Fixes `module 'distutils' has no attribute 'sysconfig'`
+    import distutils.sysconfig
 
     from pathlib import Path
 

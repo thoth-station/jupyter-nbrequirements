@@ -149,7 +149,9 @@ export class Ensure extends Command {
 namespace Add {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
+        // Package name and alias
         dependency: string
+        alias: string
         // Version constraint
         version: string
         // Index (source name) for this dependency.
@@ -177,6 +179,7 @@ export class Add extends Command {
         if ( _.isUndefined( req ) ) {
             const python_version = get_python_version( Jupyter.notebook )
             req = {
+                aliases: {},
                 packages: {},
                 requires: { python_version: python_version },
                 sources: [ new Source() ],
@@ -198,6 +201,8 @@ export class Add extends Command {
 
             spec = { version: args.version, index: args.index }
         }
+
+        req.aliases[ args.alias ] = args.dependency
 
         // resolve development package
         if ( args.dev )

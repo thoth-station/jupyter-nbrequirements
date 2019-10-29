@@ -1,6 +1,7 @@
 export type ResolutionEngine = "thoth" | "pipenv"
 
 export interface Requirements {
+    aliases: { [ name: string ]: string }
     packages: { [ name: string ]: string | { version: string, index: string } }
     requires: Requires
     sources: ( SourcesEntity )[] | null

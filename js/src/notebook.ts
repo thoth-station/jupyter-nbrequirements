@@ -71,7 +71,9 @@ export function set_requirements( notebook: Jupyter.Notebook, requirements: Requ
 export function get_requirements( notebook: Jupyter.Notebook, ignore_metadata: boolean = false ): Promise<Requirements> {
     return new Promise( async ( resolve, reject ) => {
         Logger.log( "Reading notebook requirements." )
+
         let notebook_metadata: Requirements | {} = notebook.metadata.requirements || {}
+        const aliases = _.get( notebook_metadata, "aliases" ) || {}
 
         Logger.log( "Gathering library usage." )
         try {
@@ -79,7 +81,12 @@ export function get_requirements( notebook: Jupyter.Notebook, ignore_metadata: b
             const python_packages: { [ name: string ]: any } = {}
 
             library_usage.forEach( ( p: string ) => {
-                const python_package_name = p.toLocaleLowerCase()
+                let python_package_name = p.toLocaleLowerCase()
+                if ( _.has( aliases, python_package_name ) ) {
+                    // replace the package name by alias
+                    python_package_name = aliases[ python_package_name ]
+                }
+
                 const python_package = new PackageVersion( python_package_name )
 
                 _.assign(
@@ -90,6 +97,7 @@ export function get_requirements( notebook: Jupyter.Notebook, ignore_metadata: b
 
             const requires = { python_version: get_python_version( notebook ) }
             const notebook_requirements: Requirements = {
+                aliases: aliases,
                 packages: python_packages,
                 requires: requires,
                 sources: [

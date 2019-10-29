@@ -352,6 +352,14 @@ class RequirementsMagic(Magics):
                 help="The dependency to be added to notebook metadata.",
             )
             parser_add.set_defaults(func=_default_requirements_handler)
+            parser_add.add_argument(
+                "--alias",
+                type=str,
+                help=(
+                    "Alias of a package."
+                    "This is useful if package name differs from import."
+                )
+            )
 
             # command: add-source
             parser_source = subparsers.add_parser(

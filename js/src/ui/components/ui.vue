@@ -1,7 +1,7 @@
 <template>
-    <section v-bind:style="style">
+    <section v-bind:style="css">
         <b-table
-            :data="data"
+            :data="isEmpty ? [] : data"
             :loading="loading"
             paginated
             backend-pagination
@@ -24,36 +24,79 @@
                     sortable
                 >{{ props.row.package_name }}</b-table-column>
 
-                <b-table-column field="score" label="Score" numeric sortable>
-                    <span class="tag" :class="type(props.row.score)">{{ props.row.score }}</span>
-                </b-table-column>
-
                 <b-table-column field="constraint" label="Constraint">{{ props.row.constraint }}</b-table-column>
 
                 <b-table-column field="release" label="Release">{{ props.row.release }}</b-table-column>
 
-                <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column>
+                <b-table-column field="score" label="Score" numeric sortable>
+                    <span class="tag" :class="type(props.row.score)">{{ props.row.score }}</span>
+                </b-table-column>
+
+                <b-table-column field="actions" label="Action">
+                    <div class="level">
+                        <b-button
+                            class="level-item"
+                            icon-right="pencil"
+                            size="is-medium"
+                            @click="console.log('Edit' + row)"
+                        />
+                        <b-button
+                            class="level-item"
+                            icon-right="delete-outline"
+                            size="is-medium"
+                            @click="console.log('Delete' + row)"
+                        />
+                        <b-button
+                            class="level-item"
+                            icon-right="pin-outline"
+                            size="is-medium"
+                            @click="console.log('Pin' + row)"
+                        />
+                    </div>
+                </b-table-column>
+                <!-- <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column> -->
+            </template>
+
+            <template slot="footer">
+                <span />
+            </template>
+
+            <template slot="empty">
+                <section class="section">
+                    <div class="content has-text-grey has-text-centered">
+                        <p>
+                            <b-icon icon="emoticon-sad" size="is-large"></b-icon>
+                        </p>
+                        <p>This notebook has no requirements specified.</p>
+                    </div>
+                </section>
             </template>
         </b-table>
-        <div class="columns is-centered">
-            <b-button
-                rounded
-                icon-right="plus-circle-outline"
-                size="is-medium"
-                @click="onAddDependency"
-            />
+
+        <div class="columns level-left">
+            <Field class="column is-one-third" label="Package" placeholder="e.g. pandas" />
+            <Field class="column is-one-quarter" label="Constraint" placeholder="e.g. >=0.25.0" />
+            <div style="margin-top: 25px;">
+                <b-button
+                    icon-right="plus-circle-outline"
+                    size="is-medium"
+                    @click="onAddDependency"
+                />
+            </div>
         </div>
     </section>
 </template>
 
 <script lang="ts">
+import _ from "lodash";
 import axios from "axios";
-
-import Vue from "vue";
-import Component from "vue-class-component";
 
 import { Logger } from "../../config";
 import { Requirements } from "../../types/requirements";
+
+import Vue from "vue";
+import Component from "vue-class-component";
+import Field from "./field.vue";
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -61,13 +104,19 @@ import Jupyter = require("base/js/namespace");
 
 const BaseUI = Vue.extend({
     props: {
-        style: Object,
+        isEmpty: Boolean,
+
+        css: Object,
+
         data: Array,
         total: Number,
+
         loading: Boolean,
+
         sortField: String,
         sortOrder: String,
         defaultSortOrder: String,
+
         page: Number,
         perPage: Number
     }
@@ -79,16 +128,25 @@ const BaseUI = Vue.extend({
          * Filter to truncate string, accepts a length parameter
          */
         truncate(value: string, length: number) {
+            if (_.isUndefined(value)) {
+                return "";
+            }
             return value.length > length
                 ? value.substr(0, length) + "..."
                 : value;
         }
+    },
+    components: {
+        Field
     }
 })
 export default class UI extends BaseUI {
-    style = {
+    css = {
         "padding-bottom": "30px"
     };
+
+    isEmpty: boolean = true;
+    loading = true;
 
     page: number = 1;
     perPage: number = 10;
@@ -102,7 +160,7 @@ export default class UI extends BaseUI {
     /*
      * Load async data
      */
-    loadAsyncData() {
+    async loadAsyncData() {
         this.loading = true;
 
         this.data = [];
@@ -110,6 +168,8 @@ export default class UI extends BaseUI {
 
         const requirements: Requirements =
             Jupyter.notebook.metadata.requirements || {};
+
+        const data: any[] = [];
         for (let [pkg, version] of Object.entries(requirements.packages)) {
             // get info about the package from PyPI
             let item: {
@@ -120,7 +180,7 @@ export default class UI extends BaseUI {
                 score: string;
             };
 
-            axios
+            await axios
                 .get(`https://pypi.org/pypi/${pkg}/json`)
                 .then(response => {
                     const package_data = response.data;
@@ -135,16 +195,25 @@ export default class UI extends BaseUI {
                         summary: package_data.info.summary,
                         score: (Math.random() * 10).toPrecision(2) // TODO
                     };
-                    this.data.push(item);
-                    this.total += 1;
+                    data.push(item);
                 })
                 .catch((err: Error) => {
-                    this.loading = false;
-                    Logger.error(err);
+                    this.data = [];
+                    this.isEmpty = true;
+
+                    throw err;
                 });
         }
 
-        this.loading = false;
+        setTimeout(() => {
+            // Timeout to avoid blink-loading
+            this.data = data;
+
+            this.total = this.data.length;
+            this.isEmpty = this.total <= 0;
+
+            this.loading = false;
+        }, 1000);
     }
     onAddDependency() {}
     /*

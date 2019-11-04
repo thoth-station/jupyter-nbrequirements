@@ -11,3 +11,4 @@
 
 export { cli } from "./cli"
 export { version } from "../package.json"
+export { vm } from "./ui"

@@ -37,7 +37,11 @@ if ( window.require ) {
             }
         }
     } );
-    window.require( [ 'nbrequirements' ], () => console.log( "Loaded extension: jupyter-nbrequirements" ) )
+    window.require( [ 'nbrequirements' ], ( module ) => {
+        window.vm = module.vm
+
+        console.log( "Loaded extension: jupyter-nbrequirements" )
+    } )
 }
 
 // Export the required load_ipython_extension

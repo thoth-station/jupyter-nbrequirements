@@ -68,7 +68,7 @@
         page: number = 1
         perPage: number = 10
 
-        sortField: string = 'vote_count'
+        sortField: string = 'score'
         sortOrder: string = 'desc'
         defaultSortOrder: string = 'desc'
 
@@ -91,7 +91,7 @@
                     constraint: string
                     release: string
                     summary: string
-                    score: number
+                    score: string
                 }
 
                 axios
@@ -107,7 +107,7 @@
                             constraint: version as string,
                             release: package_data.info.version,
                             summary: package_data.info.summary,
-                            score: 9.3,  // TODO
+                            score: ( Math.random() * 10 ).toPrecision( 2 ),  // TODO
                         }
                         this.data.push( item );
                         this.total += 1;
@@ -123,23 +123,35 @@
         /*
          * Handle page-change event
          */
-        onPageChange( page: any ) {
+        onPageChange( page: number ) {
             this.page = page;
-            this.loadAsyncData();
+            // TODO: Paging
         }
         /*
          * Handle sort event
          */
-        onSort( field: any, order: any ) {
+        onSort( field: string, order: string ) {
             this.sortField = field;
             this.sortOrder = order;
-            this.loadAsyncData();
+
+            this.data = Array.from( this.data ).sort( ( a: any, b: any ) => {
+                let ret: number;
+
+                if ( a[ field ] < b[ field ] )
+                    ret = -1
+                else if ( a[ field ] > b[ field ] )
+                    ret = 1
+                else ret = 0
+
+                return ret * ( order === "desc" ? -1 : 1 )
+            } )
         }
         /*
          * Type style in relation to the value
          */
         type( value: string ) {
             const number = parseFloat( value );
+
             if ( number < 6 ) {
                 return "is-danger";
             } else if ( number >= 6 && number < 8 ) {

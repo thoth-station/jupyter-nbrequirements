@@ -208,11 +208,12 @@ export default class PackageFinder extends BaseField {
     }
 
     onPackageSelect(option: any) {
+        if (!option) return;
         this.selected = option;
         this.selectedPackage = new PackageVersion(option.info.name);
     }
     onVersionSelect(option: any) {
-        if (!option) return
+        if (!option) return;
         if (!this.selectedPackage) {
             throw Error("Package cannot be undefined.");
         }

@@ -1,5 +1,5 @@
 <template>
-    <section v-bind:style="css">
+    <section>
         <b-table
             :data="isEmpty ? [] : data"
             :loading="loading"
@@ -110,8 +110,6 @@ import Jupyter = require("base/js/namespace");
 
 const BaseUI = Vue.extend({
     props: {
-        css: Object,
-
         sortField: String,
         sortOrder: String,
         defaultSortOrder: String,
@@ -148,10 +146,6 @@ export default class UI extends BaseUI {
 
     data!: any[]; // TODO: PyPI interface
     loading!: boolean;
-
-    css = {
-        "padding-bottom": "30px"
-    };
 
     page: number = 1;
     perPage: number = 10;

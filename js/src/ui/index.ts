@@ -17,7 +17,12 @@ function createUIContainer(): void {
     Logger.debug( "Creating a new UI container." )
     const ui = $( "<div/>" )
         .attr( "id", "nbrequirements-ui" )
-        .prependTo( "#notebook-container" )
+        .attr( "class", "container" )
+        .attr(
+            "style",
+            "background-color: #fff; padding: 30px; margin-bottom: 30px;"
+        )
+        .prependTo( "#notebook" )
         .click( function ( event ) {
             event.preventDefault()
             event.stopPropagation()

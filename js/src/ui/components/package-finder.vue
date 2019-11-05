@@ -11,7 +11,7 @@
                     :keep-first="true"
                     @focus.prevent="onFocusIn"
                     @blur.prevent="onFocusOut"
-                    @select="onSelect"
+                    @select="onPackageSelect"
                     @typing="getAsyncData"
                 >
                     <template slot-scope="props">
@@ -35,7 +35,7 @@
 
         <div class="column is-1">
             <b-field custom-class="is-medium">
-                <b-select placeholder="constraint">
+                <b-select ref="versionConstraint" placeholder="constraint">
                     <option value></option>
                     <option value="==">==</option>
                     <option value="~=">~=</option>
@@ -61,6 +61,7 @@
                     @focus.prevent="onFocusIn"
                     @blur.prevent="onFocusOut"
                     @typing="onTyping"
+                    @select="onVersionSelect"
                     @click.stop.prevent
                 >
                     <template slot-scope="props">
@@ -91,7 +92,7 @@ import axios from "axios";
 import debounce from "lodash/debounce";
 
 import Vue from "vue";
-import { mapMutations } from "vuex";
+import { mapMutations, mapActions } from "vuex";
 
 import Component from "vue-class-component";
 
@@ -124,10 +125,17 @@ const BaseField = Vue.extend({
                 ? value.substr(0, length) + "..."
                 : value;
         }
-    }
+    },
+    methods: mapActions(["setRequirements"])
 })
 export default class PackageFinder extends BaseField {
+    $refs!: {
+        versionConstraint: any;
+    };
     releaseFilter: string = ".*";
+
+    // Package which should be added as a dependency
+    selectedPackage: PackageVersion | null = null;
 
     get getAsyncData() {
         return debounce(name => {
@@ -195,10 +203,28 @@ export default class PackageFinder extends BaseField {
         }, 500);
     }
 
-    onAddPackage() {}
+    onAddPackage() {
+        this.$store.dispatch("addRequirement", this.selectedPackage);
+    }
 
-    onSelect(option: any) {
+    onPackageSelect(option: any) {
         this.selected = option;
+        this.selectedPackage = new PackageVersion(option.info.name);
+    }
+    onVersionSelect(option: any) {
+        if (!option) return
+        if (!this.selectedPackage) {
+            throw Error("Package cannot be undefined.");
+        }
+        const versionConstraint = this.$refs.versionConstraint.selected || "==";
+        const version =
+            option.release !== "*"
+                ? `${versionConstraint}${option.release}`
+                : "*";
+        this.selectedPackage = new PackageVersion(
+            this.selectedPackage.name,
+            version
+        );
     }
 
     onFocusIn(event: Event) {

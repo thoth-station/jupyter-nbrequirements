@@ -151,7 +151,7 @@ namespace Add {// eslint-disable-line
     export interface Arguments extends DefaultArguments {
         // Package name and alias
         dependency: string
-        alias: string
+        alias?: string
         // Version constraint
         version: string
         // Index (source name) for this dependency.
@@ -159,7 +159,7 @@ namespace Add {// eslint-disable-line
         // Whether to store the dependency as dev-package.
         dev: boolean
         // Whether to sync notebook metadata with the Pipfile
-        sync: boolean
+        sync?: boolean
     }
 
 }

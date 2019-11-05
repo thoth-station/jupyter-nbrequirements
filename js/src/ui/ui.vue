@@ -73,17 +73,7 @@
             </template>
         </b-table>
 
-        <div class="columns level-left">
-            <Field class="column is-one-third" label="Package" placeholder="e.g. pandas" />
-            <Field class="column is-one-quarter" label="Constraint" placeholder="e.g. >=0.25.0" />
-            <div style="margin-top: 25px;">
-                <b-button
-                    icon-right="plus-circle-outline"
-                    size="is-medium"
-                    @click="onAddDependency"
-                />
-            </div>
-        </div>
+        <PackageFinder ref="packageFinder" />
     </section>
 </template>
 
@@ -91,12 +81,13 @@
 import _ from "lodash";
 import axios from "axios";
 
-import { Logger } from "../../config";
-import { Requirements } from "../../types/requirements";
+import { Logger } from "../config";
+import { Requirements } from "../types/requirements";
 
 import Vue from "vue";
+
 import Component from "vue-class-component";
-import Field from "./field.vue";
+import PackageFinder from "./components/package-finder.vue";
 
 // Jupyter runtime environment
 // @ts-ignore
@@ -137,10 +128,15 @@ const BaseUI = Vue.extend({
         }
     },
     components: {
-        Field
+        PackageFinder
     }
 })
 export default class UI extends BaseUI {
+    // Component properties and methods set in the decorator
+    $refs!: {
+        packageFinder: PackageFinder;
+    };
+
     css = {
         "padding-bottom": "30px"
     };

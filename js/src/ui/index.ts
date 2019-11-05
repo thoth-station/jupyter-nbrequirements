@@ -3,7 +3,8 @@ import Buefy from "buefy"
 
 import { Logger } from "../config"
 
-import UI from "./components/ui.vue"
+import store from "./store"
+import UI from "./ui.vue"
 
 // Create the UI
 Vue.use( Buefy )
@@ -17,6 +18,12 @@ function createUIContainer(): void {
     const ui = $( "<div/>" )
         .attr( "id", "nbrequirements-ui" )
         .prependTo( "#notebook-container" )
+        .click( function ( event ) {
+            event.preventDefault()
+            event.stopPropagation()
+
+            return false
+        } )
         .get( 0 )
 
     const style = document.createElement( "style" )
@@ -34,5 +41,6 @@ function createUIContainer(): void {
 
 export const vm = new UI( {
     el: container,
+    store,
     beforeCreate: createUIContainer
 } )

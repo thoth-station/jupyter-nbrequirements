@@ -1,3 +1,4 @@
+import _ from "lodash"
 import axios from "axios"
 
 import Vue from "vue"
@@ -28,9 +29,6 @@ export default new Vuex.Store( {
         selectedPackages: [],
     },
     mutations: {
-        sync( state ) {
-            state.requirements = Jupyter.notebook.metadata.requirements
-        },
         sortData( state, { field, order }: { field: string, order: "asc" | "desc" } ) {
             // sort data in place
             state.data.sort( ( a: any, b: any ) => {
@@ -46,24 +44,9 @@ export default new Vuex.Store( {
         }
     },
     actions: {
-        addRequirement( { commit, dispatch }, dep: PackageVersion ) {
-            const cmd = new Add()
-            cmd.run( {
-                dev: dep.develop,
-                index: "pypi",
-                dependency: dep.name,
-                version: dep.version,
-            } ).then( () => {
-                commit( "sync" ); dispatch( "loadData" )
-            } )
-        },
-        setRequirements( { commit, dispatch }, req: Requirements ) {
-            const cmd = new Set()
-            cmd.run( {
-                requirements: req
-            } ).then( () => {
-                commit( "sync" ); dispatch( "loadData" )
-            } )
+        sync( { state, dispatch } ) {
+            state.requirements = Jupyter.notebook.metadata.requirements
+            dispatch( "loadData" )
         },
 
         /*
@@ -74,6 +57,12 @@ export default new Vuex.Store( {
             state.data = []
 
             const requirements: Requirements = state.requirements
+            if ( _.isUndefined( requirements ) ) {
+                state.data = []
+                state.loading = false
+
+                return
+            }
 
             const data: any[] = []
             for ( const [ pkg, v ] of Object.entries( requirements.packages ) ) {
@@ -115,6 +104,25 @@ export default new Vuex.Store( {
                 state.data = data
                 state.loading = false
             }, 1000 )
+        },
+
+        addRequirement( { dispatch }, dep: PackageVersion ) {
+            const cmd = new Add()
+            cmd.run( {
+                dev: dep.develop,
+                index: "pypi",
+                dependency: dep.name,
+                version: dep.version,
+            } )
+                .then( () => dispatch( "sync" ) )
+        },
+
+        setRequirements( { dispatch }, req: Requirements ) {
+            const cmd = new Set()
+            cmd.run( {
+                requirements: req
+            } )
+                .then( () => dispatch( "sync" ) )
         },
     }
 

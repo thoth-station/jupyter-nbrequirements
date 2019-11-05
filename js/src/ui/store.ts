@@ -31,7 +31,7 @@ export default new Vuex.Store( {
         sync( state ) {
             state.requirements = Jupyter.notebook.metadata.requirements
         },
-        sortData( state, { field, order }: { field: string, order: "ascending" | "descending" } ) {
+        sortData( state, { field, order }: { field: string, order: "asc" | "desc" } ) {
             // sort data in place
             state.data.sort( ( a: any, b: any ) => {
                 let ret: number
@@ -40,7 +40,7 @@ export default new Vuex.Store( {
                 else if ( a[ field ] > b[ field ] ) ret = 1
                 else ret = 0
 
-                return ret * ( order === "descending" ? -1 : 1 )
+                return ret * ( order === "desc" ? -1 : 1 )
 
             } )
         }

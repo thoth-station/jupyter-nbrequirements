@@ -71,10 +71,18 @@
             <template slot="empty">
                 <section class="section">
                     <div class="content has-text-grey has-text-centered">
-                        <p>
-                            <b-icon icon="emoticon-sad" size="is-large"></b-icon>
-                        </p>
-                        <p>This notebook has no requirements specified.</p>
+                        <template v-if="loading">
+                            <p>
+                                <b-icon icon="timer-sand" size="is-large"></b-icon>
+                            </p>
+                            <p>Loading notebook requirements...</p>
+                        </template>
+                        <template v-else>
+                            <p>
+                                <b-icon icon="emoticon-sad" size="is-large"></b-icon>
+                            </p>
+                            <p>This notebook has no requirements specified.</p>
+                        </template>
                     </div>
                 </section>
             </template>
@@ -149,8 +157,8 @@ export default class UI extends BaseUI {
     perPage: number = 10;
 
     sortField: string = "score";
-    sortOrder: string = "descending";
-    defaultSortOrder: string = "descending";
+    sortOrder: string = "desc";
+    defaultSortOrder: string = "desc";
 
     total: number = 0;
 

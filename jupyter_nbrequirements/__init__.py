@@ -118,7 +118,7 @@ def _default_requirements_handler(args, params: dict = None, **kwargs) -> str:
         # %requirements is an alias to 'get' if no command is provided
         command = default_command
 
-    if command == "get" and getattr(args, "from_file", None) is not None:
+    if command in ["get", "add"] and getattr(args, "from_file", None) is not None:
         # read the requirements from the file and change the command to set
         with args.from_file as f:
             requirements = Pipfile.from_string(f.read()).to_dict()
@@ -296,7 +296,7 @@ class RequirementsMagic(Magics):
                 "-f",
                 "--from-file",
                 type=argparse.FileType("r", encoding="utf-8"),
-                help="Whether to store output to file.",
+                help="Load requirements from a Pipfile.",
             )
             parser.add_argument(
                 "--to-json",
@@ -321,6 +321,12 @@ class RequirementsMagic(Magics):
             parser_add = subparsers.add_parser(
                 "add",
                 description="Add dependency to notebook metadata without installing it.",
+            )
+            parser.add_argument(
+                "-f",
+                "--from-file",
+                type=argparse.FileType("r", encoding="utf-8"),
+                help="Load requirements from a Pipfile.",
             )
             parser_add.add_argument(
                 "-d",

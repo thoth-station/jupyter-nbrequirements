@@ -141,18 +141,24 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
 
         setTimeout( () => { should_notify = true }, DEFAULT_NOTIFICATION_TIMEOUT )
         // Run the command
-        await cmd.run( args, element, context ).then( () => {
+        await cmd.run( args, element, context )
+            .then( () => {
 
-            // make sure the cell is marked correctly as finished
-            if ( !_.isUndefined( context ) ) {
-                // @ts-ignore
-                context.cell.running = false
-            }
+                // make sure the cell is marked correctly as finished
+                if ( !_.isUndefined( context ) ) {
+                    // @ts-ignore
+                    context.cell.running = false
+                }
 
-        } )
-        status = "Success"
+                status = "Success"
+            } )
+            .catch( ( err: Error ) => {
+                throw err
+            } )
 
     } catch ( err ) {
+        status = "Failed"
+
         Logger.error( err )
 
         if ( context && !_.isUndefined( context.cell ) ) {

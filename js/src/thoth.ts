@@ -270,7 +270,7 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
             _STD_LIB = {p.name.rstrip(".py") for p in _STD_LIB_PATH.iterdir()}
 
             tree = ast.parse('''
-            \n${ notebook_content }
+            \n${ utils.escape( notebook_content ) }
             ''')
 
             visitor = invectio.lib.InvectioVisitor()

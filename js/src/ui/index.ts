@@ -16,11 +16,11 @@ container.id = "v-app"
 function createUIContainer(): void {
     Logger.debug( "Creating a new UI container." )
     const ui = $( "<div/>" )
-        .attr( "id", "nbrequirements-ui" )
+        .attr( "id", "nbrequirements-ui-container" )
         .attr( "class", "container" )
         .attr(
             "style",
-            "background-color: #fff; padding: 30px; margin-bottom: 30px;"
+            "padding: 0px 30px 30px 30px"
         )
         .prependTo( "#notebook" )
         .click( function ( event ) {
@@ -36,6 +36,18 @@ function createUIContainer(): void {
     @import url( https://unpkg.com/buefy/dist/buefy.min.css );
     @import url( https://use.fontawesome.com/releases/v5.2.0/css/all.css );
     @import url( https://cdn.materialdesignicons.com/2.5.94/css/materialdesignicons.min.css );
+
+    .trapezoid {
+        border-top: 30px solid #555;
+        border-left: 25px solid transparent;
+        border-right: 25px solid transparent;
+        height: 0;
+        width: 100px;
+    }
+
+    .b-table .table {
+        background-color: transparent;
+    }
     `
 
     const shadow = ui.attachShadow( { mode: "open" } )

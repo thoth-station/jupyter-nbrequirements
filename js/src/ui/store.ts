@@ -9,6 +9,8 @@ import { Add, Set } from "../cli/requirements"
 import { Requirements } from "../types/requirements"
 import { PackageVersion } from "../thoth"
 
+import { UserWarning } from "../types/ui"
+
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
@@ -21,12 +23,14 @@ export default new Vuex.Store( {
     state: {
         // Package data gathered from PyPI
         // TODO: Create PyPI interface
-        data: Array<any>( [] ),
+        data: Array<any>(),
 
         loading: false,
 
         requirements: Jupyter.notebook.metadata.requirements,
         selectedPackages: [],
+
+        warnings: Array<UserWarning>(),
     },
     mutations: {
         sortData( state, { field, order }: { field: string, order: "asc" | "desc" } ) {

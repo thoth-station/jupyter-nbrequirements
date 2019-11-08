@@ -1,94 +1,132 @@
 <template>
     <section>
-        <b-table
-            :data="isEmpty ? [] : data"
-            :loading="loading"
-            paginated
-            backend-pagination
-            :per-page="perPage"
-            @page-change="onPageChange"
-            aria-next-label="Next page"
-            aria-previous-label="Previous page"
-            aria-page-label="Page"
-            aria-current-label="Current page"
-            backend-sorting
-            :default-sort-direction="defaultSortOrder"
-            :default-sort="[sortField, sortOrder]"
-            @sort="onSort"
-        >
-            <template slot-scope="props">
-                <b-table-column
-                    field="package_name"
-                    label="Package"
-                    sortable
-                >{{ props.row.package_name }}</b-table-column>
+        <b-collapse aria-id="nbrequirements-ui" class="panel" :open.sync="isCollapsed">
+            <div
+                aria-controls="nbrequirements-ui"
+                class="nbrequirements-ui-trigger columns is-centered"
+                role="button"
+                slot="trigger"
+            >
+                <b-notification
+                    class="trapezoid"
+                    style="background-color: transparent; padding: unset;"
+                    :closable="false"
+                >
+                    <b-icon
+                        custom-class="mdi-18px"
+                        icon="pin-outline"
+                        size="is-small"
+                        style="position: absolute; top: -20px; right: 18px;"
+                        :type="pinColour"
+                    ></b-icon>
+                    <b-loading :is-full-page="true" :active.sync="loading" :can-cancel="true">
+                        <div style="display: flex; flex-direction: column; align-items: center;">
+                            <b-icon
+                                pack="fas"
+                                icon="sync-alt"
+                                size="is-large"
+                                custom-class="fa-spin"
+                            ></b-icon>
+                            <br />
+                            <span
+                                class="has-text-weight-large is-family-primary"
+                            >Loading notebook requirements</span>
+                        </div>
+                    </b-loading>
+                </b-notification>
+            </div>
 
-                <b-table-column
-                    centered
-                    field="constraint"
-                    label="Constraint"
-                >{{ props.row.constraint }}</b-table-column>
+            <b-table
+                aria-next-label="Next page"
+                aria-previous-label="Previous page"
+                aria-page-label="Page"
+                aria-current-label="Current page"
+                backend-pagination
+                backend-sorting
+                paginated
+                style="margin-top: 30px"
+                :data="isEmpty ? [] : data"
+                :default-sort-direction="defaultSortOrder"
+                :default-sort="[sortField, sortOrder]"
+                :loading="loading"
+                :per-page="perPage"
+                @page-change="onPageChange"
+                @sort="onSort"
+            >
+                <template slot-scope="props">
+                    <b-table-column
+                        field="package_name"
+                        label="Package"
+                        sortable
+                    >{{ props.row.package_name }}</b-table-column>
 
-                <b-table-column centered field="release" label="Release">{{ props.row.release }}</b-table-column>
+                    <b-table-column
+                        centered
+                        field="constraint"
+                        label="Constraint"
+                    >{{ props.row.constraint }}</b-table-column>
 
-                <b-table-column field="score" label="Score" numeric sortable>
-                    <span
-                        class="tag"
-                        style="width: 3.5em; font-size: .65em;"
-                        :class="type(props.row.score)"
-                    >{{ props.row.score }}</span>
-                </b-table-column>
+                    <b-table-column centered field="release" label="Release">{{ props.row.release }}</b-table-column>
 
-                <b-table-column field="actions" label="Action">
-                    <div class="level" style="padding-bottom: unset;">
-                        <b-button
-                            class="level-item"
-                            icon-right="pencil"
-                            size="is-medium"
-                            @click="console.log('Edit' + row)"
-                        />
-                        <b-button
-                            class="level-item"
-                            icon-right="delete-outline"
-                            size="is-medium"
-                            @click="console.log('Delete' + row)"
-                        />
-                        <b-button
-                            class="level-item"
-                            icon-right="pin-outline"
-                            size="is-medium"
-                            @click="console.log('Pin' + row)"
-                        />
-                    </div>
-                </b-table-column>
-                <!-- <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column> -->
-            </template>
+                    <b-table-column field="score" label="Score" numeric sortable>
+                        <span
+                            class="tag"
+                            style="width: 3.5em; font-size: .65em;"
+                            :class="type(props.row.score)"
+                        >{{ props.row.score }}</span>
+                    </b-table-column>
 
-            <template slot="footer">
-                <span />
-            </template>
+                    <b-table-column field="actions" label="Action">
+                        <div class="level" style="padding-bottom: unset;">
+                            <b-button
+                                class="level-item"
+                                icon-right="pencil"
+                                size="is-medium"
+                                @click="console.log('Edit' + row)"
+                            />
+                            <b-button
+                                class="level-item"
+                                icon-right="delete-outline"
+                                size="is-medium"
+                                @click="console.log('Delete' + row)"
+                            />
+                            <b-button
+                                class="level-item"
+                                icon-right="pin-outline"
+                                size="is-medium"
+                                @click="console.log('Pin' + row)"
+                            />
+                        </div>
+                    </b-table-column>
+                    <!-- <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column> -->
+                </template>
 
-            <template slot="empty">
-                <section class="section">
-                    <div class="content has-text-grey has-text-centered">
-                        <template v-if="loading">
-                            <p>
-                                <b-icon icon="timer-sand" size="is-large"></b-icon>
-                            </p>
-                            <p>Loading notebook requirements...</p>
-                        </template>
-                        <template v-else>
-                            <p>
-                                <b-icon icon="emoticon-sad" size="is-large"></b-icon>
-                            </p>
-                            <p>This notebook has no requirements specified.</p>
-                        </template>
-                    </div>
-                </section>
-            </template>
-        </b-table>
+                <template slot="footer">
+                    <span />
+                </template>
 
-        <PackageFinder ref="packageFinder" />
+                <template slot="empty">
+                    <section class="section">
+                        <div class="content has-text-grey has-text-centered">
+                            <template v-if="loading">
+                                <p>
+                                    <b-icon icon="timer-sand" size="is-large"></b-icon>
+                                </p>
+                                <p>Loading notebook requirements...</p>
+                            </template>
+                            <template v-else>
+                                <p>
+                                    <b-icon icon="emoticon-sad" size="is-large"></b-icon>
+                                </p>
+                                <p>This notebook has no requirements specified.</p>
+                            </template>
+                        </div>
+                    </section>
+                </template>
+            </b-table>
+
+            <PackageFinder ref="packageFinder" />
+        </b-collapse>
     </section>
 </template>
 
@@ -113,6 +151,8 @@ const BaseUI = Vue.extend({
         sortField: String,
         sortOrder: String,
         defaultSortOrder: String,
+
+        isCollapsed: Boolean,
 
         page: Number,
         perPage: Number
@@ -154,8 +194,6 @@ export default class UI extends BaseUI {
     sortOrder: string = "desc";
     defaultSortOrder: string = "desc";
 
-    total: number = 0;
-
     get isEmpty(): boolean {
         return this.$store.state.data.length <= 0;
     }
@@ -177,6 +215,22 @@ export default class UI extends BaseUI {
 
         this.$store.commit("sortData", { field: field, order: order });
     }
+
+    get pinColour(): string {
+        if (this.loading) return "is-dark";
+        if (this.isEmpty) return "is-warning";
+
+        if (this.$store.state.warnings.length > 0) {
+            for (const warning of this.$store.state.warnings) {
+                if (warning.level === "danger") return "is-danger";
+            }
+
+            return "is-warning";
+        }
+
+        return "is-success";
+    }
+
     /*
      * Type style in relation to the value
      */

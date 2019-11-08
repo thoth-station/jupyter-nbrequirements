@@ -1,6 +1,6 @@
 <template>
     <section>
-        <b-collapse aria-id="nbrequirements-ui" class="panel" :open.sync="isCollapsed">
+        <b-collapse aria-id="nbrequirements-ui" class="panel" :open.sync="isExpanded">
             <div
                 aria-controls="nbrequirements-ui"
                 class="nbrequirements-ui-trigger columns is-centered"
@@ -19,7 +19,7 @@
                         style="position: absolute; top: -20px; right: 18px;"
                         :type="pinColour"
                     ></b-icon>
-                    <b-loading :is-full-page="true" :active.sync="loading" :can-cancel="true">
+                    <b-loading :active.sync="displayLoader" :can-cancel="true" :is-full-page="true">
                         <div style="display: flex; flex-direction: column; align-items: center;">
                             <b-icon
                                 pack="fas"
@@ -30,7 +30,8 @@
                             <br />
                             <span
                                 class="has-text-weight-large is-family-primary"
-                            >Loading notebook requirements</span>
+                                style="font-size: 2rem;"
+                            >Loading notebook requirements...</span>
                         </div>
                     </b-loading>
                 </b-notification>
@@ -187,6 +188,8 @@ export default class UI extends BaseUI {
     data!: any[]; // TODO: PyPI interface
     loading!: boolean;
 
+    isExpanded = false;
+
     page: number = 1;
     perPage: number = 10;
 
@@ -214,6 +217,10 @@ export default class UI extends BaseUI {
         this.sortOrder = order;
 
         this.$store.commit("sortData", { field: field, order: order });
+    }
+
+    get displayLoader(): boolean {
+        return this.loading && !this.isExpanded;
     }
 
     get pinColour(): string {

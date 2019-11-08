@@ -3,6 +3,7 @@
         <div class="column is-5">
             <b-field label="Package" label-position="inside" custom-class="is-medium">
                 <b-autocomplete
+                    ref="package"
                     size="is-medium"
                     field="info.name"
                     placeholder="e.g. pandas"
@@ -50,7 +51,7 @@
         <div class="column is-3">
             <b-field label="Version" label-position="inside" custom-class="is-medium">
                 <b-autocomplete
-                    ref="versionInput"
+                    ref="version"
                     size="is-medium"
                     field="release"
                     placeholder="*"
@@ -130,6 +131,8 @@ const BaseField = Vue.extend({
 })
 export default class PackageFinder extends BaseField {
     $refs!: {
+        package: any;
+        version: any;
         versionConstraint: any;
     };
     releaseFilter: string = ".*";
@@ -205,6 +208,9 @@ export default class PackageFinder extends BaseField {
 
     onAddPackage() {
         this.$store.dispatch("addRequirement", this.selectedPackage);
+        // clear the values of the autocomplete elements
+        this.$refs.package.newValue = undefined;
+        this.$refs.version.newValue = undefined;
     }
 
     onPackageSelect(option: any) {

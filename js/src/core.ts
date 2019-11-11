@@ -22,7 +22,58 @@ import { ILogger } from "js-logger/src/types"
 import Jupyter = require( "base/js/namespace" )
 
 
-export function execute_request( request: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+export function execute_shell_command( command: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+    // wrap it so that we could get the exit status code
+    command = `${ command } ; >&2 echo "[exit]: $?"`
+
+    return execute_request( `!${ command }`, callbacks, options, context )
+}
+
+export function execute_shell_script( script: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+
+    return execute_request( `%%bash\n${ script }`, callbacks, options, context )
+}
+
+export function execute_python_script( script: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+
+    return execute_request( `${ script }`, callbacks, options, context )
+}
+
+export function execute_request( request: string, callbacks?: io.Callbacks, options?: any, context?: Context ) {
+    let logger = Logger
+    if ( !_.isUndefined( options ) && !_.isUndefined( options.logger ) )
+        logger = options.logger
+
+    context = context || get_execute_context( logger )
+
+    if ( !_.isUndefined( context ) && context ) {
+        return execute_request_with_context( request, context, callbacks, options )
+    }
+
+    return new Promise( ( resolve, reject ) => {
+        const default_options = {
+            silent: false,
+            store_history: true,
+            stop_on_error: true
+        }
+        options = _.assign( default_options, options )
+
+        const kernel = Jupyter.notebook.kernel
+
+        logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
+        const msg_id = kernel.execute( request, callbacks, options )
+
+        kernel.events.on(
+            "finished_iopub.Kernel",
+            ( e: Event, d: { kernel: any, msg_id: string } ) => {
+                if ( d.msg_id === msg_id ) {
+                    kernel._msg_callbacks[ msg_id ].status != 0 ? reject() : resolve()
+                }
+            } )
+    } )
+}
+
+export function execute_request_with_context( request: string, context: Context, callbacks?: io.Callbacks, options?: any ) {
     return new Promise( ( resolve, reject ) => {
         let logger = Logger
         if ( !_.isUndefined( options ) && !_.isUndefined( options.logger ) )
@@ -33,16 +84,11 @@ export function execute_request( request: string, callbacks?: io.Callbacks, opti
             store_history: true,
             stop_on_error: true
         }
-
-        if ( _.isUndefined( context ) ) {
-            // passing the logger here makes logs more consistent
-            context = get_execute_context( logger )
-        }
+        options = _.assign( default_options, options )
 
         const cell = context.cell
         const kernel = Jupyter.notebook.kernel
 
-        options = _.assign( default_options, options )
         callbacks = _.assign( cell.get_callbacks(), callbacks || {} )
 
         // Make sure to mark the cell as running so that the output
@@ -135,7 +181,7 @@ export function get_execute_context( logger?: ILogger ): Context | undefined {
     const cell: CodeCell = Jupyter.notebook.get_executed_cell()
 
     logger = logger || Logger
-    if ( _.isUndefined( cell ) ) {
+    if ( _.isUndefined( cell ) || cell === null ) {
         logger.warn( "Execution context could not be determined." )
         return
     }
@@ -144,21 +190,4 @@ export function get_execute_context( logger?: ILogger ): Context | undefined {
         cell: cell,
         output_area: cell.output_area
     }
-}
-
-export function execute_shell_command( command: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
-    // wrap it so that we could get the exit status code
-    command = `${ command } ; >&2 echo "[exit]: $?"`
-
-    return execute_request( `!${ command }`, callbacks, options, context )
-}
-
-export function execute_shell_script( script: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
-
-    return execute_request( `%%bash\n${ script }`, callbacks, options, context )
-}
-
-export function execute_python_script( script: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
-
-    return execute_request( `${ script }`, callbacks, options, context )
 }

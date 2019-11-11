@@ -482,9 +482,11 @@ export function lock_requirements_with_pipenv(
 }
 
 export function install_requirements(
-    requirements: string[],
-    dev_packages = false,
-    pre_releases = false
+    requirements: string[], options?: {
+        dev_packages?: boolean,
+        pre_releases?: boolean,
+        ignore_pipfile?: boolean
+    }
 ): Promise<void> {
     return new Promise( async ( resolve, reject ) => {
 
@@ -529,14 +531,16 @@ export function install_requirements(
 
 
         let opts = ""
-
-        if ( dev_packages ) opts += "--dev "
-        if ( pre_releases ) opts += "--pre"
+        if ( !_.isUndefined( options ) ) {
+            if ( options.dev_packages ) opts += "--dev "
+            if ( options.pre_releases ) opts += "--pre "
+            if ( options.ignore_pipfile ) opts += "--ignore-pipfile"
+        }
 
         Logger.log( "Installing requirements." )
 
         await execute_shell_command(
-            `pipenv install --ignore-pipfile --keep-outdated ${ opts } ${ requirements }`,
+            `pipenv install --keep-outdated ${ opts } ${ requirements }`,
             { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
             .catch( err => { throw err } )

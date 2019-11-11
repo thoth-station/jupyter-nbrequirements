@@ -130,7 +130,8 @@ export class Ensure extends Command {
 
         // Stage 3: install the requirements along with the dev packages
         // empty [] makes sure that the requirements are installed from the Pipfile.lock
-        await install_requirements( [], true ).catch( err => { throw err } )
+        await install_requirements( [], { dev_packages: true, ignore_pipfile: true } )
+            .catch( err => { throw err } )
 
         // [Optional] Stage 4: install the Jupyter kernel
         if ( args.skip_kernel ) return
@@ -361,6 +362,7 @@ namespace Install {// eslint-disable-line
         requirements: string[]
         dev: boolean
         pre: boolean
+        ignore_pipfile: boolean
     }
 
 }
@@ -375,7 +377,10 @@ export class Install extends Command {
      * @memberof Install
      */
     public async run( args: Install.Arguments ): Promise<void> {
-        await install_requirements( args.requirements, args.dev, args.pre )
+        await install_requirements(
+            args.requirements,
+            { dev_packages: args.dev, pre_releases: args.pre, ignore_pipfile: args.ignore_pipfile }
+        )
     }
 }
 

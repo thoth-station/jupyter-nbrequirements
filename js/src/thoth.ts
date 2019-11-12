@@ -482,7 +482,7 @@ export function lock_requirements_with_pipenv(
 }
 
 export function install_requirements(
-    requirements: string[], options?: {
+    requirements?: string[], options?: {
         dev_packages?: boolean,
         pre_releases?: boolean,
         ignore_pipfile?: boolean
@@ -522,11 +522,10 @@ export function install_requirements(
 
             if ( msg.metadata.status != 0 ) {
                 reject( msg.metadata.output )
+            } else {
+                Logger.log( "Requirements have been successfully installed" )
+                resolve()
             }
-
-            Logger.log( "Requirements have been successfully installed" )
-
-            resolve()
         }
 
 
@@ -540,7 +539,7 @@ export function install_requirements(
         Logger.log( "Installing requirements." )
 
         await execute_shell_command(
-            `pipenv install --keep-outdated ${ opts } ${ requirements }`,
+            `pipenv install --keep-outdated ${ opts } ${ requirements.join( " " ) }`,
             { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
             .catch( err => { throw err } )

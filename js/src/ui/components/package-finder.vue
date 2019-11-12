@@ -102,7 +102,7 @@ import { PackageVersion } from "../../thoth";
 // @ts-ignore
 import Jupyter = require("base/js/namespace");
 
-const BaseField = Vue.extend({
+const BaseComponent = Vue.extend({
     props: {
         data: Array,
 
@@ -129,7 +129,7 @@ const BaseField = Vue.extend({
     },
     methods: mapActions(["setRequirements"])
 })
-export default class PackageFinder extends BaseField {
+export default class PackageFinder extends BaseComponent {
     $refs!: {
         package: any;
         version: any;

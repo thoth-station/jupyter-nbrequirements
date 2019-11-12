@@ -15,6 +15,14 @@ import { UserWarning } from "../types/ui"
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
 
+interface ExecutionStatus {
+    cmd?: ( ...args: any[] ) => any | string
+    err?: Error
+    msg?: string
+
+    current: "ready" | "installation" | "success" | "failed"
+}
+
 
 Vue.use( Vuex )
 
@@ -30,9 +38,14 @@ export default new Vuex.Store( {
         requirements: Jupyter.notebook.metadata.requirements,
         selectedPackages: [],
 
+        status: {},
+
         warnings: Array<UserWarning>(),
     },
     mutations: {
+
+        ready( state ): void { state.status = { current: "ready" } },
+
         sortData( state, { field, order }: { field: string, order: "asc" | "desc" } ) {
             // sort data in place
             state.data.sort( ( a: any, b: any ) => {
@@ -45,6 +58,13 @@ export default new Vuex.Store( {
                 return ret * ( order === "desc" ? -1 : 1 )
 
             } )
+        },
+
+        status( state, status: ExecutionStatus ): void {
+            if ( _.isUndefined( status ) )
+                throw new Error( "Store received status of type 'undefined'" )
+
+            state.status = status
         }
     },
     actions: {
@@ -76,7 +96,7 @@ export default new Vuex.Store( {
                     constraint: string
                     release: string
                     summary: string
-                    score: string
+                    health: string
                 }
 
                 await axios
@@ -93,7 +113,7 @@ export default new Vuex.Store( {
                             constraint: version as string,
                             release: package_data.info.version,
                             summary: package_data.info.summary,
-                            score: ( Math.random() * 10 ).toPrecision( 2 ) // TODO
+                            health: ( Math.random() * 10 ).toPrecision( 2 ) // TODO
                         }
                         data.push( item )
                     } )

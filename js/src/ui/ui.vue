@@ -69,12 +69,12 @@
 
                     <b-table-column centered field="release" label="Release">{{ props.row.release }}</b-table-column>
 
-                    <b-table-column field="score" label="Score" numeric sortable>
+                    <b-table-column field="health" label="Health" numeric sortable>
                         <span
                             class="tag"
                             style="width: 3.5em; font-size: .65em;"
-                            :class="type(props.row.score)"
-                        >{{ props.row.score }}</span>
+                            :class="type(props.row.health)"
+                        >{{ props.row.health }}</span>
                     </b-table-column>
 
                     <b-table-column field="actions" label="Action">
@@ -127,6 +127,8 @@
             </b-table>
 
             <PackageFinder ref="packageFinder" />
+
+            <Installer ref="installer" />
         </b-collapse>
     </section>
 </template>
@@ -141,6 +143,7 @@ import Vue from "vue";
 import { mapState } from "vuex";
 
 import Component from "vue-class-component";
+import Installer from "./components/install.vue";
 import PackageFinder from "./components/package-finder.vue";
 
 // Jupyter runtime environment
@@ -175,6 +178,7 @@ const BaseUI = Vue.extend({
         }
     },
     components: {
+        Installer,
         PackageFinder
     },
     computed: mapState(["data", "loading"])
@@ -182,6 +186,7 @@ const BaseUI = Vue.extend({
 export default class UI extends BaseUI {
     // Component properties and methods set in the decorator
     $refs!: {
+        installer: Installer;
         packageFinder: PackageFinder;
     };
 
@@ -193,7 +198,7 @@ export default class UI extends BaseUI {
     page: number = 1;
     perPage: number = 10;
 
-    sortField: string = "score";
+    sortField: string = "health";
     sortOrder: string = "desc";
     defaultSortOrder: string = "desc";
 

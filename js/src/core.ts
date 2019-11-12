@@ -20,60 +20,62 @@ import { ILogger } from "js-logger/src/types"
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+// @ts-ignore
+import codecell = require( "notebook/js/codecell" )
 
 
-export function execute_shell_command( command: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+export function execute_shell_command(
+    command: string, callbacks?: io.Callbacks, options?: any, context?: any
+) {
     // wrap it so that we could get the exit status code
     command = `${ command } ; >&2 echo "[exit]: $?"`
 
     return execute_request( `!${ command }`, callbacks, options, context )
 }
 
-export function execute_shell_script( script: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+export function execute_shell_script(
+    script: string, callbacks?: io.Callbacks, options?: any, context?: any
+) {
 
     return execute_request( `%%bash\n${ script }`, callbacks, options, context )
 }
 
-export function execute_python_script( script: string, callbacks?: io.Callbacks, options?: any, context?: any ) {
+export function execute_python_script(
+    script: string, callbacks?: io.Callbacks, options?: any, context?: any
+) {
 
     return execute_request( `${ script }`, callbacks, options, context )
 }
 
-export function execute_request( request: string, callbacks?: io.Callbacks, options?: any, context?: Context ) {
+export function execute_request(
+    request: string, callbacks?: io.Callbacks, options?: any, context?: Context
+) {
     let logger = Logger
     if ( !_.isUndefined( options ) && !_.isUndefined( options.logger ) )
         logger = options.logger
 
     context = context || get_execute_context( logger )
 
-    if ( !_.isUndefined( context ) && context ) {
-        return execute_request_with_context( request, context, callbacks, options )
+    if ( _.isUndefined( context ) || !context ) {
+        const notebook = Jupyter.notebook
+
+        const cell_options = {
+            config: notebook.config,
+            events: notebook.events,
+            notebook: notebook,
+        }
+        // Create a fake context to execute the request in
+        context = {
+            cell: new codecell.CodeCell( notebook.kernel, cell_options ),
+        }
     }
 
-    return new Promise( ( resolve, reject ) => {
-        const default_options = {
-            silent: false,
-            store_history: true,
-            stop_on_error: true
-        }
-        options = _.assign( default_options, options )
-
-        const kernel = Jupyter.notebook.kernel
-
-        logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
-        const msg_id = kernel.execute( request, callbacks, options )
-
-        kernel.events.on(
-            "finished_iopub.Kernel",
-            ( e: Event, d: { kernel: any, msg_id: string } ) => {
-                if ( d.msg_id === msg_id ) {
-                    kernel._msg_callbacks[ msg_id ].status != 0 ? reject() : resolve()
-                }
-            } )
-    } )
+    return execute_request_with_context( request, context, callbacks, options )
 }
 
-export function execute_request_with_context( request: string, context: Context, callbacks?: io.Callbacks, options?: any ) {
+export function execute_request_with_context(
+    request: string, context: Context, callbacks?: io.Callbacks, options?: any
+) {
     return new Promise( ( resolve, reject ) => {
         let logger = Logger
         if ( !_.isUndefined( options ) && !_.isUndefined( options.logger ) )
@@ -129,9 +131,9 @@ export function execute_request_with_context( request: string, context: Context,
             }
 
             else if ( msg.msg_type == "stream" ) {
-                const m = msg.content.text.search( /\[exit\]: ([^0])/m )
-                if ( m >= 0 ) {
-                    status = Number( msg.content.text[ m ] )
+                const m = msg.content.text.match( /\[exit\]: ([^0])/m )
+                if ( m !== null ) {
+                    status = Number( m[ 1 ] )
                     // Use preferably output of the parent message instead
                     output = kernel._msg_callbacks[ msg_id ].output
                     if ( _.isUndefined( output ) ) {

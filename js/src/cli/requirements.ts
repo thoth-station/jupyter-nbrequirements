@@ -320,7 +320,7 @@ export class Lock extends Command {
      * @returns {Promise<void>}
      * @memberof Lock
      */
-    public async run( args: Lock.Arguments, element: HTMLDivElement ): Promise<void> {
+    public async run( args: Lock.Arguments, element?: HTMLDivElement ): Promise<void> {
         args.engine = args.engine || DEFAULT_RESOLUTION_ENGINE
         if ( args.engine === "pipenv" ) {
             args.dev_packages = args.dev_packages || false
@@ -347,7 +347,7 @@ export class Lock extends Command {
                 }
 
                 // default, display requirements in Pipfile.lock format
-                utils.display( req_locked, element )
+                if ( !_.isUndefined( element ) ) utils.display( req_locked, element )
             } )
             .catch( ( err: string ) => {
                 Logger.error( "Failed to lock requirements.\n", err )

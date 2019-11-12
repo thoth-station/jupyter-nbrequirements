@@ -64,6 +64,7 @@ module.exports = [
 			'base/js/events': { amd: 'base/js/events' },
 			'base/js/namespace': { amd: 'base/js/namespace' },
 			'base/js/utils': { amd: 'base/js/utils' },
+			'notebook/js/codecell': { amd: 'notebook/js/codecell' },
 		},
 		devtool: 'source-map',
 		plugins: [

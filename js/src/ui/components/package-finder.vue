@@ -59,11 +59,10 @@
                     :loading="isFetching"
                     :keep-first="true"
                     :open-on-focus="true"
-                    @focus.prevent="onFocusIn"
                     @blur.prevent="onFocusOut"
-                    @typing="onTyping"
+                    @focus.prevent="onFocusIn"
                     @select="onVersionSelect"
-                    @click.stop.prevent
+                    @typing="onTyping"
                 >
                     <template slot-scope="props">
                         <div class="media">
@@ -139,6 +138,15 @@ export default class PackageFinder extends BaseComponent {
 
     // Package which should be added as a dependency
     selectedPackage: PackageVersion | null = null;
+
+    mounted() {
+        this.$el.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            return false;
+        });
+    }
 
     get getAsyncData() {
         return debounce(name => {

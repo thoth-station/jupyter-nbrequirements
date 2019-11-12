@@ -1,12 +1,6 @@
 export default class VueContainer extends HTMLDivElement {
     constructor() {
         super()
-        this.addEventListener( "click", ( event ) => {
-            event.preventDefault()
-            event.stopPropagation()
-
-            return false
-        } )
     }
 
     public connectedCallback() {

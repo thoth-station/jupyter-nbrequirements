@@ -79,24 +79,13 @@
 
                     <b-table-column field="actions" label="Action">
                         <div class="level" style="padding-bottom: unset;">
-                            <b-button
-                                class="level-item"
-                                icon-right="pencil"
-                                size="is-medium"
-                                @click="console.log('Edit' + row)"
-                            />
+                            <b-button class="level-item" icon-right="pencil" size="is-medium" />
                             <b-button
                                 class="level-item"
                                 icon-right="delete-outline"
                                 size="is-medium"
-                                @click="console.log('Delete' + row)"
                             />
-                            <b-button
-                                class="level-item"
-                                icon-right="pin-outline"
-                                size="is-medium"
-                                @click="console.log('Pin' + row)"
-                            />
+                            <b-button class="level-item" icon-right="pin-outline" size="is-medium" />
                         </div>
                     </b-table-column>
                     <!-- <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column> -->

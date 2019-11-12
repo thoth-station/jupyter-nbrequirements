@@ -264,7 +264,11 @@ export default class UI extends BaseUI {
 }
 </script>
 
-<style scoped>
+<style lang="scss">
+.vue-container {
+    padding: 0px 30px 30px 30px;
+}
+
 @import url(https://use.fontawesome.com/releases/v5.2.0/css/all.css);
 @import url(https://cdn.materialdesignicons.com/2.5.94/css/materialdesignicons.min.css);
 </style>

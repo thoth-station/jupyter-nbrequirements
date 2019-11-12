@@ -11,4 +11,6 @@
 
 export { cli } from "./cli"
 export { version } from "../package.json"
-export { vm } from "./ui"
+import { createUI } from "./ui"
+
+export const vm = createUI()

@@ -4,60 +4,65 @@ import Buefy from "buefy"
 import { Logger } from "../config"
 
 import store from "./store"
+
 import UI from "./ui.vue"
+import VueContainer from "./container"
 
 // Create the UI
 Vue.use( Buefy )
 
+customElements.define( "vue-container", VueContainer, { extends: "div" } )
 
-const container = document.createElement( "div" )
-container.id = "v-app"
 
-function createUIContainer(): void {
-    Logger.debug( "Creating a new UI container." )
-    const ui = $( "<div/>" )
-        .attr( "id", "nbrequirements-ui-container" )
-        .attr( "class", "container" )
-        .attr(
-            "style",
-            "padding: 0px 30px 30px 30px"
-        )
+function createNotificationContainer(): HTMLElement {
+    Logger.debug( "Creating a new notification container." )
+
+    const container = $( document.createElement( "div", { is: "vue-container" } ) )
+        .attr( "id", "nbrequirements-notification-container" )
+        .attr( "class", "notices is-top" )
         .prependTo( "#notebook" )
-        .click( function ( event ) {
-            event.preventDefault()
-            event.stopPropagation()
+        .get( 0 )
 
-            return false
-        } )
+    return container
+}
+
+function createUIContainer(): HTMLElement {
+    Logger.debug( "Creating a new UI container." )
+
+    const container = $( document.createElement( "div", { is: "vue-container" } ) )
+        .attr( "id", "nbrequirements-ui-container" )
+        .attr( "class", "vue-container container" )
+        .prependTo( "#notebook" )
         .get( 0 )
 
     const style = document.createElement( "style" )
     style.textContent = `
-    @import url( https://unpkg.com/buefy/dist/buefy.min.css );
-    @import url( https://use.fontawesome.com/releases/v5.2.0/css/all.css );
-    @import url( https://cdn.materialdesignicons.com/2.5.94/css/materialdesignicons.min.css );
+        .trapezoid {
+            border-top: 30px solid #555;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            height: 0;
+            width: 100px;
+        }
 
-    .trapezoid {
-        border-top: 30px solid #555;
-        border-left: 25px solid transparent;
-        border-right: 25px solid transparent;
-        height: 0;
-        width: 100px;
-    }
-
-    .b-table .table {
-        background-color: transparent;
-    }
+        .b-table .table {
+            background-color: transparent;
+        }
     `
+    const ui = document.createElement( "div" )
 
-    const shadow = ui.attachShadow( { mode: "open" } )
-
-    shadow.appendChild( container )
-    shadow.appendChild( style )
+    container.appendChild( style )
+    container.appendChild( ui )
+    return ui
 }
 
-export const vm = new UI( {
-    el: container,
-    store,
-    beforeCreate: createUIContainer
-} )
+export function createUI(): UI {
+    const ui = createUIContainer()
+    const vm = new UI( {
+        el: ui,
+        store,
+        beforeCreate: createNotificationContainer
+    } )
+
+    return vm
+}

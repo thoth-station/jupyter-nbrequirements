@@ -19,10 +19,21 @@ function createNotificationContainer(): HTMLElement {
 
     const container = $( document.createElement( "div", { is: "vue-container" } ) )
         .attr( "id", "nbrequirements-notification-container" )
-        .attr( "class", "notices is-top" )
         .prependTo( "#notebook" )
         .get( 0 )
 
+    const style = document.createElement( "style" )
+    style.textContent = `
+        .notices * {
+            font-family: BlinkMacSystemFont,-apple-system,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,Helvetica,Arial,sans-serif;
+            font-size: 15px;
+
+            text-rendering: optimizeLegibility;
+            text-size-adjust: 100%;
+        }
+    `
+
+    container.appendChild( style )
     return container
 }
 

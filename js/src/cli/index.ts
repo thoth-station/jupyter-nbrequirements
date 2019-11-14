@@ -87,6 +87,15 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
         case "get": cmd = new Get(); break
 
         /**
+         * Remove a notebook dependency
+         *
+         * @param {Remove.Arguments} args
+         * @returns {Promise<void>}
+         * @memberof Remove
+         */
+        case "remove": cmd = new Get(); break
+
+        /**
          * Set notebook requirements.
          * If `to_file` argument is provided, writes them to the Pipfile.
          *

@@ -5,7 +5,7 @@ import Vue from "vue"
 import Vuex from "vuex"
 
 
-import { Add, Set } from "../cli/requirements"
+import { Add, Set, Remove } from "../cli/requirements"
 import { Requirements } from "../types/requirements"
 import { PackageVersion } from "../thoth"
 
@@ -97,6 +97,7 @@ export default new Vuex.Store( {
                     release: string
                     summary: string
                     health: string
+                    locked: boolean
                 }
 
                 await axios
@@ -109,6 +110,7 @@ export default new Vuex.Store( {
                             version = v.version
                         }
                         item = {
+                            locked: true,
                             package_name: pkg,
                             constraint: version as string,
                             release: package_data.info.version,
@@ -139,6 +141,19 @@ export default new Vuex.Store( {
                 version: dep.version,
             } )
                 .then( () => dispatch( "sync" ) )
+        },
+
+        removeRequirement( { dispatch }, name: string ) {
+            const cmd = new Remove()
+            cmd.run( {
+                dependency: name
+            } )
+                .then( () => dispatch( "sync" ) )
+        },
+
+        updateRequirement( { dispatch }, dep: PackageVersion ) {
+            // alias to add (performs check for an existing package)
+            dispatch( "addRequirement", dep )
         },
 
         setRequirements( { dispatch }, req: Requirements ) {

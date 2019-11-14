@@ -38,13 +38,14 @@
             </div>
 
             <b-table
+                backend-pagination
+                backend-sorting
+                paginated
+                ref="table"
                 aria-next-label="Next page"
                 aria-previous-label="Previous page"
                 aria-page-label="Page"
                 aria-current-label="Current page"
-                backend-pagination
-                backend-sorting
-                paginated
                 style="margin-top: 30px"
                 :data="isEmpty ? [] : data"
                 :default-sort-direction="defaultSortOrder"
@@ -56,13 +57,27 @@
             >
                 <template slot-scope="props">
                     <b-table-column
+                        v-if="!props.row.locked"
+                        sortable
+                        ref="package"
                         field="package_name"
                         label="Package"
+                        width="300"
+                    >
+                        <PackageField :placeholder="props.row.package_name" />
+                    </b-table-column>
+                    <b-table-column
+                        v-else
                         sortable
+                        ref="package"
+                        field="package_name"
+                        label="Package"
+                        width="300"
                     >{{ props.row.package_name }}</b-table-column>
 
                     <b-table-column
                         centered
+                        ref="constraint"
                         field="constraint"
                         label="Constraint"
                     >{{ props.row.constraint }}</b-table-column>
@@ -79,13 +94,32 @@
 
                     <b-table-column field="actions" label="Action">
                         <div class="level" style="padding-bottom: unset;">
-                            <b-button class="level-item" icon-right="pencil" size="is-medium" />
+                            <b-button
+                                v-if="props.row.locked"
+                                class="level-item"
+                                icon-right="pencil"
+                                size="is-medium"
+                                @click="onEdit(props.row)"
+                            />
+                            <b-button
+                                v-else
+                                class="level-item"
+                                icon-right="content-save-outline"
+                                size="is-medium"
+                                @click="onSave(props.row)"
+                            />
                             <b-button
                                 class="level-item"
                                 icon-right="delete-outline"
                                 size="is-medium"
+                                @click="onRemoveRequirement(props.row)"
                             />
-                            <b-button class="level-item" icon-right="pin-outline" size="is-medium" />
+                            <b-button
+                                disabled
+                                class="level-item"
+                                icon-right="pin-outline"
+                                size="is-medium"
+                            />
                         </div>
                     </b-table-column>
                     <!-- <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column> -->
@@ -129,15 +163,17 @@ import { Logger } from "../config";
 import { Requirements } from "../types/requirements";
 
 import Vue from "vue";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 
 import Component from "vue-class-component";
 import Installer from "./components/install.vue";
 import PackageFinder from "./components/package-finder.vue";
+import PackageField from "./components/package-field.vue";
 
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require("base/js/namespace");
+import { PackageVersion } from "../thoth";
 
 const BaseUI = Vue.extend({
     props: {
@@ -153,6 +189,7 @@ const BaseUI = Vue.extend({
 });
 
 @Component({
+    methods: mapActions(["removeRequirement"]),
     filters: {
         /**
          * Filter to truncate string, accepts a length parameter
@@ -166,16 +203,23 @@ const BaseUI = Vue.extend({
                 : value;
         }
     },
+    computed: mapState(["data", "loading"]),
     components: {
         Installer,
+        PackageField,
         PackageFinder
-    },
-    computed: mapState(["data", "loading"])
+    }
 })
 export default class UI extends BaseUI {
     // Component properties and methods set in the decorator
     $refs!: {
+        table: any;
+
+        constraint: any;
+        package: any;
+
         installer: Installer;
+
         packageFinder: PackageFinder;
     };
 
@@ -193,24 +237,6 @@ export default class UI extends BaseUI {
 
     get isEmpty(): boolean {
         return this.$store.state.data.length <= 0;
-    }
-
-    onAddDependency() {}
-    /*
-     * Handle page-change event
-     */
-    onPageChange(page: number) {
-        this.page = page;
-        // TODO: Paging
-    }
-    /*
-     * Handle sort event
-     */
-    onSort(field: string, order: string) {
-        this.sortField = field;
-        this.sortOrder = order;
-
-        this.$store.commit("sortData", { field: field, order: order });
     }
 
     get displayLoader(): boolean {
@@ -231,6 +257,42 @@ export default class UI extends BaseUI {
 
         return "is-success";
     }
+
+    onEdit(row: any) {
+        row.locked = !row.locked;
+    }
+
+    /*
+     * Handle page-change event
+     */
+
+    onPageChange(page: number) {
+        this.page = page;
+        // TODO: Paging
+    }
+
+    onRemoveRequirement(row: any) {
+        this.removeRequirement(row.package_name);
+    }
+
+    onSave(row: any) {
+        const constraint = this.$refs.constraint.value
+        const dep: PackageVersion = new PackageVersion(row.package_name, constraint);
+
+        this.$store.dispatch("updateRequirement", dep);
+    }
+
+    /*
+     * Handle sort event
+     */
+    onSort(field: string, order: string) {
+        this.sortField = field;
+        this.sortOrder = order;
+
+        this.$store.commit("sortData", { field: field, order: order });
+    }
+
+    removeRequirement!: (dep: string) => void;
 
     /*
      * Type style in relation to the value

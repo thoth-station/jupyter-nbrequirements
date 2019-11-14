@@ -272,6 +272,50 @@ export class Get extends Command {
     }
 }
 
+namespace Remove {
+    export interface Arguments extends DefaultArguments {
+        dependency: string
+    }
+}
+export class Remove extends Command {
+
+    /**
+     * Remove a notebook dependency
+     *
+     * @param {Remove.Arguments} args
+     * @returns {Promise<void>}
+     * @memberof Remove
+     */
+    public async run( args: Remove.Arguments ) {
+        const req: Requirements | undefined = Jupyter.notebook.metadata.requirements
+        if ( _.isUndefined( req ) ) {
+            Logger.info( "Notebook requirements are empty. Nothing to remove." )
+            return
+        }
+
+        const pkg: string = args.dependency
+        for ( const attr of [ "packages", "dev-packages" ] ) {
+            const obj: any = _.get( req, attr )
+
+            if ( _.has( obj, pkg ) ) {
+                const updated = _.omit( obj, pkg )
+                _.set( req, attr, updated )
+
+                Logger.info( `Removed dependency ${ pkg } from ${ attr }` )
+            }
+        }
+
+        for ( const [ alias, original ] of Object.entries( req.aliases ) ) {
+            if ( original === pkg ) {
+                req.aliases = _.omit( req.aliases, alias )
+                break
+            }
+        }
+
+        return set_requirements( Jupyter.notebook, req as Requirements )
+    }
+}
+
 namespace Set {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {

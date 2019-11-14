@@ -57,32 +57,32 @@
             >
                 <template slot-scope="props">
                     <b-table-column
-                        v-if="!props.row.locked"
                         sortable
-                        ref="package"
                         field="package_name"
                         label="Package"
-                        width="300"
-                    >
-                        <PackageField :placeholder="props.row.package_name" />
-                    </b-table-column>
-                    <b-table-column
-                        v-else
-                        sortable
-                        ref="package"
-                        field="package_name"
-                        label="Package"
-                        width="300"
+                        width="250"
                     >{{ props.row.package_name }}</b-table-column>
 
                     <b-table-column
+                        v-if="!props.row.locked"
                         centered
-                        ref="constraint"
                         field="constraint"
                         label="Constraint"
+                        width="150"
+                    >
+                        <VersionField
+                            v-on:selected="value => update(props.row, {constraint: value})"
+                            :data="props.row.releases"
+                            :placeholder="props.row.constraint"
+                        />
+                    </b-table-column>
+                    <b-table-column
+                        v-else
+                        centered
+                        field="constraint"
+                        label="Constraint"
+                        width="150"
                     >{{ props.row.constraint }}</b-table-column>
-
-                    <b-table-column centered field="release" label="Release">{{ props.row.release }}</b-table-column>
 
                     <b-table-column field="health" label="Health" numeric sortable>
                         <span
@@ -94,26 +94,35 @@
 
                     <b-table-column field="actions" label="Action">
                         <div class="level" style="padding-bottom: unset;">
-                            <b-button
-                                v-if="props.row.locked"
-                                class="level-item"
-                                icon-right="pencil"
-                                size="is-medium"
-                                @click="onEdit(props.row)"
-                            />
-                            <b-button
-                                v-else
-                                class="level-item"
-                                icon-right="content-save-outline"
-                                size="is-medium"
-                                @click="onSave(props.row)"
-                            />
-                            <b-button
-                                class="level-item"
-                                icon-right="delete-outline"
-                                size="is-medium"
-                                @click="onRemoveRequirement(props.row)"
-                            />
+                            <template v-if="props.row.locked">
+                                <b-button
+                                    class="level-item"
+                                    icon-right="pencil"
+                                    size="is-medium"
+                                    @click="onEdit(props.row)"
+                                />
+                                <b-button
+                                    class="level-item"
+                                    icon-right="delete-outline"
+                                    size="is-medium"
+                                    @click="onRemoveRequirement(props.row)"
+                                />
+                            </template>
+                            <template v-else>
+                                <b-button
+                                    class="level-item"
+                                    icon-right="cancel"
+                                    size="is-medium"
+                                    @click="onCancel(props.row)"
+                                />
+                                <b-button
+                                    disabled
+                                    class="level-item"
+                                    icon-right="delete-outline"
+                                    size="is-medium"
+                                    @click="onRemoveRequirement(props.row)"
+                                />
+                            </template>
                             <b-button
                                 disabled
                                 class="level-item"
@@ -122,7 +131,6 @@
                             />
                         </div>
                     </b-table-column>
-                    <!-- <b-table-column label="Summary" width="500">{{ props.row.summary | truncate(80) }}</b-table-column> -->
                 </template>
 
                 <template slot="footer">
@@ -149,9 +157,16 @@
                 </template>
             </b-table>
 
-            <PackageFinder ref="packageFinder" />
-
-            <Installer ref="installer" />
+            <Installer v-if="!editing" ref="installer" />
+            <div v-else class="columns is-centered">
+                <b-button
+                    class="is-primary is-large"
+                    style="margin-top: 20px;"
+                    icon-left="content-save"
+                    size="is-medium"
+                    @click="onSave"
+                >Save</b-button>
+            </div>
         </b-collapse>
     </section>
 </template>
@@ -164,16 +179,18 @@ import { Requirements } from "../types/requirements";
 
 import Vue from "vue";
 import { mapState, mapActions } from "vuex";
-
 import Component from "vue-class-component";
+
 import Installer from "./components/install.vue";
 import PackageFinder from "./components/package-finder.vue";
 import PackageField from "./components/package-field.vue";
+import VersionField from "./components/version-field.vue";
+
+import { PackageVersion } from "../thoth";
 
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require("base/js/namespace");
-import { PackageVersion } from "../thoth";
 
 const BaseUI = Vue.extend({
     props: {
@@ -203,10 +220,11 @@ const BaseUI = Vue.extend({
                 : value;
         }
     },
-    computed: mapState(["data", "loading"]),
+    computed: mapState(["data", "editing", "loading"]),
     components: {
         Installer,
         PackageField,
+        VersionField,
         PackageFinder
     }
 })
@@ -214,17 +232,12 @@ export default class UI extends BaseUI {
     // Component properties and methods set in the decorator
     $refs!: {
         table: any;
-
-        constraint: any;
-        package: any;
-
-        installer: Installer;
-
-        packageFinder: PackageFinder;
     };
 
     data!: any[]; // TODO: PyPI interface
     loading!: boolean;
+
+    updates: any[] = [];
 
     isExpanded = false;
 
@@ -258,10 +271,6 @@ export default class UI extends BaseUI {
         return "is-success";
     }
 
-    onEdit(row: any) {
-        row.locked = !row.locked;
-    }
-
     /*
      * Handle page-change event
      */
@@ -275,11 +284,16 @@ export default class UI extends BaseUI {
         this.removeRequirement(row.package_name);
     }
 
-    onSave(row: any) {
-        const constraint = this.$refs.constraint.value
-        const dep: PackageVersion = new PackageVersion(row.package_name, constraint);
+    onSave() {
+        const req: Requirements = this.$store.getters.requirements;
+        for (const update of this.updates) {
+            const d = _.assign(update.target, update.value);
 
-        this.$store.dispatch("updateRequirement", dep);
+            req.packages[d.package_name] = d.constraint;
+        }
+
+        this.$store.commit("editing", false);
+        this.$store.dispatch("setRequirements", req);
     }
 
     /*
@@ -294,6 +308,21 @@ export default class UI extends BaseUI {
 
     removeRequirement!: (dep: string) => void;
 
+    onCancel(row: any) {
+        row.locked = true;
+
+        // Discard updates for the specific row (if applicable)
+        this.updates = this.updates.filter(
+            d => d.target.package_name !== row.package_name
+        );
+        this.$store.commit("editing", false);
+    }
+
+    onEdit(row: any) {
+        row.locked = false;
+        this.$store.commit("editing", true);
+    }
+
     /*
      * Type style in relation to the value
      */
@@ -307,6 +336,10 @@ export default class UI extends BaseUI {
         } else if (number >= 8) {
             return "is-success";
         }
+    }
+
+    update(row: any, value: any) {
+        this.updates.push({ target: row, value: value });
     }
 
     mounted() {

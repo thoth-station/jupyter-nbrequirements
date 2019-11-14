@@ -5,7 +5,7 @@ import Vue from "vue"
 import Vuex from "vuex"
 
 
-import { Add, Set, Remove } from "../cli/requirements"
+import * as command from "../cli/requirements"
 import { Requirements } from "../types/requirements"
 import { PackageVersion } from "../thoth"
 
@@ -33,16 +33,32 @@ export default new Vuex.Store( {
         // TODO: Create PyPI interface
         data: Array<any>(),
 
+        editing: false,
         loading: false,
 
         requirements: Jupyter.notebook.metadata.requirements,
+
         selectedPackages: [],
 
         status: {},
-
         warnings: Array<UserWarning>(),
     },
+
+    getters: {
+        data: state => state.data,
+        requirements: state => state.requirements
+    },
+
     mutations: {
+
+        editing( state, active: boolean ): void {
+            state.editing = active
+            if ( active )
+                state.status = { current: "editing" }
+            else {
+                state.status = { current: "ready" }
+            }
+        },
 
         ready( state ): void { state.status = { current: "ready" } },
 
@@ -92,12 +108,13 @@ export default new Vuex.Store( {
             for ( const [ pkg, v ] of Object.entries( requirements.packages ) ) {
                 // get info about the package from PyPI
                 let item: {
-                    package_name: string
                     constraint: string
-                    release: string
-                    summary: string
                     health: string
                     locked: boolean
+                    package_name: string
+                    releases: string
+                    summary: string
+                    latest: string
                 }
 
                 await axios
@@ -110,12 +127,13 @@ export default new Vuex.Store( {
                             version = v.version
                         }
                         item = {
+                            constraint: version as string,
+                            health: ( Math.random() * 10 ).toPrecision( 2 ), // TODO
+                            latest: package_data.info.version,
                             locked: true,
                             package_name: pkg,
-                            constraint: version as string,
-                            release: package_data.info.version,
                             summary: package_data.info.summary,
-                            health: ( Math.random() * 10 ).toPrecision( 2 ) // TODO
+                            releases: package_data.releases,
                         }
                         data.push( item )
                     } )
@@ -133,7 +151,7 @@ export default new Vuex.Store( {
         },
 
         addRequirement( { dispatch }, dep: PackageVersion ) {
-            const cmd = new Add()
+            const cmd = new command.Add()
             cmd.run( {
                 dev: dep.develop,
                 index: "pypi",
@@ -144,7 +162,7 @@ export default new Vuex.Store( {
         },
 
         removeRequirement( { dispatch }, name: string ) {
-            const cmd = new Remove()
+            const cmd = new command.Remove()
             cmd.run( {
                 dependency: name
             } )
@@ -157,7 +175,7 @@ export default new Vuex.Store( {
         },
 
         setRequirements( { dispatch }, req: Requirements ) {
-            const cmd = new Set()
+            const cmd = new command.Set()
             cmd.run( {
                 requirements: req
             } )

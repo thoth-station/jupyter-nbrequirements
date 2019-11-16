@@ -1,6 +1,13 @@
 <template>
     <section>
-        <b-field :label="label" label-position="inside" custom-class="is-medium">
+        <b-field
+            ref="field"
+            label-position="inside"
+            custom-class="is-medium"
+            :label="label"
+            :message="{ 'Invalid or non-existing package name': hasError }"
+            :type="{ 'is-danger': hasError }"
+        >
             <b-autocomplete
                 ref="autocomplete"
                 icon="magnify"
@@ -40,6 +47,7 @@ import Vue from "vue";
 import { mapMutations, mapActions } from "vuex";
 
 import Component from "vue-class-component";
+import { Emit, Watch } from "vue-property-decorator";
 
 import { PackageVersion } from "../../thoth";
 
@@ -49,8 +57,6 @@ import Jupyter = require("base/js/namespace");
 const BaseComponent = Vue.extend({
     props: {
         label: String,
-
-        selected: Object,
         placeholder: String
     }
 });
@@ -75,15 +81,27 @@ export default class PackageField extends BaseComponent {
     // Typed
     $refs!: {
         autocomplete: any;
+        field: any;
     };
     label!: string;
+    placeholder!: string;
 
     // Properties
     data: any[] = [];
+    selection: any = null;
 
     // State
+    error: boolean = true;
     fetching: boolean = false;
-    selectedPackage: PackageVersion | null = null;
+
+    get hasError(): boolean {
+        return this.error;
+    }
+
+    set hasError(on: boolean) {
+        this.error = on;
+        this.$emit("error", on);
+    }
 
     get isFetching(): boolean {
         return this.fetching;
@@ -104,10 +122,16 @@ export default class PackageField extends BaseComponent {
     get getAsyncData() {
         return debounce(name => {
             if (!name.length) {
+                this.hasError = true;
+
                 this.packages = [];
+                this.selected = null;
+
                 return;
             }
-            this.isFetching = true;
+
+            this.fetching = true;
+            this.hasError = false;
 
             const url = `https://pypi.org/pypi/${name}/json`;
             axios
@@ -117,11 +141,11 @@ export default class PackageField extends BaseComponent {
                 })
                 .catch(error => {
                     this.packages = [];
-                    throw error;
+                    this.hasError = true;
                 })
                 // @ts-ignore
                 .finally(() => {
-                    this.isFetching = false;
+                    this.fetching = false;
                 });
         }, 500);
     }
@@ -132,10 +156,39 @@ export default class PackageField extends BaseComponent {
         return;
     }
 
+    get selected(): any {
+        return this.selection;
+    }
+
+    set selected(selection: any) {
+        if (selection) this.selection = selection;
+        else
+            this.selection = {
+                package_name: null,
+                constraint: "*"
+            };
+    }
+
+    @Emit("select")
     onSelect(option: any) {
-        if (!option) return;
-        this.selected = option;
-        this.selectedPackage = new PackageVersion(option.info.name);
+        if (!option) {
+            this.selected = null;
+            this.hasError = true;
+        } else {
+            const packageData = {
+                constraint: "*",
+                health: (Math.random() * 10).toPrecision(2), // TODO
+                latest: _.get(option.info, "version"),
+                locked: false,
+                package_name: _.get(option.info, "name"),
+                summary: _.get(option.info, "summary"),
+                releases: _.get(option, "releases", {})
+            };
+
+            this.selected = packageData;
+        }
+
+        return this.selected;
     }
 
     onFocusIn(event: Event) {
@@ -148,12 +201,36 @@ export default class PackageField extends BaseComponent {
     onFocusOut() {
         // enable keyboard manager
         Jupyter.notebook.keyboard_manager.enable();
+
+        // trigger select to store current selection
+        const selectedPackage = this.$refs.autocomplete.newValue;
+
+        let packageData = null;
+        for (const p of this.data) {
+            if (p.package_name === selectedPackage) packageData = p;
+        }
+
+        if (!packageData && selectedPackage) {
+            // Query once more (for quickly typing users)
+            const url = `https://pypi.org/pypi/${selectedPackage}/json`;
+            axios
+                .get(url)
+                .then(({ data }) => {
+                    this.onSelect(data);
+                    this.hasError = false;
+                })
+                .catch(error => {
+                    this.hasError = true;
+                });
+        }
     }
 
     mounted() {
-        const icon = this.$refs.autocomplete.$el.querySelector(".mdi");
-
-        icon.className = icon.className.replace(/mdi-(\d+)px/, "mdi-18px");
+        // search and alert icons
+        const icons = this.$refs.autocomplete.$el.querySelectorAll(".mdi");
+        for (const icon of icons) {
+            icon.className = icon.className.replace(/mdi-(\d+)px/, "mdi-18px");
+        }
 
         this.$el.addEventListener("click", event => {
             event.preventDefault();

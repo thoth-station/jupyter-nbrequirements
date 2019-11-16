@@ -71,7 +71,7 @@
                         width="150"
                     >
                         <VersionField
-                            v-on:selected="value => update(props.row, {constraint: value})"
+                            v-on:select="value => update(props.row, {constraint: value})"
                             :data="props.row.releases"
                             :placeholder="props.row.constraint"
                         />
@@ -89,7 +89,7 @@
                             class="tag"
                             style="width: 3.5em; font-size: .65em;"
                             :class="type(props.row.health)"
-                        >{{ props.row.health }}</span>
+                        >{{ props.row.health || "?" }}</span>
                     </b-table-column>
 
                     <b-table-column field="actions" label="Action">
@@ -99,13 +99,13 @@
                                     class="level-item"
                                     icon-right="pencil"
                                     size="is-medium"
-                                    @click="onEdit(props.row)"
+                                    @click="onEdit(props.row, props.index)"
                                 />
                                 <b-button
                                     class="level-item"
                                     icon-right="delete-outline"
                                     size="is-medium"
-                                    @click="onRemoveRequirement(props.row)"
+                                    @click="onRemoveRequirement(props.row, props.index)"
                                 />
                             </template>
                             <template v-else>
@@ -113,14 +113,14 @@
                                     class="level-item"
                                     icon-right="cancel"
                                     size="is-medium"
-                                    @click="onCancel(props.row)"
+                                    @click="onCancelEdit(props.row, props.index)"
                                 />
                                 <b-button
                                     disabled
                                     class="level-item"
                                     icon-right="delete-outline"
                                     size="is-medium"
-                                    @click="onRemoveRequirement(props.row)"
+                                    @click="onRemoveRequirement(props.row, props.index)"
                                 />
                             </template>
                             <b-button
@@ -133,8 +133,65 @@
                     </b-table-column>
                 </template>
 
+                <!-- Footer -->
+
                 <template slot="footer">
-                    <span />
+                    <template v-if="newRequirement">
+                        <b-table-column sortable field="package_name" label="Package" width="250">
+                            <PackageField
+                                v-on:error="err => hasError = err"
+                                v-on:select="value => newRequirement = value"
+                                placeholder="e.g. pandas"
+                            />
+                        </b-table-column>
+                        <b-table-column centered field="constraint" label="Constraint" width="150">
+                            <VersionField
+                                v-on:error="err => hasError = err"
+                                v-on:select="value => update(newRequirement, {constraint: value})"
+                                :data="newRequirement.releases"
+                                :placeholder="newRequirement.constraint || '*'"
+                            />
+                        </b-table-column>
+                        <b-table-column field="health" label="Health" numeric sortable>
+                            <span
+                                class="tag"
+                                style="width: 3.5em; font-size: .65em;"
+                                :class="type(newRequirement.health)"
+                            >{{ newRequirement.health || "?" }}</span>
+                        </b-table-column>
+
+                        <b-table-column field="actions" label="Action">
+                            <div class="level" style="padding-bottom: unset;">
+                                <b-button
+                                    class="level-item"
+                                    icon-right="cancel"
+                                    size="is-medium"
+                                    @click="onCancelAdd(newRequirement)"
+                                />
+                                <b-button
+                                    disabled
+                                    class="level-item"
+                                    icon-right="delete-outline"
+                                    size="is-medium"
+                                />
+                                <b-button
+                                    disabled
+                                    class="level-item"
+                                    icon-right="pin-outline"
+                                    size="is-medium"
+                                />
+                            </div>
+                        </b-table-column>
+                    </template>
+
+                    <div v-else class="columns is-centered">
+                        <b-button
+                            style="margin-top:15px;"
+                            icon-right="plus-circle-outline"
+                            size="is-medium"
+                            @click="onNewRequirement"
+                        />
+                    </div>
                 </template>
 
                 <template slot="empty">
@@ -157,9 +214,10 @@
                 </template>
             </b-table>
 
-            <Installer v-if="!editing" ref="installer" />
+            <Installer v-if="!editing" :disabled="hasError" ref="installer" />
             <div v-else class="columns is-centered">
                 <b-button
+                    :disabled="hasError"
                     class="is-primary is-large"
                     style="margin-top: 20px;"
                     icon-left="content-save"
@@ -182,7 +240,6 @@ import { mapState, mapActions } from "vuex";
 import Component from "vue-class-component";
 
 import Installer from "./components/install.vue";
-import PackageFinder from "./components/package-finder.vue";
 import PackageField from "./components/package-field.vue";
 import VersionField from "./components/version-field.vue";
 
@@ -224,22 +281,20 @@ const BaseUI = Vue.extend({
     components: {
         Installer,
         PackageField,
-        VersionField,
-        PackageFinder
+        VersionField
     }
 })
 export default class UI extends BaseUI {
-    // Component properties and methods set in the decorator
+    // Typed
     $refs!: {
         table: any;
     };
-
     data!: any[]; // TODO: PyPI interface
     loading!: boolean;
 
+    // Properties
+    newData: any = null;
     updates: any[] = [];
-
-    isExpanded = false;
 
     page: number = 1;
     perPage: number = 10;
@@ -247,6 +302,18 @@ export default class UI extends BaseUI {
     sortField: string = "health";
     sortOrder: string = "desc";
     defaultSortOrder: string = "desc";
+
+    // State
+    error: boolean = false;
+    isExpanded: boolean = false;
+
+    get hasError(): boolean {
+        return this.error;
+    }
+
+    set hasError(on: boolean) {
+        this.error = on;
+    }
 
     get isEmpty(): boolean {
         return this.$store.state.data.length <= 0;
@@ -271,9 +338,22 @@ export default class UI extends BaseUI {
         return "is-success";
     }
 
-    /*
-     * Handle page-change event
-     */
+    get newRequirement(): any {
+        return this.newData;
+    }
+
+    set newRequirement(data: any) {
+        this.newData = data;
+    }
+
+    onNewRequirement() {
+        this.newData = {
+            package_name: null,
+            constraint: "*",
+            releases: {}
+        };
+        this.$store.commit("editing", true);
+    }
 
     onPageChange(page: number) {
         this.page = page;
@@ -292,13 +372,20 @@ export default class UI extends BaseUI {
             req.packages[d.package_name] = d.constraint;
         }
 
+        if (this.newData) {
+            const dep = new PackageVersion(
+                this.newData.package_name,
+                this.newData.constraint
+            );
+            this.$store.dispatch("addRequirement", dep);
+        }
+
+        this.newData = null;
+
         this.$store.commit("editing", false);
         this.$store.dispatch("setRequirements", req);
     }
 
-    /*
-     * Handle sort event
-     */
     onSort(field: string, order: string) {
         this.sortField = field;
         this.sortOrder = order;
@@ -306,15 +393,23 @@ export default class UI extends BaseUI {
         this.$store.commit("sortData", { field: field, order: order });
     }
 
-    removeRequirement!: (dep: string) => void;
+    onCancelAdd(row: any) {
+        this.newRequirement = null;
+        this.$store.commit("editing", false);
+    }
 
-    onCancel(row: any) {
-        row.locked = true;
+    onCancelEdit(row: any, index: number) {
+        if (_.isUndefined(row.package_name) || !row.package_name) {
+            this.$store.commit("removeByIndex", index);
+        } else {
+            // Discard updates for a specific row (if applicable)
+            row.locked = true;
 
-        // Discard updates for the specific row (if applicable)
-        this.updates = this.updates.filter(
-            d => d.target.package_name !== row.package_name
-        );
+            this.updates = this.updates.filter(
+                d => d.target.package_name !== row.package_name
+            );
+        }
+
         this.$store.commit("editing", false);
     }
 
@@ -322,6 +417,8 @@ export default class UI extends BaseUI {
         row.locked = false;
         this.$store.commit("editing", true);
     }
+
+    removeRequirement!: (dep: string) => void;
 
     /*
      * Type style in relation to the value
@@ -349,6 +446,10 @@ export default class UI extends BaseUI {
 </script>
 
 <style lang="scss">
+.help {
+    font-size: 0.95rem;
+}
+
 .vue-container {
     padding: 0px 30px 30px 30px;
 }

@@ -51,16 +51,24 @@ export default new Vuex.Store( {
 
     mutations: {
 
-        editing( state, active: boolean ): void {
-            state.editing = active
-            if ( active )
-                state.status = { current: "editing" }
-            else {
-                state.status = { current: "ready" }
-            }
+        /* Data operations */
+
+        push( state, row: any ) {
+            state.data.push( row )
         },
 
-        ready( state ): void { state.status = { current: "ready" } },
+        pop( state ) {
+            state.data.pop()
+        },
+
+        remove( state, row: any ) {
+            const idx = state.data.indexOf( row )
+            delete state.data[ idx ]
+        },
+
+        removeByIndex( state, index: number ) {
+            delete state.data[ index ]
+        },
 
         sortData( state, { field, order }: { field: string, order: "asc" | "desc" } ) {
             // sort data in place
@@ -76,6 +84,28 @@ export default new Vuex.Store( {
             } )
         },
 
+        /* States */
+
+        editing( state, on: boolean ): void {
+            state.editing = on
+            if ( on )
+                state.status = { current: "editing" }
+            else {
+                state.status = { current: "ready" }
+            }
+        },
+
+        loading( state, on: boolean ): void {
+            state.loading = on
+            if ( on )
+                state.status = { current: "loading" }
+            else {
+                state.status = { current: "ready" }
+            }
+        },
+
+        ready( state ): void { state.status = { current: "ready" } },
+
         status( state, status: ExecutionStatus ): void {
             if ( _.isUndefined( status ) )
                 throw new Error( "Store received status of type 'undefined'" )
@@ -83,6 +113,7 @@ export default new Vuex.Store( {
             state.status = status
         }
     },
+
     actions: {
         sync( { state, dispatch } ) {
             state.requirements = Jupyter.notebook.metadata.requirements

@@ -147,7 +147,7 @@
                         <b-table-column centered field="constraint" label="Constraint" width="150">
                             <VersionField
                                 v-on:error="err => hasError = err"
-                                v-on:select="value => update(newRequirement, {constraint: value})"
+                                v-on:select="value => newRequirement.constraint = value"
                                 :data="newRequirement.releases"
                                 :placeholder="newRequirement.constraint || '*'"
                             />

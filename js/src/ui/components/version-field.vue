@@ -173,6 +173,14 @@ export default class VersionField extends Vue {
             this.selected = null;
         }
 
+        this.selected = option.release as string;
+        if (this.selected.length <= 0 || this.selected === "*") {
+            this.releaseFilter = ".*";
+            this.hasWarning = true;
+        } else {
+            this.releaseFilter = this.selected;
+        }
+
         return this.selected;
     }
 
@@ -196,22 +204,12 @@ export default class VersionField extends Vue {
         Jupyter.notebook.keyboard_manager.enable();
 
         setTimeout(() => {
-            const selected =
-                this.$refs.autocomplete.newValue ||
-                this.$refs.autocomplete.$attrs.placeholder;
-            if (!selected.length || selected === "*") {
-                this.releaseFilter = ".*";
-                this.hasWarning = true;
-            } else {
-                this.releaseFilter = selected;
-            }
-
-            const releases = this.releases;
-            if (releases.length > 0) {
-                this.hasError = false;
-                this.onSelect(releases[0]);
-            } else {
-                this.hasError = true;
+            const value = this.$refs.autocomplete.newValue;
+            if (value !== this.selected) {
+                const data = this.releases.filter(d => d.release === value);
+                if (data.length <= 0) {
+                    this.hasError = true;
+                }
             }
         }, 500);
     }

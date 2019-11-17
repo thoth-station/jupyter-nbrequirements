@@ -181,7 +181,7 @@ export default class VersionField extends Vue {
             this.releaseFilter = this.selected;
         }
 
-        return this.selected;
+        return `==${this.selected}`;
     }
 
     onTyping(value: string) {

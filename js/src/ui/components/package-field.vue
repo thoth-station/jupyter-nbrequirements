@@ -239,5 +239,12 @@ export default class PackageField extends BaseComponent {
             return false;
         });
     }
+
+    updated() {
+        const icons = this.$refs.autocomplete.$el.querySelectorAll(".mdi");
+        for (const icon of icons) {
+            icon.className = icon.className.replace(/mdi-(\d+)px/, "mdi-18px");
+        }
+    }
 }
 </script>

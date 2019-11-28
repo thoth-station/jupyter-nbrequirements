@@ -37,11 +37,6 @@ if ( window.require ) {
             }
         }
     } );
-    window.require( [ 'nbrequirements' ], ( module ) => {
-        window.vm = module.vm
-
-        console.log( "Loaded extension: jupyter-nbrequirements" )
-    } )
 }
 
 // Export the required load_ipython_extension
@@ -50,7 +45,7 @@ module.exports = {
         // wait for both the kernel and the jupyter-require extension to be loaded
         window.require( [
             "base/js/namespace",
-            "base/js/events"
+            "base/js/events",
         ], ( Jupyter, events ) => {
             const options = {
                 silent: false,
@@ -64,10 +59,17 @@ module.exports = {
             // Wait for the required extension to be loaded
             events.one( "extension_loaded.JupyterRequire", () => {
 
-                console.info( "Loading magic commands: [ '%dep', '%requirements', '%kernel' ]" )
+                window.require( [ 'nbrequirements' ], ( module ) => {
+                    Promise.resolve( module.vm )
+                        .then( ( vm ) => window.vm = vm )
 
-                const cmd = "%reload_ext " + __extension__
-                Jupyter.notebook.kernel.execute( cmd, {}, options )
+                    console.info( "Loading magic commands: [ '%dep', '%requirements', '%kernel' ]" )
+
+                    const cmd = "%reload_ext " + __extension__
+                    Jupyter.notebook.kernel.execute( cmd, {}, options )
+
+                    console.log( "Loaded extension: jupyter-nbrequirements" )
+                } )
 
             } )
         } )

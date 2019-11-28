@@ -171,9 +171,11 @@ export default class VersionField extends Vue {
     onSelect(option: any) {
         if (!option) {
             this.selected = null;
+            return;
         }
 
         this.selected = option.release as string;
+
         if (this.selected.length <= 0 || this.selected === "*") {
             this.releaseFilter = ".*";
             this.hasWarning = true;
@@ -181,7 +183,9 @@ export default class VersionField extends Vue {
             this.releaseFilter = this.selected;
         }
 
-        return `==${this.selected}`;
+        const op = this.selected === "*" ? "" : "=="; // TODO: dropdown control
+
+        return `${op}${this.selected}`;
     }
 
     onTyping(value: string) {

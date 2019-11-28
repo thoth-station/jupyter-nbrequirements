@@ -1,9 +1,10 @@
 <template>
-    <section>
+    <section ref="app" id="nbrequirements-ui">
         <b-collapse aria-id="nbrequirements-ui" class="panel" :open.sync="isExpanded">
             <div
                 aria-controls="nbrequirements-ui"
-                class="nbrequirements-ui-trigger columns is-centered"
+                id="nbrequirements-ui-trigger "
+                class="columns is-centered"
                 role="button"
                 slot="trigger"
             >
@@ -13,6 +14,15 @@
                     :closable="false"
                 >
                     <b-icon
+                        v-if="status.current === 'installation'"
+                        custom-class="fa-spin mdi-18px"
+                        icon="sync-alt"
+                        pack="fas"
+                        size="is-small"
+                        style="position: absolute; top: -20px; right: 18px;"
+                    ></b-icon>
+                    <b-icon
+                        v-else
                         custom-class="mdi-18px"
                         icon="pin-outline"
                         size="is-small"
@@ -20,7 +30,7 @@
                         :type="pinColour"
                     ></b-icon>
                     <b-loading :active.sync="displayLoader" :can-cancel="true" :is-full-page="true">
-                        <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div id="nbrequirements-loader">
                             <b-icon
                                 pack="fas"
                                 icon="sync-alt"
@@ -277,7 +287,7 @@ const BaseUI = Vue.extend({
                 : value;
         }
     },
-    computed: mapState(["data", "editing", "loading"]),
+    computed: mapState(["data", "editing", "loading", "status"]),
     components: {
         Installer,
         PackageField,
@@ -446,14 +456,35 @@ export default class UI extends BaseUI {
 </script>
 
 <style lang="scss">
-.help {
-    font-size: 0.95rem;
+#nbrequirements-loader {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+
+    align-items: center;
+    align-content: center;
+
+    justify-content: center;
 }
 
 .vue-container {
     padding: 0px 30px 30px 30px;
 }
 
+::shadow {
+    .help {
+        font-size: 0.95rem;
+    }
+}
+
 @import url(https://use.fontawesome.com/releases/v5.2.0/css/all.css);
 @import url(https://cdn.materialdesignicons.com/2.5.94/css/materialdesignicons.min.css);
+@import url(https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css);
 </style>

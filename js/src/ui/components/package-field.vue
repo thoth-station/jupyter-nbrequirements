@@ -50,6 +50,7 @@ import Component from "vue-class-component";
 import { Emit, Watch } from "vue-property-decorator";
 
 import { PackageVersion } from "../../thoth";
+import { PackageData } from "../store";
 
 // @ts-ignore
 import Jupyter = require("base/js/namespace");
@@ -175,15 +176,12 @@ export default class PackageField extends BaseComponent {
             this.selected = null;
             this.hasError = true;
         } else {
-            const packageData = {
+            const packageName: string = _.get(option.info, "name").toLowerCase();
+            const packageData = new PackageData(packageName, {
                 constraint: "*",
-                health: "?", // TODO
-                latest: _.get(option.info, "version"),
-                locked: false,
-                package_name: _.get(option.info, "name"),
-                summary: _.get(option.info, "summary"),
-                releases: _.get(option, "releases", {})
-            };
+                package_name: packageName,
+                package_data: option
+            });
 
             this.selected = packageData;
         }

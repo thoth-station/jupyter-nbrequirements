@@ -148,7 +148,7 @@ export default class VersionField extends Vue {
         }
 
         // matching most recent version
-        if (this.releaseFilter === ".*")
+        if (this.releaseFilter === ".*" || !this.releaseFilter)
             releases.unshift({
                 release: "*",
                 data: { upload_time: new Date().toLocaleDateString() }
@@ -170,6 +170,7 @@ export default class VersionField extends Vue {
     @Emit("select")
     onSelect(option: any) {
         if (!option) {
+            this.releaseFilter = ".*";
             this.selected = null;
             return;
         }
@@ -209,7 +210,11 @@ export default class VersionField extends Vue {
 
         setTimeout(() => {
             const value = this.$refs.autocomplete.newValue;
-            if (value !== this.selected) {
+            if (!value) {
+                this.releaseFilter = ".*";
+                this.selected = "*";
+                this.hasError = false;
+            } else if (value !== this.selected) {
                 const data = this.releases.filter(d => d.release === value);
                 if (data.length <= 0) {
                     this.hasError = true;

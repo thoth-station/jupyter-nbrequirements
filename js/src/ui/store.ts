@@ -25,7 +25,7 @@ interface ExecutionStatus {
     current: "ready" | "installation" | "success" | "failed"
 }
 
-class PackageData {
+export class PackageData {
     public constraint: string = "*"
     public package_data: any
     public repo_data: any
@@ -33,20 +33,20 @@ class PackageData {
     public locked: boolean = true
 
     public constructor(
-        public readonly package_name: string,
+        public readonly package_name?: string,
         data?: {
             constraint?: string,
             locked?: boolean,
-            package_name?: string,
-            package_data?: any,
+            package_name: string,
+            package_data: any,
             repo_data?: any,
         } ) {
 
         Object.assign( this, data )
     }
 
-    public get health(): number {
-        if ( !this.stars ) return -1
+    public get health(): number | null {
+        if ( !this.stars ) return null
 
         // This should really be more sophisticated
         if ( this.stars > 5000 ) return 0.8
@@ -60,10 +60,15 @@ class PackageData {
     public get latest(): string { return this.package_data.info.version }
 
     public get releases(): any[] {
-        return this.package_data.info.releases
+        return this.package_data.releases
     }
 
-    public get stars(): number { return this.repo_data.stargazers_count }
+    public get stars(): number | null {
+        if ( !this.repo_data )
+            return null
+
+        return this.repo_data.stargazers_count
+    }
 
     public get summary(): string { return this.package_data.info.summary }
 }
@@ -186,17 +191,18 @@ export default new Vuex.Store( {
                     .get( `https://pypi.org/pypi/${ pkg }/json` )
                     .then( async response => {
                         const package_data = response.data
-                        const source_url: string | null = _.get( package_data.info.project_urls, "Source Code" )
+                        const github_url = Object.values(
+                            package_data.info.project_urls as { [ k: string ]: string }
+                        ).filter( ( url: string ) => url.match( /github.com/ ) )
 
                         let repo_data = {}
-
-                        if ( source_url ) {
-                            const m = source_url.match( /github.com\/(.*)\// )
+                        if ( github_url ) {
+                            const m = github_url[ 0 ].match( /github.com\/(.*?)\// )
                             if ( m && m[ 1 ].length > 0 ) {
                                 const owner = m[ 1 ]
-                                const github_url = `https://api.github.com/repos/${ owner }/${ pkg }`
+                                const api_url = `https://api.github.com/repos/${ owner }/${ pkg }`
 
-                                repo_data = await axios.get( github_url )
+                                repo_data = await axios.get( api_url )
                                     .then( resp => resp.data )
                                     .catch( () => { } )
                             }
@@ -204,7 +210,7 @@ export default new Vuex.Store( {
 
                         let version = v
                         if ( typeof v !== "string" ) {
-                            version = v.version
+                            version = v ? v.version : "*"
                         }
 
                         item = new PackageData( pkg, {
@@ -218,6 +224,12 @@ export default new Vuex.Store( {
                     } )
                     .catch( ( err: Error ) => {
                         state.data = []
+                        state.loading = false
+                        state.warnings.push( {
+                            "context": this,
+                            "level": "danger",
+                            "msg": err.message
+                        } )
                         throw err
                     } )
             }

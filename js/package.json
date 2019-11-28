@@ -65,6 +65,6 @@
   },
   "types": "types/index.d.ts",
   "_moduleAliases": {
-    "@": "dist"
+    "@": "dist/src"
   }
 }

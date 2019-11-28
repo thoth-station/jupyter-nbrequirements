@@ -177,7 +177,7 @@ export default class PackageField extends BaseComponent {
         } else {
             const packageData = {
                 constraint: "*",
-                health: (Math.random() * 10).toPrecision(2), // TODO
+                health: "?", // TODO
                 latest: _.get(option.info, "version"),
                 locked: false,
                 package_name: _.get(option.info, "name"),

@@ -11,6 +11,8 @@ import { PackageVersion } from "../thoth"
 
 import { UserWarning } from "../types/ui"
 
+Vue.use( Vuex )
+
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
@@ -23,8 +25,48 @@ interface ExecutionStatus {
     current: "ready" | "installation" | "success" | "failed"
 }
 
+class PackageData {
+    public constraint: string = "*"
+    public package_data: any
+    public repo_data: any
 
-Vue.use( Vuex )
+    public locked: boolean = true
+
+    public constructor(
+        public readonly package_name: string,
+        data?: {
+            constraint?: string,
+            locked?: boolean,
+            package_name?: string,
+            package_data?: any,
+            repo_data?: any,
+        } ) {
+
+        Object.assign( this, data )
+    }
+
+    public get health(): number {
+        if ( !this.stars ) return -1
+
+        // This should really be more sophisticated
+        if ( this.stars > 5000 ) return 0.8
+        if ( this.stars > 1000 ) return 0.6
+        if ( this.stars > 100 ) return 0.4
+        if ( this.stars > 10 ) return 0.2
+
+        return 1
+    }
+
+    public get latest(): string { return this.package_data.info.version }
+
+    public get releases(): any[] {
+        return this.package_data.info.releases
+    }
+
+    public get stars(): number { return this.repo_data.stargazers_count }
+
+    public get summary(): string { return this.package_data.info.summary }
+}
 
 export default new Vuex.Store( {
 
@@ -138,34 +180,40 @@ export default new Vuex.Store( {
             const data: any[] = []
             for ( const [ pkg, v ] of Object.entries( requirements.packages ) ) {
                 // get info about the package from PyPI
-                let item: {
-                    constraint: string
-                    health: string
-                    locked: boolean
-                    package_name: string
-                    releases: string
-                    summary: string
-                    latest: string
-                }
+                let item: PackageData
 
                 await axios
                     .get( `https://pypi.org/pypi/${ pkg }/json` )
-                    .then( response => {
+                    .then( async response => {
                         const package_data = response.data
+                        const source_url: string | null = _.get( package_data.info.project_urls, "Source Code" )
+
+                        let repo_data = {}
+
+                        if ( source_url ) {
+                            const m = source_url.match( /github.com\/(.*)\// )
+                            if ( m && m[ 1 ].length > 0 ) {
+                                const owner = m[ 1 ]
+                                const github_url = `https://api.github.com/repos/${ owner }/${ pkg }`
+
+                                repo_data = await axios.get( github_url )
+                                    .then( resp => resp.data )
+                                    .catch( () => { } )
+                            }
+                        }
 
                         let version = v
                         if ( typeof v !== "string" ) {
                             version = v.version
                         }
-                        item = {
+
+                        item = new PackageData( pkg, {
                             constraint: version as string,
-                            health: ( Math.random() * 10 ).toPrecision( 2 ), // TODO
-                            latest: package_data.info.version,
                             locked: true,
+                            package_data: package_data,
                             package_name: pkg,
-                            summary: package_data.info.summary,
-                            releases: package_data.releases,
-                        }
+                            repo_data: repo_data
+                        } )
                         data.push( item )
                     } )
                     .catch( ( err: Error ) => {

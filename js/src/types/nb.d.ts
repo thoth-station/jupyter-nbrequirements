@@ -1,5 +1,4 @@
 import * as io from "./io"
-import { Requirements } from "./requirements"
 import { Callbacks } from "./io"
 
 export interface Context {
@@ -19,6 +18,8 @@ export interface CodeCell {
     source: string
 
     get_callbacks: () => Callbacks
+
+    toJSON: () => any
 }
 
 export interface CellMetadata { [ key: string ]: any }

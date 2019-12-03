@@ -17,6 +17,7 @@ import { Logger } from "./config"
 import { Requirements, RequirementsLocked, ResolutionEngine } from "./types/requirements"
 
 import { KernelInfo, KernelInfoProxy, KernelSpec } from "./kernel"
+import { CodeCell } from "./types/nb"
 import {
     PackageVersion,
     Source,
@@ -45,13 +46,34 @@ Jupyter.Notebook.prototype.get_requirements_locked = _.partial( get_requirements
 
 Jupyter.Notebook.prototype.get_kernel_info = _.partial( get_kernel_info, Jupyter.notebook )
 
-Object.defineProperty( _, "execution_count", {
-    // Defines total number of executions in the current session
-    value: 0,
+Object.defineProperty( window, "__execution_count__", {
+    // Count total number of executions in the current session on a cell basis
+    value: get_execution_count(),
     writable: true
 } )
-// @ts-ignore
-events.on( "kernel_ready.Kernel", () => { _.execution_count = 0 } )
+
+events.on( "kernel_ready.Kernel", () => {
+    // @ts-ignore
+    window.__execution_count__ = 0
+} )
+events.on( "execute.CodeCell", () => {
+    // @ts-ignore
+    window.__execution_count__ += 1
+} )
+
+function get_execution_count(): number {
+    let total = 0
+
+    Jupyter.notebook.get_cells().forEach( ( cell: CodeCell ) => {
+        if ( cell.cell_type === "code" ) {
+            const data = cell.toJSON()
+
+            total += data.execution_count || 0
+        }
+    } )
+
+    return total
+}
 
 
 export function set_requirements( notebook: Jupyter.Notebook, requirements: Requirements ): void {

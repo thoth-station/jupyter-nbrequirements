@@ -2,8 +2,214 @@ Changelog
 =========
 
 
-0.3.0
+0.4.0
 -----
+
+New
+~~~
+- Reload the extension when the kernel restarts. [Marek Cermak]
+- Added .eslintignore. [Marek Cermak]
+- Collect more data about packages. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   ../Makefile
+  modified:   package.json
+  modified:   src/types/index.d.ts
+  modified:   src/ui/components/package-field.vue
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+- Added version field component. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  new file:   js/src/ui/components/install.vue
+  new file:   js/src/ui/components/version-field.vue
+- Validate new packages before saving them. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  deleted:    js/src/ui/components/package-finder.vue
+  modified:   js/src/ui/components/package-field.vue
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Added possibility to edit dependencies. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/index.ts
+  modified:   js/src/cli/requirements.ts
+  new file:   js/src/ui/components/package-field.vue
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Fixed requirements installation via UI. [Marek Cermak]
+- New widget to install requirements with UI. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  Changes to be committed:
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/core.ts
+  modified:   js/src/thoth.ts
+  modified:   js/src/types/nb.d.ts
+  modified:   js/src/ui/components/package-finder.vue
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+  modified:   js/webpack.config.js
+- Execution without context. [Marek Cermak]
+- Collapsible Requirements UI. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Clear packageFinder fields when package is added. [Marek Cermak]
+- Move UI out of the notebook container. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/ui.vue
+- CLI commands trigger store sync. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/index.ts
+  modified:   js/src/ui/store.ts
+- Display loading message when UI is loading. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Added functionality to add requirements via UI. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/command.ts
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/ui/components/package-finder.vue
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- %dep add can load requirements from Pipfile. [Marek Cermak]
+- Allow package name aliases. [Marek Cermak]
+
+  Added option to specify package name alias in `%dep add`. This is useful
+  if package name differs from the import.
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/notebook.ts
+  modified:   js/src/types/requirements.d.ts
+  modified:   jupyter_nbrequirements/__init__.py
+
+Changes
+~~~~~~~
+- Get rid of the assets folder. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  deleted:    src/ui/assets/_ui.scss
+  deleted:    src/ui/assets/style.scss
+  modified:   webpack.common.js
+  modified:   webpack.dev.js
+  modified:   webpack.prod.js
+- Use a common webpack config for dev/prod. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  deleted:    webpack.config.prod.js
+  modified:   package-lock.json
+  modified:   package.json
+  new file:   webpack.dev.js
+  new file:   webpack.prod.js
+- Make notification font bigger. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/index.ts
+  modified:   js/src/utils.ts
+- Use Custom VueContainer element. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/package-lock.json
+  modified:   js/package.json
+  modified:   js/src/index.ts
+  new file:   js/src/ui/container.ts
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/ui.vue
+  modified:   js/webpack.config.js
+
+Fix
+~~~
+- Fixed missing webpack common module. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  renamed:    webpack.config.js -> webpack.common.js
+  modified:   webpack.dev.js
+  modified:   webpack.prod.js
+- Added forgotten modules to git. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  new file:   js/src/types/ui.ts
+  new file:   js/src/ui/assets/_ui.scss
+  new file:   js/src/ui/assets/style.scss
+- Fixed issues with repo_data and versions. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/ui/components/package-field.vue
+  modified:   src/ui/components/version-field.vue
+  modified:   src/ui/store.ts
+- Fixed misplaced loading position. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/extension.js
+  modified:   js/src/ui/components/version-field.vue
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/ui.vue
+  modified:   js/webpack.config.js
+- Emit version constraint with operator. [Marek Cermak]
+- Fixed version constraint not being saved. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/ui/components/version-field.vue
+  modified:   src/ui/ui.vue
+- Fixed alert icon on update as well. [Marek Cermak]
+- Allow editing multiple dependencies. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Fixed incorrect event propagation. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/components/package-finder.vue
+  modified:   js/src/ui/container.ts
+- Do not display page load when UI is expanded. [Marek Cermak]
+- Fixed escaped newlines in Python strings. [Marek Cermak]
+
+  Fixes: #66
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/index.ts
+  modified:   js/src/thoth.ts
+  modified:   js/src/utils.ts
+- Fix `module 'distutils' has no attribute 'sysconfig'` [Marek Cermak]
+
+
+v0.3.0 (2019-10-26)
+-------------------
 
 New
 ~~~

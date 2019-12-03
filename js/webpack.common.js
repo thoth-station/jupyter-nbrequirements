@@ -9,7 +9,6 @@ const VueLoaderPlugin = require( 'vue-loader/lib/plugin' )
 
 module.exports = [
 	{// UI Assets
-		mode: 'development',
 		entry: './src/ui/assets',
 		module: {
 			rules: [ {
@@ -24,7 +23,6 @@ module.exports = [
 		}
 	},
 	{// Notebook extension loader
-		mode: 'development',
 		entry: './src/extension.js',
 		output: {
 			filename: 'extension.js',
@@ -36,7 +34,6 @@ module.exports = [
 		},
 	},
 	{// Notebook extension bundle
-		mode: 'development',
 		entry: './src/index.ts',
 		resolve: {
 			alias: {
@@ -87,7 +84,6 @@ module.exports = [
 			'base/js/utils': { amd: 'base/js/utils' },
 			'notebook/js/codecell': { amd: 'notebook/js/codecell' },
 		},
-		devtool: 'source-map',
 		plugins: [
 			new VueLoaderPlugin()
 		]

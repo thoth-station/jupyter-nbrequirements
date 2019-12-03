@@ -1,6 +1,6 @@
 /* eslint-disable */
 
-const common = require( './webpack.config.js' )
+const common = require( './webpack.common.js' )
 const merge = require( 'webpack-merge' )
 
 const __library__ = 'nbrequirements'
@@ -8,7 +8,7 @@ const __package__ = 'jupyter_nbrequirements'
 
 const VueLoaderPlugin = require( 'vue-loader/lib/plugin' )
 
-module.exports = merge.multiple( [
+module.exports = merge.multiple( common, [
 	{// UI Assets
 		mode: 'development',
 	},

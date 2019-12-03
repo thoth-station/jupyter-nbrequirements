@@ -57,7 +57,7 @@ module.exports = {
             }
 
             // Wait for the required extension to be loaded
-            events.one( "extension_loaded.JupyterRequire", () => {
+            events.on( "extension_loaded.JupyterRequire", () => {
 
                 window.require( [ 'nbrequirements' ], ( module ) => {
                     Promise.resolve( module.vm )

@@ -8,20 +8,6 @@ const __package__ = 'jupyter_nbrequirements'
 const VueLoaderPlugin = require( 'vue-loader/lib/plugin' )
 
 module.exports = [
-	{// UI Assets
-		entry: './src/ui/assets',
-		module: {
-			rules: [ {
-				test: /\.(sc|sa|c)ss$/,
-				use: [
-					"css-loader",
-					{
-						loader: 'sass-loader',
-					}
-				]
-			} ],
-		}
-	},
 	{// Notebook extension loader
 		entry: './src/extension.js',
 		output: {

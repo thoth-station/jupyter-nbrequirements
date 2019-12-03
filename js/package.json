@@ -15,8 +15,8 @@
   "private": true,
   "scripts": {
     "lint": "tsc --noEmit && eslint \"**/*.ts\" --fix",
-    "build": "npm run lint && webpack -d",
-    "build-prod": "npm run lint && webpack -p --config webpack.config.prod.js",
+    "build": "npm run lint && webpack --config webpack.dev.js",
+    "build-prod": "npm run lint && webpack -p --config webpack.prod.js",
     "watch": "webpack -d --watch",
     "build-ts": "rm -rf dist/ && tsc",
     "watch-ts": "tsc --watch",
@@ -61,7 +61,8 @@
     "typescript": "^3.6.4",
     "vue-style-loader": "^4.1.2",
     "webpack": "^4.41.1",
-    "webpack-cli": "^3.3.5"
+    "webpack-cli": "^3.3.5",
+    "webpack-merge": "^4.2.2"
   },
   "types": "types/index.d.ts",
   "_moduleAliases": {

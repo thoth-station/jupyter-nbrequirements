@@ -57,17 +57,12 @@ SCRIPT_TEMPLATE = """
     CodeCell = require("notebook/js/codecell").CodeCell
     CodeCell.prototype._handle_execute_reply = function ( msg ) {
 
-        if ( context.status == "pending" ) {
-            _.execution_count += 1
-        }
-        else {
-            this.set_input_prompt(msg.content.execution_count - _.execution_count)
+        if ( context.status != "pending" ) {
+            this.set_input_prompt(window.__execution_count__)
 
             this.element.removeClass( "running" )
             this.events.trigger( "set_dirty.Notebook", { value: true } )
         }
-
-        context.execution_count = msg.content.execution_count - _.execution_count
     }
 
     require(['nbrequirements'], ({cli, version}) => {
@@ -77,7 +72,7 @@ SCRIPT_TEMPLATE = """
                 setTimeout(() => {
                     context.status = "finished"
 
-                    cell.set_input_prompt(context.execution_count)
+                    cell.set_input_prompt(window.__execution_count__)
 
                     cell.element.removeClass( "running" )
                     cell.events.trigger( "set_dirty.Notebook", { value: true } )
@@ -321,12 +316,6 @@ class RequirementsMagic(Magics):
             parser_add = subparsers.add_parser(
                 "add",
                 description="Add dependency to notebook metadata without installing it.",
-            )
-            parser.add_argument(
-                "-f",
-                "--from-file",
-                type=argparse.FileType("r", encoding="utf-8"),
-                help="Load requirements from a Pipfile.",
             )
             parser_add.add_argument(
                 "-d",

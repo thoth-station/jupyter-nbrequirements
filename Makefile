@@ -44,6 +44,22 @@ endif
 VERSION  ?= $(shell v=$(GIT_BRANCH); echo $${v/release-/})
 PYPI_REPOSITORY ?= https://upload.pypi.org/legacy/
 
+.PHONY: patch
+patch: SHELL:=/bin/bash
+patch: validate
+	- rm -rf build/ dist/
+	- git tag --delete "v${VERSION}"
+
+	$(MAKE) changelog
+
+	sed -i "s/__version__ = \(.*\)/__version__ = \"${VERSION}\"/g" ${PACKAGE}/__about__.py
+
+	python setup.py sdist bdist_wheel
+	twine check dist/* || (echo "Twine check did not pass. Aborting."; exit 1)
+
+	git commit -a -m ":wrench: Patch ${VERSION}" --signoff
+	git tag -a "v${VERSION}" -m "Patch ${VERSION}"
+
 
 .PHONY: release
 release: SHELL:=/bin/bash

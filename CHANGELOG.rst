@@ -2,8 +2,26 @@ Changelog
 =========
 
 
-0.4.0
+0.4.1
 -----
+
+New
+~~~
+- Added Makefile patch target. [Marek Cermak]
+
+Fix
+~~~
+- Fixed funny input prompt behaviour. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/notebook.ts
+  modified:   js/src/types/nb.d.ts
+  modified:   jupyter_nbrequirements/__init__.py
+
+
+v0.4.0 (2019-12-03)
+-------------------
 
 New
 ~~~

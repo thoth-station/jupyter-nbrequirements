@@ -18,6 +18,8 @@ import Command, { DefaultArguments } from "./command"
 import { Context } from "../types"
 import { OutputError } from "../types/nb"
 
+import store from "../ui/store"
+
 import {
     Clear,
     Ensure,
@@ -83,6 +85,15 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
          * @memberof Get
          */
         case "get": cmd = new Get(); break
+
+        /**
+         * Remove a notebook dependency
+         *
+         * @param {Remove.Arguments} args
+         * @returns {Promise<void>}
+         * @memberof Remove
+         */
+        case "remove": cmd = new Get(); break
 
         /**
          * Set notebook requirements.
@@ -175,6 +186,9 @@ export async function cli( command: string, args: DefaultArguments, element?: HT
             // append the error output
             context.cell.output_area.append_error( obj )
         }
+    }
+    finally {
+        store.dispatch( "sync" )
     }
 
     if ( should_notify && !document.hasFocus() ) {

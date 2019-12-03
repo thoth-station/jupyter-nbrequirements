@@ -13,15 +13,15 @@ import { Context } from "../types"
 
 export interface DefaultArguments {
     // show this help message and exit
-    help: boolean
+    help?: boolean
     // Whether to ignore embedded notebook metadata
-    ignore_metadata: boolean
+    ignore_metadata?: boolean
     // Whether to display output in JSON format
-    to_json: boolean
+    to_json?: boolean
     // Whether to store output to file
-    to_file: boolean
+    to_file?: boolean
     // Whether to overwrite existing file
-    overwrite: boolean
+    overwrite?: boolean
 }
 
 /**

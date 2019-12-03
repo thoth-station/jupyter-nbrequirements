@@ -15,8 +15,8 @@
   "private": true,
   "scripts": {
     "lint": "tsc --noEmit && eslint \"**/*.ts\" --fix",
-    "build": "npm run lint && webpack -d",
-    "build-prod": "npm run lint && webpack -p --config webpack.config.prod.js",
+    "build": "npm run lint && webpack --config webpack.dev.js",
+    "build-prod": "npm run lint && webpack -p --config webpack.prod.js",
     "watch": "webpack -d --watch",
     "build-ts": "rm -rf dist/ && tsc",
     "watch-ts": "tsc --watch",
@@ -31,8 +31,18 @@
     "thoth"
   ],
   "dependencies": {
+    "axios": "^0.19.0",
+    "buefy": "^0.8.6",
+    "css-loader": "^3.2.0",
     "js-logger": "^1.6.0",
-    "lodash": "^4.17.13"
+    "lodash": "^4.17.13",
+    "style-loader": "^1.0.0",
+    "vue": "^2.6.10",
+    "vue-class-component": "^7.1.0",
+    "vue-loader": "^15.7.2",
+    "vue-property-decorator": "^8.3.0",
+    "vue-template-compiler": "^2.6.10",
+    "vuex": "^3.1.1"
   },
   "devDependencies": {
     "@types/jquery": "^3.3.31",
@@ -44,14 +54,18 @@
     "eslint": "^5.0.0",
     "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-prettier": "^3.1.1",
+    "node-sass": "^4.13.0",
     "prettier": "^1.18.2",
+    "sass-loader": "^8.0.0",
     "ts-loader": "^6.2.0",
     "typescript": "^3.6.4",
+    "vue-style-loader": "^4.1.2",
     "webpack": "^4.41.1",
-    "webpack-cli": "^3.3.5"
+    "webpack-cli": "^3.3.5",
+    "webpack-merge": "^4.2.2"
   },
   "types": "types/index.d.ts",
   "_moduleAliases": {
-    "@": "dist"
+    "@": "dist/src"
   }
 }

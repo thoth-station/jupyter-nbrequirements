@@ -41,7 +41,7 @@ ifeq (${GIT_TAG},)
 GIT_TAG = $(shell git rev-parse --abbrev-ref HEAD)
 endif
 
-CLIENT_VERSION  ?= $(shell v=$(GIT_BRANCH); echo $${v/release-/})
+VERSION  ?= $(shell v=$(GIT_BRANCH); echo $${v/release-/})
 PYPI_REPOSITORY ?= https://upload.pypi.org/legacy/
 
 
@@ -49,27 +49,27 @@ PYPI_REPOSITORY ?= https://upload.pypi.org/legacy/
 release: SHELL:=/bin/bash
 release: validate
 	- rm -rf build/ dist/
-	- git tag --delete "v${CLIENT_VERSION}"
+	- git tag --delete "v${VERSION}"
 
 	$(MAKE) changelog
 
-	sed -i "s/__version__ = \(.*\)/__version__ = \"${CLIENT_VERSION}\"/g" ${PACKAGE}/__about__.py
+	sed -i "s/__version__ = \(.*\)/__version__ = \"${VERSION}\"/g" ${PACKAGE}/__about__.py
 
 	python setup.py sdist bdist_wheel
 	twine check dist/* || (echo "Twine check did not pass. Aborting."; exit 1)
 
-	git commit -a -m ":tada: Release ${CLIENT_VERSION}" --allow-empty --signoff
-	git tag -a "v${CLIENT_VERSION}" -m "Release ${CLIENT_VERSION}"
+	git commit -a -m ":tada: Release ${VERSION}" --allow-empty --signoff
+	git tag -a "v${VERSION}" -m "Release ${VERSION}"
 
 validate:
-	@echo "Validating version '${CLIENT_VERSION}' on branch '${GIT_BRANCH}'"
+	@echo "Validating version '${VERSION}' on branch '${GIT_BRANCH}'"
 
 	if [ "$(shell python -c \
-		"from semantic_version import validate; print( validate('${CLIENT_VERSION}') )" \
+		"from semantic_version import validate; print( validate('${VERSION}') )" \
 	)" != "True" ]; then \
 		echo "Invalid version. Aborting."; \
 		exit 1; \
 	fi
 
 changelog:
-	RELEASE_VERSION=${CLIENT_VERSION} gitchangelog > CHANGELOG.rst
+	RELEASE_VERSION=${VERSION} gitchangelog > CHANGELOG.rst

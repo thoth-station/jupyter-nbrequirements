@@ -130,7 +130,8 @@ export class Ensure extends Command {
 
         // Stage 3: install the requirements along with the dev packages
         // empty [] makes sure that the requirements are installed from the Pipfile.lock
-        await install_requirements( [], true ).catch( err => { throw err } )
+        await install_requirements( [], { dev_packages: true, ignore_pipfile: true } )
+            .catch( err => { throw err } )
 
         // [Optional] Stage 4: install the Jupyter kernel
         if ( args.skip_kernel ) return
@@ -151,7 +152,7 @@ namespace Add {// eslint-disable-line
     export interface Arguments extends DefaultArguments {
         // Package name and alias
         dependency: string
-        alias: string
+        alias?: string
         // Version constraint
         version: string
         // Index (source name) for this dependency.
@@ -159,7 +160,7 @@ namespace Add {// eslint-disable-line
         // Whether to store the dependency as dev-package.
         dev: boolean
         // Whether to sync notebook metadata with the Pipfile
-        sync: boolean
+        sync?: boolean
     }
 
 }
@@ -271,6 +272,50 @@ export class Get extends Command {
     }
 }
 
+namespace Remove {
+    export interface Arguments extends DefaultArguments {
+        dependency: string
+    }
+}
+export class Remove extends Command {
+
+    /**
+     * Remove a notebook dependency
+     *
+     * @param {Remove.Arguments} args
+     * @returns {Promise<void>}
+     * @memberof Remove
+     */
+    public async run( args: Remove.Arguments ) {
+        const req: Requirements | undefined = Jupyter.notebook.metadata.requirements
+        if ( _.isUndefined( req ) ) {
+            Logger.info( "Notebook requirements are empty. Nothing to remove." )
+            return
+        }
+
+        const pkg: string = args.dependency
+        for ( const attr of [ "packages", "dev-packages" ] ) {
+            const obj: any = _.get( req, attr )
+
+            if ( _.has( obj, pkg ) ) {
+                const updated = _.omit( obj, pkg )
+                _.set( req, attr, updated )
+
+                Logger.info( `Removed dependency ${ pkg } from ${ attr }` )
+            }
+        }
+
+        for ( const [ alias, original ] of Object.entries( req.aliases ) ) {
+            if ( original === pkg ) {
+                req.aliases = _.omit( req.aliases, alias )
+                break
+            }
+        }
+
+        return set_requirements( Jupyter.notebook, req as Requirements )
+    }
+}
+
 namespace Set {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
@@ -319,7 +364,7 @@ export class Lock extends Command {
      * @returns {Promise<void>}
      * @memberof Lock
      */
-    public async run( args: Lock.Arguments, element: HTMLDivElement ): Promise<void> {
+    public async run( args: Lock.Arguments, element?: HTMLDivElement ): Promise<void> {
         args.engine = args.engine || DEFAULT_RESOLUTION_ENGINE
         if ( args.engine === "pipenv" ) {
             args.dev_packages = args.dev_packages || false
@@ -346,7 +391,7 @@ export class Lock extends Command {
                 }
 
                 // default, display requirements in Pipfile.lock format
-                utils.display( req_locked, element )
+                if ( !_.isUndefined( element ) ) utils.display( req_locked, element )
             } )
             .catch( ( err: string ) => {
                 Logger.error( "Failed to lock requirements.\n", err )
@@ -361,6 +406,7 @@ namespace Install {// eslint-disable-line
         requirements: string[]
         dev: boolean
         pre: boolean
+        ignore_pipfile: boolean
     }
 
 }
@@ -375,7 +421,10 @@ export class Install extends Command {
      * @memberof Install
      */
     public async run( args: Install.Arguments ): Promise<void> {
-        await install_requirements( args.requirements, args.dev, args.pre )
+        await install_requirements(
+            args.requirements,
+            { dev_packages: args.dev, pre_releases: args.pre, ignore_pipfile: args.ignore_pipfile }
+        )
     }
 }
 

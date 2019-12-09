@@ -56,7 +56,7 @@ build-prod:
 
 .PHONY: patch
 patch: SHELL:=/bin/bash
-patch: validate
+patch: build-prod validate
 	- rm -rf build/ dist/
 	- git tag --delete "v${VERSION}"
 

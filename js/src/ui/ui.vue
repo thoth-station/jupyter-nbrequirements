@@ -462,7 +462,7 @@ export default class UI extends BaseUI {
     }
 
     mounted() {
-        this.$store.dispatch("loadData");
+        this.$store.dispatch("sync");
     }
 }
 </script>

@@ -306,6 +306,46 @@ export function gather_library_usage( cells?: CodeCell[] ): Promise<string[]> {
     } )
 }
 
+export function get_installed_packages(): Promise<{ name: string, version: string }[]> {
+    return new Promise( async ( resolve, reject ) => {
+
+        const script = `
+        from pip._internal.commands.list import get_installed_distributions, format_for_json
+
+        packages = get_installed_distributions()
+        packages = sorted(
+            packages,
+            key=lambda dist: dist.project_name.lower(),
+        )
+
+        class Options:
+            verbose  = False
+            outdated = False
+
+        format_for_json(packages, Options)
+        `
+
+        const callback = ( msg: io.Message ) => {
+            Logger.debug( "Execution callback: ", msg )
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
+            }
+            else {
+
+                const result: string = msg.content.data[ "text/plain" ].replace( /'/g, "" )
+                const packages = JSON.parse( result )
+
+                resolve( packages )
+            }
+        }
+
+        await execute_python_script(
+            script,
+            { iopub: { output: callback } }, { logger: Logger }
+        )
+            .catch( err => { throw err } )
+    } )
+}
 
 export function lock_requirements(
     requirements: Requirements | undefined,

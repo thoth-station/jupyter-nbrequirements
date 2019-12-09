@@ -7,9 +7,10 @@ import Vuex from "vuex"
 
 import * as command from "../cli/requirements"
 import { Requirements } from "../types/requirements"
-import { PackageVersion } from "../thoth"
+import { PackageVersion, get_installed_packages } from "../thoth"
 
 import { UserWarning } from "../types/ui"
+import Logger from "js-logger"
 
 Vue.use( Vuex )
 
@@ -87,6 +88,7 @@ export default new Vuex.Store( {
         requirements: Jupyter.notebook.metadata.requirements,
 
         selectedPackages: [],
+        installedPackages: {},
 
         status: {},
         warnings: Array<UserWarning>(),
@@ -163,9 +165,12 @@ export default new Vuex.Store( {
     },
 
     actions: {
-        sync( { state, dispatch } ) {
+        async sync( { state, dispatch } ) {
             state.requirements = Jupyter.notebook.metadata.requirements
-            dispatch( "loadData" )
+            await dispatch( "getInstalledPackages" )
+                .catch( ( err ) => Logger.error( "Could not sync installed packages.", err ) )
+            await dispatch( "loadData" )  // TODO: This should be more intelligent
+                .catch( ( err ) => Logger.error( "Could not sync package data.", err ) )
         },
 
         /*
@@ -218,7 +223,7 @@ export default new Vuex.Store( {
 
                         item = new PackageData( pkg, {
                             constraint: version as string,
-                            // installed:  // TODO: Resolve this from the environment
+                            installed: _.has( state.installedPackages, pkg ),
                             locked: true,
                             package_data: package_data,
                             package_name: pkg,
@@ -243,6 +248,18 @@ export default new Vuex.Store( {
                 state.data = data
                 state.loading = false
             }, 1000 )
+        },
+
+        async getInstalledPackages( { state } ) {
+            state.installedPackages = {}
+
+            await get_installed_packages()
+                .then( ( packages ) => {
+                    packages.forEach( p => {
+                        // @ts-ignore
+                        state.installedPackages[ p.name.toLowerCase() ] = p.version
+                    } )
+                } )
         },
 
         addRequirement( { dispatch }, dep: PackageVersion ) {

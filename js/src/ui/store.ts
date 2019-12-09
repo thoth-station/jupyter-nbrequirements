@@ -191,20 +191,22 @@ export default new Vuex.Store( {
                     .get( `https://pypi.org/pypi/${ pkg }/json` )
                     .then( async response => {
                         const package_data = response.data
-                        const github_url = Object.values(
-                            package_data.info.project_urls as { [ k: string ]: string }
-                        ).filter( ( url: string ) => url.match( /github.com/ ) )
+                        const package_urls: { [ k: string ]: string } | null = package_data.info.project_urls
 
                         let repo_data = {}
-                        if ( github_url ) {
-                            const m = github_url[ 0 ].match( /github.com\/(.*?)\// )
-                            if ( m && m[ 1 ].length > 0 ) {
-                                const owner = m[ 1 ]
-                                const api_url = `https://api.github.com/repos/${ owner }/${ pkg }`
+                        if ( package_urls !== null ) {
+                            const github_url = Object.values( package_urls )
+                                .filter( ( url: string ) => url.match( /github.com/ ) )
+                            if ( github_url ) {
+                                const m = github_url[ 0 ].match( /github.com\/(.*?)\// )
+                                if ( m && m[ 1 ].length > 0 ) {
+                                    const owner = m[ 1 ]
+                                    const api_url = `https://api.github.com/repos/${ owner }/${ pkg }`
 
-                                repo_data = await axios.get( api_url )
-                                    .then( resp => resp.data )
-                                    .catch( () => { } )
+                                    repo_data = await axios.get( api_url )
+                                        .then( resp => resp.data )
+                                        .catch( () => { } )
+                                }
                             }
                         }
 

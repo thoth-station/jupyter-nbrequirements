@@ -33,7 +33,7 @@
   "dependencies": {
     "axios": "^0.19.0",
     "buefy": "^0.8.6",
-    "css-loader": "^3.2.0",
+    "css-loader": "^3.3.0",
     "js-logger": "^1.6.0",
     "lodash": "^4.17.13",
     "style-loader": "^1.0.0",

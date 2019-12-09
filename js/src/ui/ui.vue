@@ -93,11 +93,18 @@
                         label="Constraint"
                         width="150"
                     >{{ props.row.constraint }}</b-table-column>
-                    <b-table-column centered field="installed" label="Installed" width="150">
+
+                    <b-table-column
+                        centered
+                        sortable
+                        field="installed"
+                        label="Installed"
+                        width="150"
+                    >
                         <InstalledField :installed="props.row.installed" />
                     </b-table-column>
 
-                    <b-table-column field="health" label="Health" numeric sortable>
+                    <b-table-column numeric sortable field="health" label="Health">
                         <span
                             class="tag"
                             style="width: 3.5em; height: 2.5em; font-size: .8em;"

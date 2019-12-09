@@ -218,7 +218,7 @@ export default new Vuex.Store( {
 
                         item = new PackageData( pkg, {
                             constraint: version as string,
-                            installed: true,  // TODO: Resolve this from the environment
+                            // installed:  // TODO: Resolve this from the environment
                             locked: true,
                             package_data: package_data,
                             package_name: pkg,

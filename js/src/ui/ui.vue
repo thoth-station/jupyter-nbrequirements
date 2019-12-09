@@ -101,7 +101,7 @@
                         label="Installed"
                         width="150"
                     >
-                        <InstalledField :installed="props.row.installed" />
+                        <InstalledField :version="props.row.version" />
                     </b-table-column>
 
                     <b-table-column numeric sortable field="health" label="Health">
@@ -164,6 +164,7 @@
                                 placeholder="e.g. pandas"
                             />
                         </b-table-column>
+
                         <b-table-column centered field="constraint" label="Constraint" width="150">
                             <VersionField
                                 v-on:error="err => hasError = err"
@@ -172,6 +173,19 @@
                                 :placeholder="newRequirement.constraint || '*'"
                             />
                         </b-table-column>
+
+                        <b-table-column
+                            centered
+                            sortable
+                            field="installed"
+                            label="Installed"
+                            width="150"
+                        >
+                            <InstalledField
+                                :version="getPackageVersion(newRequirement.package_name)"
+                            />
+                        </b-table-column>
+
                         <b-table-column field="health" label="Health" numeric sortable>
                             <span
                                 class="tag"
@@ -366,6 +380,10 @@ export default class UI extends BaseUI {
 
     set newRequirement(data: any) {
         this.newData = data;
+    }
+
+    getPackageVersion(package_name: string): string {
+        return _.get(this.$store.getters.installedPackages, package_name);
     }
 
     onNewRequirement() {

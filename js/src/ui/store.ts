@@ -32,16 +32,17 @@ export class PackageData {
     public repo_data: any
 
     public locked: boolean = true
+    public version: string | null = null
 
     public constructor(
         public readonly package_name?: string,
         data?: {
             constraint?: string,
-            installed?: boolean,
             locked?: boolean,
             package_name: string,
             package_data: any,
             repo_data?: any,
+            version?: String
         } ) {
 
         Object.assign( this, data )
@@ -58,6 +59,8 @@ export class PackageData {
 
         return 1
     }
+
+    public get installed(): boolean { return this.version !== undefined }
 
     public get latest(): string { return this.package_data.info.version }
 
@@ -96,7 +99,8 @@ export default new Vuex.Store( {
 
     getters: {
         data: state => state.data,
-        requirements: state => state.requirements
+        requirements: state => state.requirements,
+        installedPackages: state => state.installedPackages
     },
 
     mutations: {
@@ -223,11 +227,11 @@ export default new Vuex.Store( {
 
                         item = new PackageData( pkg, {
                             constraint: version as string,
-                            installed: _.has( state.installedPackages, pkg ),
                             locked: true,
                             package_data: package_data,
                             package_name: pkg,
-                            repo_data: repo_data
+                            repo_data: repo_data,
+                            version: _.get( state.installedPackages, pkg ),
                         } )
                         data.push( item )
                     } )

@@ -249,9 +249,9 @@ import Vue from "vue";
 import { mapState, mapActions } from "vuex";
 import Component from "vue-class-component";
 
-import Installer from "./components/install.vue";
-import PackageField from "./components/package-field.vue";
-import VersionField from "./components/version-field.vue";
+import Installer from "./components/button-install.vue";
+import PackageField from "./components/field-package.vue";
+import VersionField from "./components/field-version.vue";
 
 import { PackageVersion } from "../thoth";
 

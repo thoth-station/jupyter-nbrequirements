@@ -2,8 +2,81 @@ Changelog
 =========
 
 
-0.4.1
+0.5.0
 -----
+
+New
+~~~
+- Update the README. [Marek Cermak]
+- Added UI screenshot to assets/ [Marek Cermak]
+- Display the installed version as a tooltip. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/ui/components/field-installed.vue
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+- Collect information about installed packages. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/thoth.ts
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+- Added a column to show whether a package is installed. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  new file:   src/ui/components/field-installed.vue
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+
+Changes
+~~~~~~~
+- Moved type prototypes to proto/ folder. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  renamed:    js/src/kernel.ts -> js/src/proto/kernel.ts
+  renamed:    js/src/requirements.ts -> js/src/proto/requirements.ts
+  modified:   js/src/notebook.ts
+  modified:   js/src/thoth.ts
+  modified:   js/src/ui/components/button-install.vue
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Renaming of UI components. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  renamed:    js/src/ui/components/install.vue -> js/src/ui/components/button-install.vue
+  renamed:    js/src/ui/components/package-field.vue -> js/src/ui/components/field-package.vue
+  renamed:    js/src/ui/components/version-field.vue -> js/src/ui/components/field-version.vue
+  modified:   js/src/ui/ui.vue
+
+Fix
+~~~
+- Fixed incorrect size of health tag. [Marek Cermak]
+- Fixed issue with null constraints. [Marek Cermak]
+
+Other
+~~~~~
+- Build(deps-dev): bump typescript from 3.6.4 to 3.7.3 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [typescript](https://github.com/Microsoft/TypeScript) from 3.6.4 to 3.7.3.
+  - [Release notes](https://github.com/Microsoft/TypeScript/releases)
+  - [Commits](https://github.com/Microsoft/TypeScript/compare/v3.6.4...v3.7.3)
+- Build(deps): bump jupyter-require from 0.5.0 to 0.6.1. [dependabot-
+  preview[bot]]
+
+  Bumps [jupyter-require](https://github.com/CermakM/jupyter-require) from 0.5.0 to 0.6.1.
+  - [Release notes](https://github.com/CermakM/jupyter-require/releases)
+  - [Changelog](https://github.com/CermakM/jupyter-require/blob/master/CHANGELOG.rst)
+  - [Commits](https://github.com/CermakM/jupyter-require/compare/v0.5.0...v0.6.1)
+
+
+v0.4.1 (2019-12-03)
+-------------------
 
 New
 ~~~
@@ -18,6 +91,10 @@ Fix
   modified:   js/src/notebook.ts
   modified:   js/src/types/nb.d.ts
   modified:   jupyter_nbrequirements/__init__.py
+
+Other
+~~~~~
+- :wrench: Patch 0.4.1. [Marek Cermak]
 
 
 v0.4.0 (2019-12-03)

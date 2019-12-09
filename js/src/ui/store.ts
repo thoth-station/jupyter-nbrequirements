@@ -42,7 +42,7 @@ export class PackageData {
             package_name: string,
             package_data: any,
             repo_data?: any,
-            version?: String
+            version?: string
         } ) {
 
         Object.assign( this, data )

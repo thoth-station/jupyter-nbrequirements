@@ -44,6 +44,16 @@ endif
 VERSION  ?= $(shell v=$(GIT_BRANCH); echo $${v/release-/})
 PYPI_REPOSITORY ?= https://upload.pypi.org/legacy/
 
+.PHONY: build
+build:
+	cd js/ >/dev/null ; \
+	npm install && npm run build
+
+.PHONY: build-prod
+build-prod:
+	cd js/ >/dev/null ; \
+	npm install && npm run build-prod
+
 .PHONY: patch
 patch: SHELL:=/bin/bash
 patch: validate
@@ -63,7 +73,7 @@ patch: validate
 
 .PHONY: release
 release: SHELL:=/bin/bash
-release: validate
+release: build-prod validate
 	- rm -rf build/ dist/
 	- git tag --delete "v${VERSION}"
 

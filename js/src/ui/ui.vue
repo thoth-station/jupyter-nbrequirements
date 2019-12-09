@@ -189,7 +189,7 @@
                         <b-table-column field="health" label="Health" numeric sortable>
                             <span
                                 class="tag"
-                                style="width: 3.5em; font-size: .65em;"
+                                style="width: 3.5em; height: 2.5em; font-size: .8em;"
                                 :class="type(newRequirement.health)"
                             >{{ newRequirement.health || "?" }}</span>
                         </b-table-column>

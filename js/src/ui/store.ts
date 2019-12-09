@@ -36,6 +36,7 @@ export class PackageData {
         public readonly package_name?: string,
         data?: {
             constraint?: string,
+            installed?: boolean,
             locked?: boolean,
             package_name: string,
             package_data: any,
@@ -217,6 +218,7 @@ export default new Vuex.Store( {
 
                         item = new PackageData( pkg, {
                             constraint: version as string,
+                            installed: true,  // TODO: Resolve this from the environment
                             locked: true,
                             package_data: package_data,
                             package_name: pkg,

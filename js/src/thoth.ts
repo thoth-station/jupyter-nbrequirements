@@ -27,7 +27,7 @@ import {
 } from "./notebook"
 
 import * as utils from "./utils"
-import { RequirementsLockedProxy } from "./requirements"
+import { RequirementsLockedProxy } from "./proto/requirements"
 
 import * as io from "./types/io"
 import { CodeCell, Context } from "./types/nb"

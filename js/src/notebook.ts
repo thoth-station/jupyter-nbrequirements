@@ -16,7 +16,7 @@ import { Logger } from "./config"
 
 import { Requirements, RequirementsLocked, ResolutionEngine } from "./types/requirements"
 
-import { KernelInfo, KernelInfoProxy, KernelSpec } from "./kernel"
+import { KernelInfo, KernelInfoProxy, KernelSpec } from "./proto/kernel"
 import { CodeCell } from "./types/nb"
 import {
     PackageVersion,

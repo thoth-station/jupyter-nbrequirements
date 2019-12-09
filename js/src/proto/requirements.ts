@@ -1,4 +1,4 @@
-import { Requirements, RequirementsLocked } from "./types/requirements"
+import { Requirements, RequirementsLocked } from "../types/requirements"
 export { Requirements, RequirementsLocked }
 
 let obj: any = null

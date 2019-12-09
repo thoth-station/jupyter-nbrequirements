@@ -1,4 +1,4 @@
-import { KernelInfo, LanguageInfo, KernelSpec } from "./types/kernel"
+import { KernelInfo, LanguageInfo, KernelSpec } from "../types/kernel"
 export { KernelInfo, LanguageInfo, KernelSpec }
 
 let obj: any = null

@@ -93,6 +93,9 @@
                         label="Constraint"
                         width="150"
                     >{{ props.row.constraint }}</b-table-column>
+                    <b-table-column centered field="installed" label="Installed" width="150">
+                        <InstalledField :installed="props.row.installed" />
+                    </b-table-column>
 
                     <b-table-column field="health" label="Health" numeric sortable>
                         <span
@@ -224,7 +227,7 @@
                 </template>
             </b-table>
 
-            <Installer v-if="!editing" :disabled="hasError" ref="installer" />
+            <InstallButton v-if="!editing" :disabled="hasError" ref="installer" />
             <div v-else class="columns is-centered">
                 <b-button
                     :disabled="hasError"
@@ -249,9 +252,10 @@ import Vue from "vue";
 import { mapState, mapActions } from "vuex";
 import Component from "vue-class-component";
 
-import Installer from "./components/button-install.vue";
+import InstallButton from "./components/button-install.vue";
 import PackageField from "./components/field-package.vue";
 import VersionField from "./components/field-version.vue";
+import InstalledField from "./components/field-installed.vue";
 
 import { PackageVersion } from "../thoth";
 
@@ -289,9 +293,10 @@ const BaseUI = Vue.extend({
     },
     computed: mapState(["data", "editing", "loading", "status"]),
     components: {
-        Installer,
+        InstallButton,
         PackageField,
-        VersionField
+        VersionField,
+        InstalledField
     }
 })
 export default class UI extends BaseUI {

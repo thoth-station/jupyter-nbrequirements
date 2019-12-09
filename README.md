@@ -39,6 +39,20 @@ jupyter nbextension install --user --py jupyter_nbrequirements
 
 ## Usage
 
+#### NBRequirements UI
+
+Since [v0.4.0](https://github.com/CermakM/jupyter-nbrequirements/releases/tag/v0.4.0), we've introduced a new UI! Check it out, interact with it and see what it can offer you!
+
+<div style="text-align:center">
+<img alt="NBRequirements UI" src="https://raw.githubusercontent.com/CermakM/jupyter-nbrequirements/master/assets/ui.png">
+</div>
+
+Our development efforts will from now on focus primarily on improving the UI.
+
+#### The old-school approach
+
+The Jupyter magic is in sync with the UI, so don't worry old schoolers, you can still run the commands manually and the existing notebooks will work!
+
 #### Create the environment for the notebook to run in
 
 Say we want to do an EDA, we will probably need [pandas](https://pandas.pydata.org), a visualization library like [plotly](https://plot.ly) and some additional libraries to make our lives easier, like [sklearn](https://scikit-learn.org/stable/) and [pandas-profiling](https://github.com/pandas-profiling/pandas-profiling).
@@ -103,7 +117,7 @@ Check out the [examples](/examples/) for more info.
 See the [Project Board](https://github.com/CermakM/jupyter-nbrequirements/projects).
 
 <br>
-    
+
 ---
 
 > Author: Marek Cermak <macermak@redhat.com>, @AICoE - Project Thoth

@@ -100,7 +100,7 @@
                             position: "is-bottom",
                             type: "is-success"
                         } );
-                        this.$store.commit( "ready" );
+                        this.$store.dispatch( "sync" );
                     } )
                     .catch( err => {
                         throw err;

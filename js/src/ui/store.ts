@@ -169,12 +169,14 @@ export default new Vuex.Store( {
     },
 
     actions: {
-        async sync( { state, dispatch } ) {
+        async sync( { state, dispatch, commit } ) {
             state.requirements = Jupyter.notebook.metadata.requirements
             await dispatch( "getInstalledPackages" )
                 .catch( ( err ) => Logger.error( "Could not sync installed packages.", err ) )
             await dispatch( "loadData" )  // TODO: This should be more intelligent
                 .catch( ( err ) => Logger.error( "Could not sync package data.", err ) )
+
+            commit( "ready" )
         },
 
         /*

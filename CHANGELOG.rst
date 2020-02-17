@@ -2,8 +2,25 @@ Changelog
 =========
 
 
-0.5.0
+0.5.1
 -----
+
+Fix
+~~~
+- Sync after installation. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/components/button-install.vue
+  modified:   js/src/ui/store.ts
+
+Other
+~~~~~
+- Fixed error if package misses github_url. [Marek Cermak]
+
+
+v0.5.0 (2019-12-09)
+-------------------
 
 New
 ~~~

@@ -209,7 +209,7 @@ export default new Vuex.Store( {
                         if ( package_urls !== null ) {
                             const github_url = Object.values( package_urls )
                                 .filter( ( url: string ) => url.match( /github.com/ ) )
-                            if ( github_url ) {
+                            if ( github_url.length != 0 ) {
                                 const m = github_url[ 0 ].match( /github.com\/(.*?)\// )
                                 if ( m && m[ 1 ].length > 0 ) {
                                     const owner = m[ 1 ]

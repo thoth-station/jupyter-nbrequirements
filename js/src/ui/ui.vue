@@ -283,6 +283,8 @@ import { PackageVersion } from "../thoth";
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require("base/js/namespace");
+// @ts-ignore
+import events = require("base/js/events");
 
 const BaseUI = Vue.extend({
     props: {
@@ -480,7 +482,13 @@ export default class UI extends BaseUI {
     }
 
     mounted() {
-        this.$store.dispatch("sync");
+        this.$store.dispatch("sync").then(() => {
+            // first do initial sync, then trigger mounted event
+            events.trigger("mounted.NBRequirementsUI", {
+                vm: this,
+                store: this.$store
+            });
+        });
     }
 }
 </script>

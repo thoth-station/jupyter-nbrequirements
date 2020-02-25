@@ -73,7 +73,7 @@ module.exports = {
             events.on( "mounted.NBRequirementsUI", async ( e, { vm, store } ) => {
                 const { cli, Logger } = window.require( 'nbrequirements' )
 
-                Logger.info( "Checking whether auto-installation is turned on." )
+                Logger.debug( "Checking whether auto-installation is turned on." )
 
                 const metadata = Jupyter.notebook.metadata
                 if ( _.has( metadata, "requirements" ) && metadata.requirements.autoinstall ) {

@@ -17,6 +17,8 @@ Vue.use( Vuex )
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+// @ts-ignore
+import events = require( "base/js/events" )
 
 interface ExecutionStatus {
     cmd?: ( ...args: any[] ) => any | string
@@ -170,12 +172,19 @@ export default new Vuex.Store( {
 
     actions: {
         async sync( { state, dispatch, commit } ) {
+            events.trigger( "before_sync.NBRequirements", this )
+
+            // clear warnings before syncing
+            // if the problems persist, the warnings will be produced again
+            state.warnings = Array<UserWarning>()
             state.requirements = Jupyter.notebook.metadata.requirements
+
             await dispatch( "getInstalledPackages" )
                 .catch( ( err ) => Logger.error( "Could not sync installed packages.", err ) )
             await dispatch( "loadData" )  // TODO: This should be more intelligent
                 .catch( ( err ) => Logger.error( "Could not sync package data.", err ) )
 
+            events.trigger( "after_sync.NBRequirements", this )
             commit( "ready" )
         },
 
@@ -235,6 +244,14 @@ export default new Vuex.Store( {
                             repo_data: repo_data,
                             version: _.get( state.installedPackages, pkg ),
                         } )
+                        if ( !item.installed ) {
+                            state.warnings.push( {
+                                "context": this,
+                                "level": "danger",
+                                "msg": `Package ${ pkg } is required but not installed.`
+                            } )
+                        }
+
                         data.push( item )
                     } )
                     .catch( ( err: Error ) => {

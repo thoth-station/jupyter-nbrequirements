@@ -489,6 +489,18 @@ export default class UI extends BaseUI {
                 store: this.$store
             });
         });
+
+        // subscribe to events
+        events.on("after_sync.NBRequirements", (e: any, store: any) => {
+            for (const warning of store.state.warnings) {
+                this.$buefy.snackbar.open({
+                    container: "#nbrequirements-notification-container",
+                    message: `Warning: ${warning.msg}`,
+                    position: "is-bottom",
+                    type: "is-danger"
+                });
+            }
+        });
     }
 }
 </script>

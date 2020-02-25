@@ -195,7 +195,7 @@ export default new Vuex.Store( {
             }
 
             const data: any[] = []
-            for ( const [ pkg, v ] of Object.entries( requirements.packages ) ) {
+            for ( const [ pkg, v ] of Object.entries( requirements.packages || {} ) ) {
                 // get info about the package from PyPI
                 let item: PackageData
 

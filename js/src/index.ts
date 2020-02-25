@@ -8,9 +8,11 @@
  * @author Marek Cermak <macermak@redhat.com>
  * @since  0.0.1
  */
+import { createUI, store } from "./ui"
 
 export { cli } from "./cli"
+export { Logger } from "./config"
 export { version } from "../package.json"
-import { createUI } from "./ui"
 
 export const vm = createUI()
+export { store }

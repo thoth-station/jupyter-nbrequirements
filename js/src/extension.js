@@ -94,7 +94,7 @@ module.exports = {
                     } )
 
                     // TODO: decide how to proceed with `skip_kernel` argument
-                    await cli( "ensure", { skip_kernel: true } )
+                    await cli( "ensure", { skip_kernel: false } )
                         .then( () => {
                             store.commit( "ready" )
 

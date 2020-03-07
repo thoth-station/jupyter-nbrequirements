@@ -11,6 +11,7 @@ import { PackageVersion, get_installed_packages } from "../thoth"
 
 import { UserWarning } from "../types/ui"
 import Logger from "js-logger"
+import { set_requirements } from "../notebook"
 
 Vue.use( Vuex )
 
@@ -83,9 +84,7 @@ export class PackageData {
 export default new Vuex.Store( {
 
     state: {
-        // Package data gathered from PyPI
-        // TODO: Create PyPI interface
-        data: Array<any>(),
+        data: Array<PackageData>(),
 
         editing: false,
         loading: false,
@@ -177,6 +176,17 @@ export default new Vuex.Store( {
             // clear warnings before syncing
             // if the problems persist, the warnings will be produced again
             state.warnings = Array<UserWarning>()
+
+            // sync the requirements with the data in the UI
+            const cmd = new command.Add()
+            state.data.map( async ( d ) => {
+                await cmd.run( {
+                    dev: false,
+                    index: "pypi",
+                    dependency: d.package_name as string,
+                    version: d.constraint || "*",
+                } )
+            } )
             state.requirements = Jupyter.notebook.metadata.requirements
 
             await dispatch( "getInstalledPackages" )

@@ -11,12 +11,15 @@ import { PackageVersion, get_installed_packages } from "../thoth"
 
 import { UserWarning } from "../types/ui"
 import Logger from "js-logger"
+import { set_requirements } from "../notebook"
 
 Vue.use( Vuex )
 
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+// @ts-ignore
+import events = require( "base/js/events" )
 
 interface ExecutionStatus {
     cmd?: ( ...args: any[] ) => any | string
@@ -81,9 +84,7 @@ export class PackageData {
 export default new Vuex.Store( {
 
     state: {
-        // Package data gathered from PyPI
-        // TODO: Create PyPI interface
-        data: Array<any>(),
+        data: Array<PackageData>(),
 
         editing: false,
         loading: false,
@@ -170,12 +171,30 @@ export default new Vuex.Store( {
 
     actions: {
         async sync( { state, dispatch, commit } ) {
+            events.trigger( "before_sync.NBRequirements", this )
+
+            // clear warnings before syncing
+            // if the problems persist, the warnings will be produced again
+            state.warnings = Array<UserWarning>()
+
+            // sync the requirements with the data in the UI
+            const cmd = new command.Add()
+            state.data.map( async ( d ) => {
+                await cmd.run( {
+                    dev: false,
+                    index: "pypi",
+                    dependency: d.package_name as string,
+                    version: d.constraint || "*",
+                } )
+            } )
             state.requirements = Jupyter.notebook.metadata.requirements
+
             await dispatch( "getInstalledPackages" )
                 .catch( ( err ) => Logger.error( "Could not sync installed packages.", err ) )
             await dispatch( "loadData" )  // TODO: This should be more intelligent
                 .catch( ( err ) => Logger.error( "Could not sync package data.", err ) )
 
+            events.trigger( "after_sync.NBRequirements", this )
             commit( "ready" )
         },
 
@@ -195,7 +214,7 @@ export default new Vuex.Store( {
             }
 
             const data: any[] = []
-            for ( const [ pkg, v ] of Object.entries( requirements.packages ) ) {
+            for ( const [ pkg, v ] of Object.entries( requirements.packages || {} ) ) {
                 // get info about the package from PyPI
                 let item: PackageData
 
@@ -235,6 +254,14 @@ export default new Vuex.Store( {
                             repo_data: repo_data,
                             version: _.get( state.installedPackages, pkg ),
                         } )
+                        if ( !item.installed ) {
+                            state.warnings.push( {
+                                "context": this,
+                                "level": "danger",
+                                "msg": `Package ${ pkg } is required but not installed.`
+                            } )
+                        }
+
                         data.push( item )
                     } )
                     .catch( ( err: Error ) => {

@@ -112,3 +112,5 @@ export async function createUI(): Promise<UI> {
 
     return vm
 }
+
+export { store }

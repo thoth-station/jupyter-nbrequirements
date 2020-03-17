@@ -242,6 +242,11 @@
                                     <b-icon icon="emoticon-sad" size="is-large"></b-icon>
                                 </p>
                                 <p>This notebook has no requirements specified.</p>
+                                <b-button
+                                    style="margin-top:15px;"
+                                    size="is-medium"
+                                    @click="onDetectRequirements"
+                                >Detect</b-button>
                             </template>
                         </div>
                     </section>
@@ -283,6 +288,10 @@ import { PackageVersion } from "../thoth";
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require("base/js/namespace");
+// @ts-ignore
+import events = require("base/js/events");
+import { get_requirements } from "../notebook";
+import { PackageData } from "./store";
 
 const BaseUI = Vue.extend({
     props: {
@@ -401,16 +410,36 @@ export default class UI extends BaseUI {
     }
 
     onRemoveRequirement(row: any) {
-        this.removeRequirement(row.package_name);
+        const idx = this.data.findIndex(d => d === row);
+
+        this.data.splice(idx, 1);
+        this.updates.push({ target: row, value: null });
+
+        this.$store.commit("editing", true);
+    }
+
+    onDetectRequirements(row: any) {
+        get_requirements(Jupyter.notebook, true)
+            .then(req => {
+                const data: PackageData[] = Object.entries(req.packages).map(
+                    ([package_name, package_version]) => {
+                        const p = new PackageData(package_name);
+                        p.constraint =
+                            typeof package_version === "string"
+                                ? package_version
+                                : package_version.version;
+
+                        return p;
+                    }
+                );
+
+                this.data.push(...data);
+            })
+            .then(() => this.$store.commit("editing", true));
     }
 
     onSave() {
-        const req: Requirements = this.$store.getters.requirements;
-        for (const update of this.updates) {
-            const d = _.assign(update.target, update.value);
-
-            req.packages[d.package_name] = d.constraint;
-        }
+        this.$store.commit("editing", false);
 
         if (this.newData) {
             const dep = new PackageVersion(
@@ -422,8 +451,28 @@ export default class UI extends BaseUI {
 
         this.newData = null;
 
-        this.$store.commit("editing", false);
-        this.$store.dispatch("setRequirements", req);
+        for (const update of this.updates) {
+            if (update.value === null) {
+                this.removeRequirement(update.target.package_name);
+                continue;
+            }
+
+            const d = _.assign(update.target, update.value);
+            const idx = this.data.findIndex(e => e == update.target);
+
+            if (idx <= 1) {
+                Logger.error(
+                    "Could not find an entry to update: ",
+                    update.target
+                );
+                continue;
+            }
+
+            this.data[idx] = d;
+            this.data[idx].locked = true;
+        }
+
+        this.$store.dispatch("sync");
     }
 
     onSort(field: string, order: string) {
@@ -479,8 +528,30 @@ export default class UI extends BaseUI {
         this.updates.push({ target: row, value: value });
     }
 
+    created() {
+        this.onRemoveRequirement = _.debounce(this.onRemoveRequirement, 100);
+    }
+
     mounted() {
-        this.$store.dispatch("sync");
+        this.$store.dispatch("sync").then(() => {
+            // first do initial sync, then trigger mounted event
+            events.trigger("mounted.NBRequirementsUI", {
+                vm: this,
+                store: this.$store
+            });
+        });
+
+        // subscribe to events
+        events.on("after_sync.NBRequirements", (e: any, store: any) => {
+            for (const warning of store.state.warnings) {
+                this.$buefy.snackbar.open({
+                    container: "#nbrequirements-notification-container",
+                    message: `Warning: ${warning.msg}`,
+                    position: "is-bottom",
+                    type: "is-danger"
+                });
+            }
+        });
     }
 }
 </script>

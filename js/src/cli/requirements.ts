@@ -96,9 +96,9 @@ export class Ensure extends Command {
         // We don't want to ignore the metadata here, the purpose of ensure
         // is to have a working environment, hence we should merge both metadata
         // and notebook requirements
-        const req: Requirements = await get_requirements( Jupyter.notebook, false )
+        const requirements: Requirements = await get_requirements( Jupyter.notebook, false )
 
-        Logger.info( "[Ensure] requirements: ", req )
+        Logger.info( "[Ensure] requirements: ", requirements )
 
         // Stage 2: lock down the dependencies and write them to the Pipfile.lock
         // This command also makes sure that the requirements are written to the Pipfile
@@ -107,13 +107,16 @@ export class Ensure extends Command {
         const engine: ResolutionEngine = args.engine || DEFAULT_RESOLUTION_ENGINE
         switch ( engine ) {
             case "thoth": {
-                req_locked = await lock_requirements( req, true )
+                req_locked = await lock_requirements( requirements, true )
                     .catch( err => { throw err } )
 
                 break
             }
 
             case "pipenv": {
+                // we want Pipfile to be synced with Pipfile.lock, always overwrite
+                await Pipfile.create( { requirements, overwrite: true, sync: true } )
+
                 req_locked = await lock_requirements_with_pipenv(
                     args.dev_packages,
                     args.pre_releases, true

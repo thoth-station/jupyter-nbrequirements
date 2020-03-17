@@ -44,9 +44,10 @@ module.exports = {
     load_ipython_extension: function () {// Autoload
         // wait for both the kernel and the jupyter-require extension to be loaded
         window.require( [
+            "underscore",
             "base/js/namespace",
             "base/js/events",
-        ], ( Jupyter, events ) => {
+        ], ( _, Jupyter, events ) => {
             const options = {
                 silent: false,
                 // if there is an error, let user try to manually
@@ -58,19 +59,62 @@ module.exports = {
 
             // Wait for the required extension to be loaded
             events.on( "extension_loaded.JupyterRequire", () => {
-
-                window.require( [ 'nbrequirements' ], ( module ) => {
-                    Promise.resolve( module.vm )
-                        .then( ( vm ) => window.vm = vm )
-
+                window.require( [ 'nbrequirements' ], ( { version } ) => {
                     console.info( "Loading magic commands: [ '%dep', '%requirements', '%kernel' ]" )
 
                     const cmd = "%reload_ext " + __extension__
                     Jupyter.notebook.kernel.execute( cmd, {}, options )
 
-                    console.log( "Loaded extension: jupyter-nbrequirements" )
+                    console.log( "Loaded extension: jupyter-nbrequirements", version )
                 } )
+            } )
 
+            // Prepare the notebook if necessary
+            events.on( "mounted.NBRequirementsUI", async ( e, { vm, store } ) => {
+                const { cli, Logger } = window.require( 'nbrequirements' )
+
+                Logger.debug( "Checking whether auto-installation is turned on." )
+
+                const metadata = Jupyter.notebook.metadata
+                if ( _.has( metadata, "requirements" ) && metadata.requirements.autoinstall ) {
+                    // TODO: Check whether the requirements need to be installed
+
+                    Logger.info( "Attempting to automatically install dependencies." )
+
+                    vm.$buefy.snackbar.open( {
+                        container: "#nbrequirements-notification-container",
+                        message: "Preparing environment.",
+                        position: "is-bottom",
+                        type: "is-info"
+                    } );
+
+                    store.commit( "status", {
+                        cmd: this,
+                        current: "installation"
+                    } )
+
+                    // TODO: decide how to proceed with `skip_kernel` argument
+                    await cli( "ensure", { skip_kernel: false } )
+                        .then( () => {
+                            store.commit( "ready" )
+
+                            vm.$buefy.snackbar.open( {
+                                container: "#nbrequirements-notification-container",
+                                message: "Environment has been successfully prepared.",
+                                position: "is-bottom",
+                                type: "is-success"
+                            } );
+
+                            metadata.requirements.autoinstall = false
+                        } )
+                        .catch( ( err ) => {
+                            Logger.error( "Unable to automatically install requirements: ", err )
+                        } )
+                } else {
+                    Logger.info( "Auto-installation of requirements is turned off." )
+                }
+
+                Logger.info( "The notebook is ready." )
             } )
         } )
     }

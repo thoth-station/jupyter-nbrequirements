@@ -2,8 +2,147 @@ Changelog
 =========
 
 
-0.5.1
+0.6.0
 -----
+
+New
+~~~
+- Dependency detection and deletion improvements. [Marek Cermak]
+
+  When deleting a package, the edit mode is triggered and changes are
+  saved and synced after user saves them.
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Send user notifications about warnings. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/extension.js
+  modified:   src/ui/components/button-install.vue
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+- Added auto-installation on notebook startup. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/extension.js
+  modified:   src/index.ts
+  modified:   src/ui/index.ts
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+
+Fix
+~~~
+- Create Pipfile before locking. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/cli/requirements.ts
+  modified:   src/extension.js
+
+Other
+~~~~~
+- Build(deps-dev): bump webpack from 4.41.6 to 4.42.0 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [webpack](https://github.com/webpack/webpack) from 4.41.6 to 4.42.0.
+  - [Release notes](https://github.com/webpack/webpack/releases)
+  - [Commits](https://github.com/webpack/webpack/compare/v4.41.6...v4.42.0)
+- Build(deps-dev): bump @types/react from 16.9.2 to 16.9.23 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [@types/react](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/HEAD/types/react) from 16.9.2 to 16.9.23.
+  - [Release notes](https://github.com/DefinitelyTyped/DefinitelyTyped/releases)
+  - [Commits](https://github.com/DefinitelyTyped/DefinitelyTyped/commits/HEAD/types/react)
+- Build(deps-dev): bump @types/node from 12.7.12 to 13.7.4 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [@types/node](https://github.com/DefinitelyTyped/DefinitelyTyped/tree/HEAD/types/node) from 12.7.12 to 13.7.4.
+  - [Release notes](https://github.com/DefinitelyTyped/DefinitelyTyped/releases)
+  - [Commits](https://github.com/DefinitelyTyped/DefinitelyTyped/commits/HEAD/types/node)
+- Build(deps): bump ipykernel from 5.1.3 to 5.1.4. [dependabot-
+  preview[bot]]
+
+  Bumps [ipykernel](https://ipython.org) from 5.1.3 to 5.1.4.
+- Build(deps): bump vue and vue-template-compiler in /js. [dependabot-
+  preview[bot]]
+
+  Bumps [vue](https://github.com/vuejs/vue) and [vue-template-compiler](https://github.com/vuejs/vue). These dependencies needed to be updated together.
+
+  Updates `vue` from 2.6.10 to 2.6.11
+  - [Release notes](https://github.com/vuejs/vue/releases)
+  - [Commits](https://github.com/vuejs/vue/compare/v2.6.10...v2.6.11)
+
+  Updates `vue-template-compiler` from 2.6.10 to 2.6.11
+  - [Release notes](https://github.com/vuejs/vue/releases)
+  - [Commits](https://github.com/vuejs/vue/compare/v2.6.10...v2.6.11)
+- Build(deps): bump vue-loader from 15.7.2 to 15.9.0 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [vue-loader](https://github.com/vuejs/vue-loader) from 15.7.2 to 15.9.0.
+  - [Release notes](https://github.com/vuejs/vue-loader/releases)
+  - [Changelog](https://github.com/vuejs/vue-loader/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/vuejs/vue-loader/compare/v15.7.2...v15.9.0)
+- Build(deps): bump thamos from 0.7.2 to 0.8.1. [dependabot-
+  preview[bot]]
+
+  Bumps [thamos](https://github.com/thoth-station/thamos) from 0.7.2 to 0.8.1.
+  - [Release notes](https://github.com/thoth-station/thamos/releases)
+  - [Changelog](https://github.com/thoth-station/thamos/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/thoth-station/thamos/compare/0.7.2...0.8.1)
+- Build(deps): bump style-loader from 1.0.0 to 1.1.3 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [style-loader](https://github.com/webpack-contrib/style-loader) from 1.0.0 to 1.1.3.
+  - [Release notes](https://github.com/webpack-contrib/style-loader/releases)
+  - [Changelog](https://github.com/webpack-contrib/style-loader/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/webpack-contrib/style-loader/compare/v1.0.0...v1.1.3)
+- Build(deps): bump css-loader from 3.2.0 to 3.4.2 in /js. [dependabot-
+  preview[bot]]
+
+  Bumps [css-loader](https://github.com/webpack-contrib/css-loader) from 3.2.0 to 3.4.2.
+  - [Release notes](https://github.com/webpack-contrib/css-loader/releases)
+  - [Changelog](https://github.com/webpack-contrib/css-loader/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/webpack-contrib/css-loader/compare/v3.2.0...v3.4.2)
+- Build(deps-dev): bump webpack from 4.41.1 to 4.41.6 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [webpack](https://github.com/webpack/webpack) from 4.41.1 to 4.41.6.
+  - [Release notes](https://github.com/webpack/webpack/releases)
+  - [Commits](https://github.com/webpack/webpack/compare/v4.41.1...v4.41.6)
+- Build(deps): bump buefy from 0.8.6 to 0.8.12 in /js. [dependabot-
+  preview[bot]]
+
+  Bumps [buefy](https://github.com/buefy/buefy) from 0.8.6 to 0.8.12.
+  - [Release notes](https://github.com/buefy/buefy/releases)
+  - [Changelog](https://github.com/buefy/buefy/blob/dev/CHANGELOG.md)
+  - [Commits](https://github.com/buefy/buefy/compare/v0.8.6...v0.8.12)
+- Build(deps): bump vue-property-decorator from 8.3.0 to 8.4.0 in /js.
+  [dependabot-preview[bot]]
+
+  Bumps [vue-property-decorator](https://github.com/kaorun343/vue-property-decorator) from 8.3.0 to 8.4.0.
+  - [Release notes](https://github.com/kaorun343/vue-property-decorator/releases)
+  - [Commits](https://github.com/kaorun343/vue-property-decorator/commits)
+- Build(deps): [security] bump bleach from 3.1.0 to 3.1.1. [dependabot-
+  preview[bot]]
+
+  Bumps [bleach](https://github.com/mozilla/bleach) from 3.1.0 to 3.1.1. **This update includes a security fix.**
+  - [Release notes](https://github.com/mozilla/bleach/releases)
+  - [Changelog](https://github.com/mozilla/bleach/blob/master/CHANGES)
+  - [Commits](https://github.com/mozilla/bleach/compare/v3.1.0...v3.1.1)
+- Build(deps): bump vuex from 3.1.1 to 3.1.2 in /js. [dependabot-
+  preview[bot]]
+
+  Bumps [vuex](https://github.com/vuejs/vuex) from 3.1.1 to 3.1.2.
+  - [Release notes](https://github.com/vuejs/vuex/releases)
+  - [Commits](https://github.com/vuejs/vuex/compare/v3.1.1...v3.1.2)
+
+
+v0.5.1 (2020-02-17)
+-------------------
 
 Fix
 ~~~
@@ -16,6 +155,7 @@ Fix
 
 Other
 ~~~~~
+- :wrench: Patch 0.5.1. [Marek Cermak]
 - Fixed error if package misses github_url. [Marek Cermak]
 
 

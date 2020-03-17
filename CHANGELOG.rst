@@ -2,8 +2,50 @@ Changelog
 =========
 
 
-0.5.1
+0.6.0
 -----
+
+New
+~~~
+- Dependency detection and deletion improvements. [Marek Cermak]
+
+  When deleting a package, the edit mode is triggered and changes are
+  saved and synced after user saves them.
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Send user notifications about warnings. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/extension.js
+  modified:   src/ui/components/button-install.vue
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+- Added auto-installation on notebook startup. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/extension.js
+  modified:   src/index.ts
+  modified:   src/ui/index.ts
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+
+Fix
+~~~
+- Create Pipfile before locking. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/cli/requirements.ts
+  modified:   src/extension.js
+
+
+v0.5.1 (2020-02-17)
+-------------------
 
 Fix
 ~~~
@@ -16,6 +58,7 @@ Fix
 
 Other
 ~~~~~
+- :wrench: Patch 0.5.1. [Marek Cermak]
 - Fixed error if package misses github_url. [Marek Cermak]
 
 

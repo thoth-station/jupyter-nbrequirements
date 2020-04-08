@@ -77,6 +77,11 @@ function createUIContainer(): Promise<HTMLElement> {
                 justify-content: center;
             }
 
+            /* Fixes extra span margin inside the #button-add-requirement button */
+            button#button-add-requirement > .icon {
+                margin-right: auto;
+            }
+
             .trapezoid {
                 width: 100px;
                 height: 0;

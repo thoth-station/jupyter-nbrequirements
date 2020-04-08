@@ -220,7 +220,8 @@
 
                     <div v-else class="columns is-centered">
                         <b-button
-                            style="margin-top:15px;"
+                            id="button-add-requirement"
+                            style="margin-top:15px"
                             icon-right="plus-circle-outline"
                             size="is-medium"
                             @click="onNewRequirement"

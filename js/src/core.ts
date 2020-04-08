@@ -166,7 +166,7 @@ export function execute_request_with_context(
             }
         )
 
-        logger.debug( `Executing shell request:\n${ request }\n\twith callbacks: `, callbacks )
+        logger.debug( `Executing shell request:\n${ request }\n\nwith callbacks: `, callbacks )
         const msg_id = kernel.execute( request, callbacks, options )
 
         kernel.events.on(

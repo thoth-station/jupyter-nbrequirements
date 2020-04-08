@@ -44,6 +44,8 @@ from thoth.python import Pipfile
 
 from .magic_parser import MagicParser, MagicParserError
 
+from .__about__ import __version__
+
 
 _HERE = Path(__file__).parent
 

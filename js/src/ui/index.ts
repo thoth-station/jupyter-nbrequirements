@@ -78,8 +78,8 @@ function createUIContainer(): Promise<HTMLElement> {
             }
 
             /* Fixes extra span margin inside the #button-add-requirement button */
-            button > .icon {
-                margin-right: auto;
+            .button .icon {
+                margin-right: unset!important;
             }
 
             .trapezoid {

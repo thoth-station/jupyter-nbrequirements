@@ -7,7 +7,7 @@ import Vuex from "vuex"
 
 import * as command from "../cli/requirements"
 import { Requirements } from "../types/requirements"
-import { PackageVersion, get_installed_packages, install_requirements } from "../thoth"
+import { PackageVersion, get_installed_packages, install_requirements_with_pip } from "../thoth"
 
 import { newNotification, Notification } from "./notify"
 import Logger from "js-logger"
@@ -19,7 +19,7 @@ Vue.use( Vuex )
 import Jupyter = require( "base/js/namespace" )
 // @ts-ignore
 import events = require( "base/js/events" )
-import { ToastProgrammatic, SnackbarProgrammatic } from "buefy"
+import { ToastProgrammatic, SnackbarProgrammatic, DialogProgrammatic } from "buefy"
 
 interface ExecutionStatus {
     cmd?: ( ...args: any[] ) => any | string
@@ -190,8 +190,30 @@ export default new Vuex.Store( {
             commit( "ready" )
         },
 
-        async sync( { state, dispatch, commit } ) {
+        async sync( { state, dispatch, commit }, require_restart: boolean = false ) {
             events.trigger( "before_sync.NBRequirements", this )
+
+            if ( require_restart ) {
+                await new Promise( ( resolve ) => {
+                    DialogProgrammatic.confirm( {
+                        title: "Kernel restart",
+                        message: "Kernel restart is required to proceed.<br><br>Skipping this step might result in undefined behaviour.",
+                        type: "is-danger",
+                        hasIcon: true,
+                        cancelText: "Skip",
+                        confirmText: "Restart Kernel",
+                        // @ts-ignore
+                        // missing type, but declared on the component
+                        // see https://buefy.org/documentation/dialog/
+                        container: "#nbrequirements-notification-container",
+                        onConfirm: () => {
+                            Jupyter.notebook.restart_kernel( { confirm: false } )
+                            events.on( "kernel_ready.Kernel", resolve )
+                        },
+                        onCancel: resolve
+                    } )
+                } )
+            }
 
             // clear warnings before syncing
             // if the problems persist, the warnings will be produced again
@@ -286,14 +308,13 @@ export default new Vuex.Store( {
                                         const ctx = ( this as unknown ) as PackageData
 
                                         that.commit( "status", {
-                                            cmd: install_requirements,
+                                            cmd: install_requirements_with_pip,
                                             current: "installation"
                                         } )
 
-                                        const r = `${ ctx.package_name }==${ ctx.constraint }`
-                                        install_requirements( [ r ], {
-                                            dev_packages: false,
-                                        } )
+                                        const v = ctx.constraint !== "*" ? ctx.constraint : ""
+                                        const r = `${ ctx.package_name }${ v }`
+                                        install_requirements_with_pip( [ r ] )
                                             .then( () => {
                                                 SnackbarProgrammatic.open( {
                                                     container: "#nbrequirements-notification-container",
@@ -302,7 +323,7 @@ export default new Vuex.Store( {
                                                     type: "is-success"
                                                 } )
 
-                                                that.dispatch( "sync" )
+                                                that.dispatch( "sync", true )
                                             } )
                                             .catch( err => {
                                                 SnackbarProgrammatic.open( {

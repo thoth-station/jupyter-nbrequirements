@@ -310,19 +310,23 @@ export function get_installed_packages(): Promise<{ name: string, version: strin
     return new Promise( async ( resolve, reject ) => {
 
         const script = `
-        from pip._internal.commands.list import get_installed_distributions, format_for_json
-
-        packages = get_installed_distributions()
-        packages = sorted(
-            packages,
-            key=lambda dist: dist.project_name.lower(),
-        )
-
-        class Options:
+        class ListOptions:
             verbose  = False
             outdated = False
 
-        format_for_json(packages, Options)
+        def list_installed_packages(options = ListOptions):
+            # this import has to be scoped
+            from pip._internal.commands.list import get_installed_distributions, format_for_json
+
+            packages = get_installed_distributions()
+            packages = sorted(
+                packages,
+                key=lambda dist: dist.project_name.lower(),
+            )
+
+            return format_for_json(packages, options)
+
+        list_installed_packages()
         `
 
         const callback = ( msg: io.Message ) => {
@@ -586,10 +590,8 @@ export function install_requirements_with_pipenv(
     } )
 }
 
-export function install_requirements(
-    requirements?: string[], options?: {
-        dev_packages?: boolean,
-    }
+export function install_requirements_with_pip(
+    requirements?: string[], options?: string
 ): Promise<void> {
     return new Promise( async ( resolve, reject ) => {
 
@@ -610,10 +612,59 @@ export function install_requirements(
                 const text = utils.parse_console_output( msg.metadata.output )
 
                 if ( stream === "stderr" ) {
+                    Logger.warn( "[pip]: ", text )
+                } else
+                    Logger.log( "[pip]: ", text )
+            }
+        }
+
+        /**
+         * Execution done callback
+         */
+        const shell_callback = ( msg: io.Message ) => {
+            Logger.debug( "Execution shell callback: ", msg )
+
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
+            } else {
+                Logger.log( "Requirements have been successfully installed" )
+                resolve()
+            }
+        }
+
+        Logger.log( "Installing requirements." )
+
+        await execute_shell_command(
+            `pip install --disable-pip-version-check --upgrade ${ options || "" } ${ requirements.join( " " ) }`,
+            { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
+        )
+            .catch( err => { throw err } )
+    } )
+}
+
+export function install_requirements( options?: {
+    dev_packages?: boolean,
+} ): Promise<void> {
+    return new Promise( async ( resolve, reject ) => {
+
+        /**
+         * Logging callback
+         */
+        const iopub_callback = ( msg: io.Message ) => {
+            Logger.debug( "Execution logging callback: ", msg )
+
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
+            }
+
+            else if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
+                const stream = msg.content.name || "stdout"
+                const text = utils.parse_console_output( msg.metadata.output )
+
+                if ( stream === "stderr" ) {
                     Logger.warn( "[micropipenv]: ", text )
                 } else
                     Logger.log( "[micropipenv]: ", text )
-
             }
         }
 
@@ -640,7 +691,7 @@ export function install_requirements(
         Logger.log( "Installing requirements." )
 
         await execute_shell_command(
-            `micropipenv install --method pipenv ${ opts } ${ requirements.join( " " ) }`,
+            `micropipenv install --method pipenv ${ opts }`,
             { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
         )
             .catch( err => { throw err } )

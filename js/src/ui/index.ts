@@ -34,6 +34,11 @@ function createNotificationContainer(): Promise<HTMLElement> {
                     text-rendering: optimizeLegibility;
                     text-size-adjust: 100%;
                 }
+
+                .dialog .icon {
+                    margin: 10px;
+                    padding-top: 20px;
+                }
             `
 
             container.appendChild( style )

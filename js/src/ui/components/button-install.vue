@@ -88,7 +88,7 @@
                     pre_releases: this.isSwitchedPre
                 } );
 
-                install_requirements( [], {
+                install_requirements( {
                     dev_packages: this.isSwitchedDev,
                 } )
                     .then( () => {
@@ -98,7 +98,7 @@
                             position: "is-bottom",
                             type: "is-success"
                         } );
-                        this.$store.dispatch( "sync" );
+                        this.$store.dispatch( "sync", true );
                     } )
                     .catch( err => {
                         throw err;

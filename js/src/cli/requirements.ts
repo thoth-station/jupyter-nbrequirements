@@ -18,6 +18,7 @@ import {
     lock_requirements,
     install_requirements,
     install_kernel,
+    install_requirements_with_pip,
 } from "../thoth"
 
 import * as utils from "../utils"
@@ -153,7 +154,7 @@ export class Ensure extends Command {
 
         // Stage 3: install the requirements along with the dev packages
         // empty [] makes sure that the requirements are installed from the Pipfile.lock
-        await install_requirements( [], { dev_packages: true } )
+        await install_requirements( { dev_packages: true } )
             .catch( err => { throw err } )
 
         // [Optional] Stage 4: install the Jupyter kernel
@@ -427,9 +428,6 @@ namespace Install {// eslint-disable-line
 
     export interface Arguments extends DefaultArguments {
         requirements: string[]
-        dev: boolean
-        pre: boolean
-        ignore_pipfile: boolean
     }
 
 }
@@ -444,9 +442,8 @@ export class Install extends Command {
      * @memberof Install
      */
     public async run( args: Install.Arguments ): Promise<void> {
-        await install_requirements(
-            args.requirements,
-            { dev_packages: args.dev }
+        await install_requirements_with_pip(
+            args.requirements
         )
     }
 }

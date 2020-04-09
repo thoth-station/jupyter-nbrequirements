@@ -9,9 +9,8 @@ import * as command from "../cli/requirements"
 import { Requirements } from "../types/requirements"
 import { PackageVersion, get_installed_packages } from "../thoth"
 
-import { UserWarning } from "../types/ui"
+import { newNotification, Notification } from "./notify"
 import Logger from "js-logger"
-import { set_requirements } from "../notebook"
 
 Vue.use( Vuex )
 
@@ -95,7 +94,7 @@ export default new Vuex.Store( {
         installedPackages: {},
 
         status: {},
-        warnings: Array<UserWarning>(),
+        notifications: Array<Notification>(),
     },
 
     getters: {
@@ -175,7 +174,7 @@ export default new Vuex.Store( {
 
             // clear warnings before syncing
             // if the problems persist, the warnings will be produced again
-            state.warnings = Array<UserWarning>()
+            state.notifications = Array<Notification>()
 
             // sync the requirements with the data in the UI
             const cmd = new command.Add()
@@ -255,11 +254,13 @@ export default new Vuex.Store( {
                             version: _.get( state.installedPackages, pkg ),
                         } )
                         if ( !item.installed ) {
-                            state.warnings.push( {
-                                "context": this,
-                                "level": "danger",
-                                "msg": `Package ${ pkg } is required but not installed.`
-                            } )
+                            const n: Notification = newNotification(
+                                {
+                                    message: `Package ${ pkg } is required but not installed.`,
+                                    type: "is-danger",
+                                }, "snackbar", pkg
+                            )
+                            state.notifications.push( n )
                         }
 
                         data.push( item )
@@ -267,11 +268,15 @@ export default new Vuex.Store( {
                     .catch( ( err: Error ) => {
                         state.data = []
                         state.loading = false
-                        state.warnings.push( {
-                            "context": this,
-                            "level": "danger",
-                            "msg": err.message
-                        } )
+
+                        const n: Notification = newNotification(
+                            {
+                                message: err.message,
+                                type: "is-danger",
+                            }, "snackbar", this
+                        )
+                        state.notifications.push( n )
+
                         throw err
                     } )
             }

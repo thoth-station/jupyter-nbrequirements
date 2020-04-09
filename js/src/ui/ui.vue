@@ -220,7 +220,6 @@
 
                     <div v-else class="columns is-centered">
                         <b-button
-                            id="button-add-requirement"
                             style="margin-top:15px"
                             icon-right="plus-circle-outline"
                             size="is-medium"
@@ -293,6 +292,8 @@ import Jupyter = require("base/js/namespace");
 import events = require("base/js/events");
 import { get_requirements } from "../notebook";
 import { PackageData } from "./store";
+import { newNotification, Notification } from "./notify";
+import { ToastConfig } from "buefy/types/components";
 
 const BaseUI = Vue.extend({
     props: {
@@ -373,9 +374,13 @@ export default class UI extends BaseUI {
         if (this.loading) return "is-dark";
         if (this.isEmpty) return "is-warning";
 
-        if (this.$store.state.warnings.length > 0) {
-            for (const warning of this.$store.state.warnings) {
-                if (warning.level === "danger") return "is-danger";
+        if (this.$store.state.notifications.length > 0) {
+            if (
+                Array(this.$store.state.notifications).some(
+                    n => n.type === "is-danger"
+                )
+            ) {
+                return "is-danger";
             }
 
             return "is-warning";
@@ -435,29 +440,34 @@ export default class UI extends BaseUI {
                 );
 
                 this.data.push(...newData);
-                return newData
+                return newData;
             })
             .then((data: PackageData[]) => {
-                const msg = `Number of notebook requirements detected: ${data.length}`
-                if ( data && data.length <= 0 ) {
-                    this.$buefy.toast.open({
-                        container: "#nbrequirements-notification-container",
-                        message: msg,
-                        position: "is-bottom",
-                        type: "is-warning"
-                    });
-                    return false
+                const msg = `Number of notebook requirements detected: ${data.length}`;
+
+                let n: ToastConfig;
+                if (data && data.length <= 0) {
+                    n = newNotification(
+                        {
+                            message: msg,
+                            type: "is-danger"
+                        },
+                        "toast"
+                    );
+
+                    this.$buefy.toast.open(n);
+                } else {
+                    n = newNotification(
+                        {
+                            message: msg,
+                            type: "is-success"
+                        },
+                        "toast"
+                    );
+
+                    this.$buefy.toast.open(n);
+                    this.$store.commit("editing", true);
                 }
-
-                this.$buefy.toast.open({
-                    container: "#nbrequirements-notification-container",
-                    message: msg,
-                    position: "is-bottom",
-                    type: "is-success"
-                });
-
-                this.$store.commit("editing", true)
-                return true
             });
     }
 
@@ -566,13 +576,10 @@ export default class UI extends BaseUI {
 
         // subscribe to events
         events.on("after_sync.NBRequirements", (e: any, store: any) => {
-            for (const warning of store.state.warnings) {
-                this.$buefy.snackbar.open({
-                    container: "#nbrequirements-notification-container",
-                    message: `Warning: ${warning.msg}`,
-                    position: "is-bottom",
-                    type: "is-danger"
-                });
+            for (const n of store.state.notifications) {
+                if (n.__type__ === "SnackbarConfig")
+                    this.$buefy.snackbar.open(n);
+                else this.$buefy.toast.open(n);
             }
         });
     }

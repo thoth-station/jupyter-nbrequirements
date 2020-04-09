@@ -78,7 +78,7 @@ function createUIContainer(): Promise<HTMLElement> {
             }
 
             /* Fixes extra span margin inside the #button-add-requirement button */
-            button#button-add-requirement > .icon {
+            button > .icon {
                 margin-right: auto;
             }
 

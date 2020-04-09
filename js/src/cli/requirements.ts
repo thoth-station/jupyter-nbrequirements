@@ -30,6 +30,7 @@ import { lock_requirements_with_pipenv } from "../thoth"
 // Jupyter runtime environment
 // @ts-ignore
 import Jupyter = require( "base/js/namespace" )
+import { store } from "../ui"
 
 declare const DEFAULT_RESOLUTION_ENGINE: ResolutionEngine
 
@@ -62,6 +63,8 @@ export class Clear extends Command {
     public async run() {
         delete Jupyter.notebook.metadata.requirements
         delete Jupyter.notebook.metadata.requirements_locked
+
+        store.dispatch( "clear" )
     }
 }
 

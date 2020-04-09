@@ -19,6 +19,7 @@ Vue.use( Vuex )
 import Jupyter = require( "base/js/namespace" )
 // @ts-ignore
 import events = require( "base/js/events" )
+import { ToastProgrammatic } from "buefy"
 
 interface ExecutionStatus {
     cmd?: ( ...args: any[] ) => any | string
@@ -169,6 +170,26 @@ export default new Vuex.Store( {
     },
 
     actions: {
+        async clear( { state, dispatch, commit } ) {
+            state.data = []
+            state.requirements = []
+
+            delete Jupyter.notebook.metadata.requirements
+            delete Jupyter.notebook.metadata.requirements_locked
+
+            state.notifications = Array<Notification>()
+
+            const n: Notification = newNotification(
+                {
+                    message: "Requirements have been cleared successfully",
+                    type: "is-info",
+                }, "toast", null
+            )
+            ToastProgrammatic.open( n )
+
+            commit( "ready" )
+        },
+
         async sync( { state, dispatch, commit } ) {
             events.trigger( "before_sync.NBRequirements", this )
 

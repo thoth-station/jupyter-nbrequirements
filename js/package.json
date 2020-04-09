@@ -61,7 +61,7 @@
     "typescript": "^3.7.3",
     "vue-style-loader": "^4.1.2",
     "webpack": "^4.42.0",
-    "webpack-cli": "^3.3.5",
+    "webpack-cli": "^3.3.11",
     "webpack-merge": "^4.2.2"
   },
   "types": "types/index.d.ts",

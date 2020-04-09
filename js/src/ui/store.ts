@@ -7,7 +7,7 @@ import Vuex from "vuex"
 
 import * as command from "../cli/requirements"
 import { Requirements } from "../types/requirements"
-import { PackageVersion, get_installed_packages } from "../thoth"
+import { PackageVersion, get_installed_packages, install_requirements } from "../thoth"
 
 import { newNotification, Notification } from "./notify"
 import Logger from "js-logger"
@@ -19,7 +19,7 @@ Vue.use( Vuex )
 import Jupyter = require( "base/js/namespace" )
 // @ts-ignore
 import events = require( "base/js/events" )
-import { ToastProgrammatic } from "buefy"
+import { ToastProgrammatic, SnackbarProgrammatic } from "buefy"
 
 interface ExecutionStatus {
     cmd?: ( ...args: any[] ) => any | string
@@ -170,7 +170,7 @@ export default new Vuex.Store( {
     },
 
     actions: {
-        async clear( { state, dispatch, commit } ) {
+        async clear( { state, commit } ) {
             state.data = []
             state.requirements = []
 
@@ -275,11 +275,50 @@ export default new Vuex.Store( {
                             version: _.get( state.installedPackages, pkg ),
                         } )
                         if ( !item.installed ) {
+                            const that = this
                             const n: Notification = newNotification(
                                 {
                                     message: `Package ${ pkg } is required but not installed.`,
-                                    type: "is-danger",
-                                }, "snackbar", pkg
+                                    type: "is-warning",
+                                    duration: 5000,
+                                    actionText: "Install",
+                                    onAction: function () {
+                                        const ctx = ( this as unknown ) as PackageData
+
+                                        that.commit( "status", {
+                                            cmd: install_requirements,
+                                            current: "installation"
+                                        } )
+
+                                        const r = `${ ctx.package_name }==${ ctx.constraint }`
+                                        install_requirements( [ r ], {
+                                            ignore_pipfile: true,
+                                            dev_packages: false,
+                                            pre_releases: false
+                                        } )
+                                            .then( () => {
+                                                SnackbarProgrammatic.open( {
+                                                    container: "#nbrequirements-notification-container",
+                                                    message: `Package ${ ctx.package_name } was successfully installed.`,
+                                                    position: "is-bottom",
+                                                    type: "is-success"
+                                                } )
+
+                                                that.dispatch( "sync" )
+                                            } )
+                                            .catch( err => {
+                                                SnackbarProgrammatic.open( {
+                                                    container: "#nbrequirements-notification-container",
+                                                    message: `Package ${ ctx.package_name } could not be installed.`,
+                                                    position: "is-bottom",
+                                                    type: "is-danger"
+                                                } )
+                                                that.commit( "ready" )
+
+                                                throw err
+                                            } )
+                                    }
+                                }, "snackbar", item
                             )
                             state.notifications.push( n )
                         }

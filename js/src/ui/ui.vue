@@ -422,7 +422,7 @@ export default class UI extends BaseUI {
     onDetectRequirements(row: any) {
         get_requirements(Jupyter.notebook, true)
             .then(req => {
-                const data: PackageData[] = Object.entries(req.packages).map(
+                const newData: PackageData[] = Object.entries(req.packages).map(
                     ([package_name, package_version]) => {
                         const p = new PackageData(package_name);
                         p.constraint =
@@ -434,9 +434,31 @@ export default class UI extends BaseUI {
                     }
                 );
 
-                this.data.push(...data);
+                this.data.push(...newData);
+                return newData
             })
-            .then(() => this.$store.commit("editing", true));
+            .then((data: PackageData[]) => {
+                const msg = `Number of notebook requirements detected: ${data.length}`
+                if ( data && data.length <= 0 ) {
+                    this.$buefy.toast.open({
+                        container: "#nbrequirements-notification-container",
+                        message: msg,
+                        position: "is-bottom",
+                        type: "is-warning"
+                    });
+                    return false
+                }
+
+                this.$buefy.toast.open({
+                    container: "#nbrequirements-notification-container",
+                    message: msg,
+                    position: "is-bottom",
+                    type: "is-success"
+                });
+
+                this.$store.commit("editing", true)
+                return true
+            });
     }
 
     onSave() {

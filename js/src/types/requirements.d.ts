@@ -1,4 +1,4 @@
-export type ResolutionEngine = "thoth" | "pipenv"
+export type ResolutionEngine = "thoth" | "pipenv" | "micropipenv"
 
 export interface Requirements {
     aliases: { [ name: string ]: string }

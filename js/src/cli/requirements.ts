@@ -129,6 +129,23 @@ export class Ensure extends Command {
                 break
             }
 
+            case "micropipenv": {
+                // we want Pipfile to be synced with Pipfile.lock, always overwrite
+                await Pipfile.create( { requirements, overwrite: true, sync: true } )
+
+                req_locked = await get_requirements_locked(
+                    Jupyter.notebook,
+                    args.ignore_metadata,
+                    args.dev_packages,
+                    args.pre_releases,
+                    true,
+                    "micropipenv"
+                )
+                    .catch( err => { throw err } )
+
+                break
+            }
+
             default: throw new Error( `Unknown resolution engine: ${ engine }` )
         }
 
@@ -136,7 +153,7 @@ export class Ensure extends Command {
 
         // Stage 3: install the requirements along with the dev packages
         // empty [] makes sure that the requirements are installed from the Pipfile.lock
-        await install_requirements( [], { dev_packages: true, ignore_pipfile: true } )
+        await install_requirements( [], { dev_packages: true } )
             .catch( err => { throw err } )
 
         // [Optional] Stage 4: install the Jupyter kernel
@@ -429,7 +446,7 @@ export class Install extends Command {
     public async run( args: Install.Arguments ): Promise<void> {
         await install_requirements(
             args.requirements,
-            { dev_packages: args.dev, pre_releases: args.pre, ignore_pipfile: args.ignore_pipfile }
+            { dev_packages: args.dev }
         )
     }
 }

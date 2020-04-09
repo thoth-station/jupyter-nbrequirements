@@ -292,9 +292,7 @@ export default new Vuex.Store( {
 
                                         const r = `${ ctx.package_name }==${ ctx.constraint }`
                                         install_requirements( [ r ], {
-                                            ignore_pipfile: true,
                                             dev_packages: false,
-                                            pre_releases: false
                                         } )
                                             .then( () => {
                                                 SnackbarProgrammatic.open( {

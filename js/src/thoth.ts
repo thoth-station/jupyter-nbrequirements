@@ -521,7 +521,7 @@ export function lock_requirements_with_pipenv(
     } )
 }
 
-export function install_requirements(
+export function install_requirements_with_pipenv(
     requirements?: string[], options?: {
         dev_packages?: boolean,
         pre_releases?: boolean,
@@ -586,6 +586,67 @@ export function install_requirements(
     } )
 }
 
+export function install_requirements(
+    requirements?: string[], options?: {
+        dev_packages?: boolean,
+    }
+): Promise<void> {
+    return new Promise( async ( resolve, reject ) => {
+
+        requirements = requirements || []
+
+        /**
+         * Logging callback
+         */
+        const iopub_callback = ( msg: io.Message ) => {
+            Logger.debug( "Execution logging callback: ", msg )
+
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
+            }
+
+            else if ( msg.msg_type == "stream" ) {  // adviser / pipenv log messages
+                const stream = msg.content.name || "stdout"
+                const text = utils.parse_console_output( msg.metadata.output )
+
+                if ( stream === "stderr" ) {
+                    Logger.warn( "[micropipenv]: ", text )
+                } else
+                    Logger.log( "[micropipenv]: ", text )
+
+            }
+        }
+
+        /**
+         * Execution done callback
+         */
+        const shell_callback = ( msg: io.Message ) => {
+            Logger.debug( "Execution shell callback: ", msg )
+
+            if ( msg.metadata.status != 0 ) {
+                reject( msg.metadata.output )
+            } else {
+                Logger.log( "Requirements have been successfully installed" )
+                resolve()
+            }
+        }
+
+
+        let opts = ""
+        if ( !_.isUndefined( options ) ) {
+            if ( options.dev_packages ) opts += "--dev "
+        }
+
+        Logger.log( "Installing requirements." )
+
+        await execute_shell_command(
+            `micropipenv install --method pipenv ${ opts } ${ requirements.join( " " ) }`,
+            { iopub: { output: iopub_callback }, shell: { reply: shell_callback } }, { logger: Logger }
+        )
+            .catch( err => { throw err } )
+    } )
+}
+
 export function install_kernel( name: string ): Promise<string> {
     return new Promise( async ( resolve, reject ) => {
 
@@ -604,9 +665,9 @@ export function install_kernel( name: string ): Promise<string> {
                 const text = utils.parse_console_output( msg.metadata.output )
 
                 if ( stream === "stderr" ) {
-                    Logger.warn( "[pipenv]: ", text )
+                    Logger.warn( "[pip]: ", text )
                 } else
-                    Logger.log( "[pipenv]: ", text )
+                    Logger.log( "[pip]: ", text )
 
             }
         }
@@ -619,13 +680,13 @@ export function install_kernel( name: string ): Promise<string> {
 
         // check if ipython and ipykernel are both installed
         const script = utils.dedent( `
-            PACKAGE_LIST=$(pipenv run pip list | cut -d' ' -f 1)
+            PACKAGE_LIST=$(pip list | cut -d' ' -f 1)
 
             if [[ $(echo $PACKAGE_LIST | grep -E "ipython\$|ipykernel\$" | wc -l) != 2 ]]; then
                 echo "Packages 'ipython' and 'ipykernel are already installed'"
             else
                 echo "Installing required packages: 'ipython', 'ipykernel'"
-                pipenv run pip install ipython ipykernel
+                pip install ipython ipykernel
             fi
         ` )
 
@@ -634,7 +695,7 @@ export function install_kernel( name: string ): Promise<string> {
         await execute_shell_script( script, { iopub: { output: iopub_callback } } )
             .then( async () => {
                 await execute_shell_command(
-                    `pipenv run ipython kernel install --user --name=${ kernel_name }`,
+                    `ipython kernel install --user --name=${ kernel_name }`,
                     { iopub: { output: iopub_callback } },
                     { logger: Logger }
                 )

@@ -174,23 +174,38 @@ export function get_requirements_locked(
         if ( _.isUndefined( requirements_locked ) || ignore_metadata ) {
             Logger.log( "Locked requirements are not defined." )
 
-            if ( engine == "thoth" ) {
-                lock_requirements( undefined, sync )
-                    .then( ( req_locked: RequirementsLocked ) => {
-                        resolve( req_locked )
-                    } )
-                    .catch( ( err: string ) => reject( new Error( err ) ) )
-            } else {
-                lock_requirements_with_pipenv( dev_packages, pre_releases, sync )
-                    .then( ( req_locked: RequirementsLocked ) => {
-                        resolve( req_locked )
-                    } )
-                    .catch( ( err: string ) => reject( new Error( err ) ) )
+            switch ( engine ) {
+                case "thoth": {
+                    lock_requirements( undefined, sync )
+                        .then( ( req_locked: RequirementsLocked ) => {
+                            resolve( req_locked )
+                        } )
+                        .catch( ( err: string ) => reject( new Error( err ) ) )
 
+                    break
+                }
+                case "pipenv": {
+                    lock_requirements_with_pipenv( dev_packages, pre_releases, sync )
+                        .then( ( req_locked: RequirementsLocked ) => {
+                            resolve( req_locked )
+                        } )
+                        .catch( ( err: string ) => reject( new Error( err ) ) )
+
+                    break
+                }
+                case "micropipenv": {
+                    reject( new Error( "Pipfile.lock must be provided for `micropipenv` engine" ) )
+
+                    break
+                }
+
+                default: throw new Error( `Unknown resolution engine: ${ engine }` )
             }
-        } else {
-            resolve( requirements_locked )
+
+            return
         }
+
+        resolve( requirements_locked )
     } )
 }
 

@@ -2,8 +2,93 @@ Changelog
 =========
 
 
-0.6.0
+0.7.0
 -----
+
+New
+~~~
+- Dialog to restart kernel during sync. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/thoth.ts
+  modified:   js/src/ui/components/button-install.vue
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/store.ts
+- Use micropipenv to install requirements. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/notebook.ts
+  modified:   js/src/thoth.ts
+  modified:   js/src/types/requirements.d.ts
+  modified:   js/src/ui/components/button-install.vue
+  modified:   js/src/ui/store.ts
+- INSTALL req directly on a snackbar warning. [Marek Cermak]
+- Notify user on requirements detection. [Marek Cermak]
+
+  chg: dev: Refactor notifications and warnings
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  deleted:    js/src/types/ui.ts
+  modified:   js/src/types/index.d.ts
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+  new file:   js/src/ui/notify.ts
+- Notify about detected packages. [Marek Cermak]
+
+Changes
+~~~~~~~
+- Added __version__ to the __init__ file. [Marek Cermak]
+
+Fix
+~~~
+- Fixed %dep clear not cleaning up UI cache. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/ui/store.ts
+- Fixed incorrect margin on buttons in general. [Marek Cermak]
+- Fixed incorrect + button margin. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/core.ts
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/ui.vue
+
+Other
+~~~~~
+- Build(deps): bump thamos from 0.8.1 to 0.9.2. [dependabot-
+  preview[bot]]
+
+  Bumps [thamos](https://github.com/thoth-station/thamos) from 0.8.1 to 0.9.2.
+  - [Release notes](https://github.com/thoth-station/thamos/releases)
+  - [Changelog](https://github.com/thoth-station/thamos/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/thoth-station/thamos/compare/0.8.1...0.9.2)
+- Build(deps): bump thoth-python from 0.6.5 to 0.9.1. [dependabot-
+  preview[bot]]
+
+  Bumps [thoth-python](https://github.com/thoth-station/python) from 0.6.5 to 0.9.1.
+  - [Release notes](https://github.com/thoth-station/python/releases)
+  - [Changelog](https://github.com/thoth-station/python/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/thoth-station/python/compare/0.6.5...0.9.1)
+- Build(deps): bump buefy from 0.8.12 to 0.8.15 in /js. [dependabot-
+  preview[bot]]
+
+  Bumps [buefy](https://github.com/buefy/buefy) from 0.8.12 to 0.8.15.
+  - [Release notes](https://github.com/buefy/buefy/releases)
+  - [Changelog](https://github.com/buefy/buefy/blob/dev/CHANGELOG.md)
+  - [Commits](https://github.com/buefy/buefy/compare/v0.8.12...v0.8.15)
+
+
+v0.6.0 (2020-03-17)
+-------------------
 
 New
 ~~~

@@ -142,18 +142,17 @@ export class Pipfile {
                 if ( msg.metadata.status != 0 ) {
                     reject( msg.metadata.output )
                 }
-                else if ( msg.msg_type === "stream" ) {
-                    // let codecell handle the callback and append the stream to the output
-                    const context: Context | undefined = get_execute_context( Logger )
-                    if ( !_.isUndefined( context ) ) {
-                        const cell: CodeCell = context.cell
+                // else if ( msg.msg_type === "stream" ) {
+                //     // let codecell handle the callback and append the stream to the output
+                //     const context: Context | undefined = get_execute_context( Logger )
+                //     if ( !_.isUndefined( context ) ) {
+                //         const cell: CodeCell = context.cell
 
-                        cell.events.trigger( "set_dirty.Notebook", { value: true } )
-                        cell.output_area.handle_output( msg )
-                    }
-                    return
-                }
-
+                //         cell.events.trigger( "set_dirty.Notebook", { value: true } )
+                //         cell.output_area.handle_output( msg )
+                //     }
+                //     return
+                // }
                 else if ( msg.msg_type === "execute_result" ) {
 
                     Logger.log( "Pipfile has been created successfully: ", msg.content.data[ "text/plain" ] )

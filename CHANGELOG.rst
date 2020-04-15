@@ -2,8 +2,16 @@ Changelog
 =========
 
 
-0.7.0
+0.7.1
 -----
+
+Fix
+~~~
+- Remove temporary fix for the + button indent. [Marek Cermak]
+
+
+v0.7.0 (2020-04-09)
+-------------------
 
 New
 ~~~

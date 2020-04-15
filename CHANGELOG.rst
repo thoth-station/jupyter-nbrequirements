@@ -14,6 +14,14 @@ New
   modified:   js/src/ui/store.ts
   modified:   js/src/ui/ui.vue
 
+Changes
+~~~~~~~
+- Silent stream output of Pipfile.create() [Marek Cermak]
+
+Other
+~~~~~
+- :wrench: Patch 0.7.2. [Marek Cermak]
+
 
 v0.7.1 (2020-04-15)
 -------------------

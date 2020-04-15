@@ -2,12 +2,29 @@ Changelog
 =========
 
 
-0.7.1
+0.7.2
 -----
+
+New
+~~~
+- Sync store on kernel restart. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+
+
+v0.7.1 (2020-04-15)
+-------------------
 
 Fix
 ~~~
 - Remove temporary fix for the + button indent. [Marek Cermak]
+
+Other
+~~~~~
+- :wrench: Patch 0.7.1. [Marek Cermak]
 
 
 v0.7.0 (2020-04-09)

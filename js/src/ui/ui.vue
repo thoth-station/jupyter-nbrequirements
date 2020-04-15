@@ -574,12 +574,18 @@ export default class UI extends BaseUI {
             });
         });
 
+        // sync the store on kernel restart
+        events.on(
+            "kernel_ready.Kernel",
+            _.debounce((e: Event) => this.$store.dispatch("sync", false), 200)
+        );
+
         // subscribe to events
         events.on("after_sync.NBRequirements", (e: any, store: any) => {
             for (const n of store.state.notifications) {
-                if (n.__type__ === "SnackbarConfig")
+                if (n.__type__ === "SnackbarConfig") {
                     this.$buefy.snackbar.open(n);
-                else this.$buefy.toast.open(n);
+                } else this.$buefy.toast.open(n);
             }
         });
     }

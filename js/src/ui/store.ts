@@ -194,7 +194,7 @@ export default new Vuex.Store( {
             events.trigger( "before_sync.NBRequirements", this )
 
             if ( require_restart ) {
-                await new Promise( ( resolve ) => {
+                const c = await new Promise( ( resolve ) => {
                     DialogProgrammatic.confirm( {
                         title: "Kernel restart",
                         message: "Kernel restart is required to proceed.<br><br>Skipping this step might result in undefined behaviour.",
@@ -208,11 +208,17 @@ export default new Vuex.Store( {
                         container: "#nbrequirements-notification-container",
                         onConfirm: () => {
                             Jupyter.notebook.restart_kernel( { confirm: false } )
-                            events.on( "kernel_ready.Kernel", resolve )
+                            resolve( false )
                         },
-                        onCancel: resolve
+                        onCancel: () => resolve( true )
                     } )
                 } )
+
+                // The function will be re-invoked by kernel_ready event
+                if ( !c ) {
+                    commit( "ready" )
+                    return
+                }
             }
 
             // clear warnings before syncing

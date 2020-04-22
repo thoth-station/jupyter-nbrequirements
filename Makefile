@@ -62,7 +62,8 @@ patch: build-prod validate
 
 	$(MAKE) changelog
 
-	sed -i "s/__version__ = \(.*\)/__version__ = \"${VERSION}\"/g" ${PACKAGE}/__about__.py
+	sed -i "s/__version__ = \(.*\)/__version__ = \"${VERSION}\"/g" 	 ${PACKAGE}/__about__.py
+	sed -i "s/\"version\": \"\(.*\)\"/\"version\": \"${VERSION}\"/g" js/package.json
 
 	python setup.py sdist bdist_wheel
 	twine check dist/* || (echo "Twine check did not pass. Aborting."; exit 1)
@@ -80,6 +81,7 @@ release: build-prod validate
 	$(MAKE) changelog
 
 	sed -i "s/__version__ = \(.*\)/__version__ = \"${VERSION}\"/g" ${PACKAGE}/__about__.py
+	sed -i "s/\"version\": \"\(.*\)\"/\"version\": \"${VERSION}\"/g" js/package.json
 
 	python setup.py sdist bdist_wheel
 	twine check dist/* || (echo "Twine check did not pass. Aborting."; exit 1)

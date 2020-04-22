@@ -2,8 +2,19 @@ Changelog
 =========
 
 
-0.7.2
+0.7.3
 -----
+- Build(deps): bump thamos from 0.9.2 to 0.9.3. [dependabot-
+  preview[bot]]
+
+  Bumps [thamos](https://github.com/thoth-station/thamos) from 0.9.2 to 0.9.3.
+  - [Release notes](https://github.com/thoth-station/thamos/releases)
+  - [Changelog](https://github.com/thoth-station/thamos/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/thoth-station/thamos/compare/0.9.2...0.9.3)
+
+
+v0.7.2 (2020-04-15)
+-------------------
 
 New
 ~~~
@@ -20,6 +31,7 @@ Changes
 
 Other
 ~~~~~
+- :wrench: Patch 0.7.2. [Marek Cermak]
 - :wrench: Patch 0.7.2. [Marek Cermak]
 
 
@@ -73,58 +85,6 @@ New
   modified:   js/src/ui/ui.vue
   new file:   js/src/ui/notify.ts
 - Notify about detected packages. [Marek Cermak]
-
-Changes
-~~~~~~~
-- Added __version__ to the __init__ file. [Marek Cermak]
-
-Fix
-~~~
-- Fixed %dep clear not cleaning up UI cache. [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  modified:   js/src/cli/requirements.ts
-  modified:   js/src/ui/store.ts
-- Fixed incorrect margin on buttons in general. [Marek Cermak]
-- Fixed incorrect + button margin. [Marek Cermak]
-
-  Signed-off-by: Marek Cermak <macermak@redhat.com>
-
-  modified:   js/src/core.ts
-  modified:   js/src/ui/index.ts
-  modified:   js/src/ui/ui.vue
-
-Other
-~~~~~
-- Build(deps): bump thamos from 0.8.1 to 0.9.2. [dependabot-
-  preview[bot]]
-
-  Bumps [thamos](https://github.com/thoth-station/thamos) from 0.8.1 to 0.9.2.
-  - [Release notes](https://github.com/thoth-station/thamos/releases)
-  - [Changelog](https://github.com/thoth-station/thamos/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/thoth-station/thamos/compare/0.8.1...0.9.2)
-- Build(deps): bump thoth-python from 0.6.5 to 0.9.1. [dependabot-
-  preview[bot]]
-
-  Bumps [thoth-python](https://github.com/thoth-station/python) from 0.6.5 to 0.9.1.
-  - [Release notes](https://github.com/thoth-station/python/releases)
-  - [Changelog](https://github.com/thoth-station/python/blob/master/CHANGELOG.md)
-  - [Commits](https://github.com/thoth-station/python/compare/0.6.5...0.9.1)
-- Build(deps): bump buefy from 0.8.12 to 0.8.15 in /js. [dependabot-
-  preview[bot]]
-
-  Bumps [buefy](https://github.com/buefy/buefy) from 0.8.12 to 0.8.15.
-  - [Release notes](https://github.com/buefy/buefy/releases)
-  - [Changelog](https://github.com/buefy/buefy/blob/dev/CHANGELOG.md)
-  - [Commits](https://github.com/buefy/buefy/compare/v0.8.12...v0.8.15)
-
-
-v0.6.0 (2020-03-17)
--------------------
-
-New
-~~~
 - Dependency detection and deletion improvements. [Marek Cermak]
 
   When deleting a package, the edit mode is triggered and changes are
@@ -152,8 +112,26 @@ New
   modified:   src/ui/store.ts
   modified:   src/ui/ui.vue
 
+Changes
+~~~~~~~
+- Added __version__ to the __init__ file. [Marek Cermak]
+
 Fix
 ~~~
+- Fixed %dep clear not cleaning up UI cache. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/cli/requirements.ts
+  modified:   js/src/ui/store.ts
+- Fixed incorrect margin on buttons in general. [Marek Cermak]
+- Fixed incorrect + button margin. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/core.ts
+  modified:   js/src/ui/index.ts
+  modified:   js/src/ui/ui.vue
 - Create Pipfile before locking. [Marek Cermak]
 
   Signed-off-by: Marek Cermak <macermak@redhat.com>
@@ -163,6 +141,27 @@ Fix
 
 Other
 ~~~~~
+- Build(deps): bump thamos from 0.8.1 to 0.9.2. [dependabot-
+  preview[bot]]
+
+  Bumps [thamos](https://github.com/thoth-station/thamos) from 0.8.1 to 0.9.2.
+  - [Release notes](https://github.com/thoth-station/thamos/releases)
+  - [Changelog](https://github.com/thoth-station/thamos/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/thoth-station/thamos/compare/0.8.1...0.9.2)
+- Build(deps): bump thoth-python from 0.6.5 to 0.9.1. [dependabot-
+  preview[bot]]
+
+  Bumps [thoth-python](https://github.com/thoth-station/python) from 0.6.5 to 0.9.1.
+  - [Release notes](https://github.com/thoth-station/python/releases)
+  - [Changelog](https://github.com/thoth-station/python/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/thoth-station/python/compare/0.6.5...0.9.1)
+- Build(deps): bump buefy from 0.8.12 to 0.8.15 in /js. [dependabot-
+  preview[bot]]
+
+  Bumps [buefy](https://github.com/buefy/buefy) from 0.8.12 to 0.8.15.
+  - [Release notes](https://github.com/buefy/buefy/releases)
+  - [Changelog](https://github.com/buefy/buefy/blob/dev/CHANGELOG.md)
+  - [Commits](https://github.com/buefy/buefy/compare/v0.8.12...v0.8.15)
 - Build(deps-dev): bump webpack from 4.41.6 to 4.42.0 in /js.
   [dependabot-preview[bot]]
 
@@ -257,6 +256,48 @@ Other
   Bumps [vuex](https://github.com/vuejs/vuex) from 3.1.1 to 3.1.2.
   - [Release notes](https://github.com/vuejs/vuex/releases)
   - [Commits](https://github.com/vuejs/vuex/compare/v3.1.1...v3.1.2)
+
+
+v0.6.0 (2020-03-17)
+-------------------
+
+New
+~~~
+- Dependency detection and deletion improvements. [Marek Cermak]
+
+  When deleting a package, the edit mode is triggered and changes are
+  saved and synced after user saves them.
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   js/src/ui/store.ts
+  modified:   js/src/ui/ui.vue
+- Send user notifications about warnings. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/extension.js
+  modified:   src/ui/components/button-install.vue
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+- Added auto-installation on notebook startup. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/extension.js
+  modified:   src/index.ts
+  modified:   src/ui/index.ts
+  modified:   src/ui/store.ts
+  modified:   src/ui/ui.vue
+
+Fix
+~~~
+- Create Pipfile before locking. [Marek Cermak]
+
+  Signed-off-by: Marek Cermak <macermak@redhat.com>
+
+  modified:   src/cli/requirements.ts
+  modified:   src/extension.js
 
 
 v0.5.1 (2020-02-17)

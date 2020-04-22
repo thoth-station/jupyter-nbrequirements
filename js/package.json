@@ -1,6 +1,6 @@
 {
   "name": "jupyter-nbrequirements",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "description": "Jupyter magic extension for managing notebook requirements",
   "author": "Marek Cermak <macermak@redhat.com>",
   "homepage": "https://github.com/CermakM/jupyter-nbrequirements#readme",

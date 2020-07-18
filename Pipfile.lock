@@ -986,11 +986,11 @@
         },
         "flake8": {
             "hashes": [
-                "sha256:19241c1cbc971b9962473e4438a2ca19749a7dd002dd1a946eaba171b4114548",
-                "sha256:8e9dfa3cecb2400b3738a42c54c3043e821682b9c840b0448c0503f781130696"
+                "sha256:15e351d19611c887e482fb960eae4d44845013cc142d42896e9862f775d8cf5c",
+                "sha256:f04b9fcbac03b0a3e58c0ab3a0ecc462e023a9faf046d57794184028123aa208"
             ],
             "index": "pypi",
-            "version": "==3.7.8"
+            "version": "==3.8.3"
         },
         "idna": {
             "hashes": [

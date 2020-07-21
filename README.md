@@ -1,8 +1,8 @@
-# jupyter-nbrequirements &nbsp;[![License](https://img.shields.io/github/license/mashape/apistatus.svg?label=License)](https://github.com/CermakM/jupyter-nbrequirements/blob/master/LICENSE)
+# jupyter-nbrequirements &nbsp;[![License](https://img.shields.io/github/license/mashape/apistatus.svg?label=License)](https://github.com/thoth-station/jupyter-nbrequirements/blob/master/LICENSE)
 
-[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=CermakM/jupyter-nbrequirements)](https://dependabot.com)
+[![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=thoth-station/jupyter-nbrequirements)](https://dependabot.com)
 [![Node CI](https://github.com/cermakm/jupyter-nbrequirements/workflows/Node%20CI/badge.svg)](https://github.com/cermakm/jupyter-nbrequirements/actions) &nbsp;
-[![Release](https://img.shields.io/github/v/tag/cermakm/jupyter-nbrequirements.svg?sort=semver&label=Release)](https://github.com/CermakM/jupyter-nbrequirements/releases/latest)
+[![Release](https://img.shields.io/github/v/tag/cermakm/jupyter-nbrequirements.svg?sort=semver&label=Release)](https://github.com/thoth-station/jupyter-nbrequirements/releases/latest)
 
 
 
@@ -41,10 +41,10 @@ jupyter nbextension install --user --py jupyter_nbrequirements
 
 #### NBRequirements UI
 
-Since [v0.4.0](https://github.com/CermakM/jupyter-nbrequirements/releases/tag/v0.4.0), we've introduced a new UI! Check it out, interact with it and see what it can offer you!
+Since [v0.4.0](https://github.com/thoth-station/jupyter-nbrequirements/releases/tag/v0.4.0), we've introduced a new UI! Check it out, interact with it and see what it can offer you!
 
 <div style="text-align:center">
-<img alt="NBRequirements UI" src="https://raw.githubusercontent.com/CermakM/jupyter-nbrequirements/master/assets/ui.png">
+<img alt="NBRequirements UI" src="https://raw.githubusercontent.com/thoth-station/jupyter-nbrequirements/master/assets/ui.png">
 </div>
 
 Our development efforts will from now on focus primarily on improving the UI.
@@ -114,7 +114,7 @@ Check out the [examples](/examples/) for more info.
 
 ## Future plans:
 
-See the [Project Board](https://github.com/CermakM/jupyter-nbrequirements/projects).
+See the [Project Board](https://github.com/thoth-station/jupyter-nbrequirements/projects).
 
 <br>
 

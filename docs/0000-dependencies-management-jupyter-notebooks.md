@@ -4,10 +4,10 @@
 
 How to guarantee reproducibility of Jupyter Notebooks?
 
-In order to allow any user to re run the notebook having similar behaviour, it's important that each notebook is shipped with dependencies requirements
+In order to allow any user to re run the notebook with similar behaviour, it's important that each notebook is shipped with dependencies requirements
 that include direct and transitive dependencies. This would also enforce and support security, reproducibility, traecability.
 
-Each notebook should be treated as single component/service that use its own dependencies, therefore when storing notebooks, they should be created in a specific repo.
+Each notebook should be treated as single component/service that use its own dependencies, therefore when storing notebooks, they should be stored each in a specific repo.
 
 ## Decision Drivers <!-- optional -->
 

@@ -13,7 +13,7 @@ __all__ = [
 
 __title__ = "jupyter-nbrequirements"
 __summary__ = "Dependency manager for Jupyter Notebooks"
-__uri__ = "https://github.com/CermakM/jupyter-nbrequirements"
+__uri__ = "https://github.com/thoth-station/jupyter-nbrequirements"
 
 __version__ = "0.7.3"
 
@@ -21,4 +21,4 @@ __author__ = "Marek Cermak"
 __email__ = "macermak@redhat.com"
 
 __license__ = "MIT"
-__copyright__ = "Copyright 2019 {0}".format(__author__)
+__copyright__ = "Copyright 2019, 2020 {0}".format(__author__)

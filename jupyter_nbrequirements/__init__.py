@@ -554,11 +554,16 @@ def load_ipython_extension(ipython):
 
 
 def _jupyter_nbextension_paths():
+    # src & dest are os paths.
+    # In contrast, require is a requirejs path, and thus must use `/` as the path separator.
     return [
         {
             "section": "notebook",
+            # src is relative to current module
             "src": "static",
+            # dest directory is in the `nbextensions/` namespace
             "dest": "jupyter-nbrequirements",
+            # require is also in the `nbextensions/` namespace
             "require": "jupyter-nbrequirements/extension",
         }
     ]

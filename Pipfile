@@ -5,8 +5,12 @@ jupyter-require = ">=0.4.0"
 invectio = "*"
 thamos = "*"
 thoth-python = "*"
+thoth-common = "*"
 
 [dev-packages]
+jupyter = "*"
+jupyter_contrib_nbextensions = "*"
+nbconvert = "==5.6.1"
 flake8 = "*"
 twine = "*"
 

@@ -366,6 +366,7 @@ export function lock_requirements(
         const command = `
             results = thamos.lib.advise_here(
                 nowait=False,
+                source_type=ThothAdviserIntegrationEnum.JUPYTER_NOTEBOOK.name
                 no_static_analysis=True  # static analysis is not yet functional for Jupyter NBs
             )
 

@@ -535,6 +535,8 @@ def load_ipython_extension(ipython):
 
     from pathlib import Path
 
+    from thoth.common.enums import ThothAdviserIntegrationEnum
+
     import invectio
 
     import thamos

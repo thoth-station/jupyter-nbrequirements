@@ -3,14 +3,14 @@
   "version": "0.7.3",
   "description": "Jupyter magic extension for managing notebook requirements",
   "author": "Marek Cermak <macermak@redhat.com>",
-  "homepage": "https://github.com/CermakM/jupyter-nbrequirements#readme",
+  "homepage": "https://github.com/thoth-station/jupyter-nbrequirements#readme",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/CermakM/jupyter-nbrequirements/issues"
+    "url": "https://github.com/thoth-station/jupyter-nbrequirements/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CermakM/jupyter-nbrequirements.git"
+    "url": "git+https://github.com/thoth-station/jupyter-nbrequirements.git"
   },
   "private": true,
   "scripts": {

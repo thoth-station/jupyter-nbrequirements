@@ -18,18 +18,19 @@ they should be stored with dependencies so that an image can be built to run the
 
 ## Considered Options
 
-* 1. Jupyter notebook without dependencies (no reproducibility)
-* 2. Jupyter notebook without dependencies embedded in json file but with Pipfile/Pipfile.lock always present (Jupyter notebook and requirements are decoupled)
-* 3. Jupyter notebook with dependencies embedded in json file of the notebook and Pipfile/Pipfile.lock present
+* 1. Jupyter notebook without dependencies (no reproducibility at all)
+* 2. Jupyter notebook without dependencies embedded in json file but with Pipfile/Pipfile.lock always present (no reproducibility if I share the notebook)
+* 3. Jupyter notebook with dependencies embedded in json file of the notebook that can be optionally extracted if the user wants. 
 
 ## Decision Outcome
 
 The option selected is 3. because:
 
 * enforce reproducibility
-* enforce traceability between notebook and requirements
+* enforce traceability between notebook
 
 ### Positive Consequences <!-- optional -->
 
 * Satisfy reproducibility, traecability, shareability.
 * Notebooks are coupled with dependencies in their metadata.
+* If more notebooks are present, a common Pipfile can be created with a button that can automatically extract from all notebook dependencies and new common Pipfile.lock will be created. This would allow creation of an image that can run the notebooks.

@@ -1252,5 +1252,3 @@ v0.1.0 (2019-10-04)
 
   new file:   jupyter_nbrequirements/__about__.py
   new file:   jupyter_nbrequirements/__init__.py
-
-

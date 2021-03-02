@@ -9,13 +9,13 @@ const __package__ = 'jupyter_nbrequirements'
 const VueLoaderPlugin = require( 'vue-loader/lib/plugin' )
 
 module.exports = merge.multiple( common, [
-	{// Notebook extension loader
-		mode: 'production',
-	},
-	{// Notebook extension bundle
-		mode: 'production',
-		optimization: {
-			minimize: false
-		}
-	}
+    {// Notebook extension loader
+        mode: 'production',
+    },
+    {// Notebook extension bundle
+        mode: 'production',
+        optimization: {
+            minimize: false
+        }
+    }
 ] )

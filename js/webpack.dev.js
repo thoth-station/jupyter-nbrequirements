@@ -9,11 +9,11 @@ const __package__ = 'jupyter_nbrequirements'
 const VueLoaderPlugin = require( 'vue-loader/lib/plugin' )
 
 module.exports = merge.multiple( common, [
-	{// Notebook extension loader
-		mode: 'development',
-	},
-	{// Notebook extension bundle
-		mode: 'development',
-		devtool: 'source-map',
-	}
+    {// Notebook extension loader
+        mode: 'development',
+    },
+    {// Notebook extension bundle
+        mode: 'development',
+        devtool: 'source-map',
+    }
 ] )

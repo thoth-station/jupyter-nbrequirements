@@ -5,10 +5,18 @@ jupyter-require = ">=0.4.0"
 invectio = "*"
 thamos = "*"
 thoth-python = "*"
+thoth-common = "*"
 
 [dev-packages]
-flake8 = "*"
-twine = "*"
+jupyter-packaging = "*"
+pytest = "*"
+pytest-timeout = "*"
+pytest-cov = "*"
+hypothesis-auto = "*"
+hypothesis = "*"
+pytest-mypy = "*"
+mypy = "*"
+pre-commit = "==2.0.1"
 
 [[source]]
 url = "https://pypi.org/simple"

@@ -20,7 +20,7 @@ they should be stored with dependencies so that an image can be built to run the
 
 * 1. Jupyter notebook without dependencies (no reproducibility at all)
 * 2. Jupyter notebook without dependencies embedded in json file but with Pipfile/Pipfile.lock always present (no reproducibility if I share the notebook)
-* 3. Jupyter notebook with dependencies embedded in json file of the notebook that can be optionally extracted if the user wants. 
+* 3. Jupyter notebook with dependencies embedded in json file of the notebook that can be optionally extracted if the user wants.
 
 ## Decision Outcome
 

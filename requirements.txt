@@ -4,3 +4,4 @@ ipython
 jupyter-require>=0.4.0
 thamos
 thoth-python
+thoth-common

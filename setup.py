@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
+"""jupyter-nbrequirements setup."""
 from __future__ import print_function
 
 from pathlib import Path

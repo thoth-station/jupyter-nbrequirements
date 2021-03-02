@@ -30,6 +30,7 @@ import json
 
 from pathlib import Path
 from textwrap import dedent, wrap
+from typing import Tuple, Dict, Any
 
 from IPython.core.magic import line_cell_magic
 from IPython.core.magic import line_magic
@@ -45,6 +46,8 @@ from thoth.python import Pipfile
 from .magic_parser import MagicParser, MagicParserError
 
 from .__about__ import __version__
+
+print("jupyterlab-requirements version is: ", __version__)
 
 
 _HERE = Path(__file__).parent
@@ -84,7 +87,9 @@ SCRIPT_TEMPLATE = """
 """
 
 
-def _default_kernel_handler(args, params: dict = None, **kwargs) -> str:
+def _default_kernel_handler(
+    args, params: dict = None, **kwargs
+) -> Tuple[str, Dict[Any, Any]]:
     """Return script to be executed on `kernel` command."""
     script = SCRIPT_TEMPLATE % "kernel"
 
@@ -104,7 +109,9 @@ def _default_kernel_handler(args, params: dict = None, **kwargs) -> str:
     return script, params
 
 
-def _default_requirements_handler(args, params: dict = None, **kwargs) -> str:
+def _default_requirements_handler(
+    args, params: dict = None, **kwargs
+) -> Tuple[str, Dict[Any, Any]]:
     """Return script to be executed on `requirements` or `dep` command."""
     params = params or dict()
 
@@ -355,17 +362,15 @@ class RequirementsMagic(Magics):
                 help=(
                     "Alias of a package."
                     "This is useful if package name differs from import."
-                )
+                ),
             )
 
             # command: add-source
             parser_source = subparsers.add_parser(
                 "add-source", description="Add source index to the notebook metadata."
             )
-            parser_source.add_argument(
-                "--name", type=str, help="Name for this index.")
-            parser_source.add_argument(
-                "--url", type=str, help="URL for this index.")
+            parser_source.add_argument("--name", type=str, help="Name for this index.")
+            parser_source.add_argument("--url", type=str, help="URL for this index.")
             parser_source.add_argument(
                 "--verify-ssl",
                 type=bool,
@@ -535,6 +540,8 @@ def load_ipython_extension(ipython):
 
     from pathlib import Path
 
+    from thoth.common.enums import ThothAdviserIntegrationEnum
+
     import invectio
 
     import thamos
@@ -552,11 +559,16 @@ def load_ipython_extension(ipython):
 
 
 def _jupyter_nbextension_paths():
+    # src & dest are os paths.
+    # In contrast, require is a requirejs path, and thus must use `/` as the path separator.
     return [
         {
             "section": "notebook",
+            # src is relative to current module
             "src": "static",
+            # dest directory is in the `nbextensions/` namespace
             "dest": "jupyter-nbrequirements",
+            # require is also in the `nbextensions/` namespace
             "require": "jupyter-nbrequirements/extension",
         }
     ]
